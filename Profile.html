@@ -1,0 +1,2564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MY PROFILE || UIU ResearchCollab</title>
+
+        <!-- Bootstrap-5 CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- INDEX CSS -->
+    <link rel="stylesheet" href="CSS/profile.css">
+</head>
+<body>
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-6">
+                    <div class="portal-title">
+                        UIU Research Collaboration Portal
+                    </div>
+                </div>
+                <div class="col-6 text-end">
+                    <div class="portal-tagline">
+                        Connecting Minds. Creating Research.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- 1ST NAVBAR -->
+<header class="dashboard-header">
+    <div class="dashboard-header-left">
+
+        <!-- LOGO -->
+        <a href="index.html" class="dashboard-logo-link">
+            <img src="../UIU Research Collaboration Portal/IMAGES/logo.jpg" alt="UIU ResearchCollab Logo" class="dashboard-logo">
+        </a>
+
+        <!-- WEBSITE NAME -->
+        <div class="dashboard-brand">
+            <h1>UIU ResearchCollab</h1>
+            <p>
+                Connecting Minds. Creating Research.
+            </p>
+        </div>
+    </div>
+
+
+    <!-- NAVBAR RIGHT -->
+    <div class="dashboard-header-right">
+
+        <!-- SEARCH -->
+        <div class="dashboard-search">
+            <input
+                type="text"
+                placeholder="Search for researchers, papers, communities..." aria-label="Search">
+            <button type="button"><i class="bi bi-search"></i></button>
+        </div>
+
+        <!-- NOTIFICATION -->
+        <div class="header-icon notification-icon">
+            <button type="button">
+                <i class="bi bi-bell"></i>
+                <span class="notification-badge">3</span>
+            </button>
+        </div>
+
+        <!-- MESSAGE -->
+        <div class="header-icon message-icon">
+            <button type="button">
+                <i class="bi bi-chat-dots"></i>
+                <span class="notification-badge">2</span>
+            </button>
+        </div>
+  
+        <!-- DIVIDER -->
+        <div class="header-divider"></div>
+     
+        <!-- USER PROFILE -->
+        <div class="dashboard-user">
+            <img src="../UIU Research Collaboration Portal/IMAGES/pic1.jpg" alt="User Profile" class="user-avatar">
+
+            <!-- USER INFORMATION -->
+            <div class="user-information">
+
+                <!--
+                    CURRENTLY STATIC
+
+                    Later in Laravel:
+
+                    {{ Auth::user()->first_name }}
+
+                -->
+
+                <h3 class="user-first-name">Rahil</h3>
+                <p>
+                    CSE Dept.
+                </p>
+            </div>
+
+            <!-- DROPDOWN BUTTON -->
+            <button
+                class="user-dropdown-button" type="button" aria-label="User menu">
+                <i class="bi bi-chevron-down"></i>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- BODY -->
+<div class="dashboard-wrapper">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="dashboard-sidebar">
+
+        <!-- SIDEBAR NAVIGATION -->
+        <nav class="sidebar-navigation">
+
+            <!-- DASHBOARD -->
+            <a href="dashboard.html" class="sidebar-link"> <i class="bi bi-house-fill"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <!-- MY PROFILE -->
+            <a href="profile.html" class="sidebar-link active"> <i class="bi bi-person-fill"></i>
+                <span>My Profile</span>
+            </a>
+
+            <!-- RESEARCH CONNECT -->
+            <a href="research-connect.html" class="sidebar-link"> <i class="bi bi-people"></i>
+                <span>Research Connect</span>
+            </a>
+
+            <!-- RESEARCH OPPORTUNITIES -->
+            <a href="opportunities.html" class="sidebar-link"> <i class="bi bi-file-earmark-text"></i>
+                <span>Research Opportunities</span>
+            </a>
+
+            <!-- MY TEAMS -->
+            <a href="my-teams.html" class="sidebar-link"> <i class="bi bi-people-fill"></i>
+                <span>My Teams</span>
+            </a>
+
+            <!-- COMMUNITIES -->
+            <a href="communities.html" class="sidebar-link"> <i class="bi bi-diagram-3"></i>
+                <span>Communities</span>
+            </a>
+
+            <!-- MESSAGES -->
+            <a href="messages.html" class="sidebar-link"> <i class="bi bi-chat-fill"></i>
+                <span>Messages</span>
+                <span class="sidebar-count">2</span>
+            </a>
+
+            <!-- RESEARCH REPOSITORIES -->
+            <a href="repository.html" class="sidebar-link"> <i class="bi bi-database-fill"></i>
+                <span>Research Repositories</span>
+            </a>
+
+            <!-- SAVED ITEMS -->
+            <a href="saved-items.html" class="sidebar-link"> <i class="bi bi-bookmark"></i>
+                <span>Saved Items</span>
+            </a>
+
+            <!-- NOTIFICATIONS -->
+            <a href="notifications.html" class="sidebar-link"> <i class="bi bi-bell"></i>
+                <span>Notifications</span>
+                <span class="sidebar-count">3</span>
+            </a>
+
+            <!-- CALENDAR -->
+            <a href="calendar.html" class="sidebar-link"> <i class="bi bi-calendar3"></i>
+                <span>Calendar</span>
+            </a>
+
+            <!-- SETTINGS -->
+            <a href="settings.html" class="sidebar-link"> <i class="bi bi-gear"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+
+        <!-- PROFILE CARD -->
+        <div class="sidebar-profile-card">
+            <h3>Complete Your Profile</h3>
+            <p>
+                Get better matches by
+                completing your profile.
+            </p>
+            <a href="profile.html" class="sidebar-update-button">
+                Update Profile
+            </a>
+            <div class="sidebar-completion">
+                <div class="completion-header">
+                    <span>Profile Completion</span>
+                    <strong>80%</strong>
+                </div>
+                <div class="completion-progress">
+                    <div class="completion-progress-bar" 
+                    style="width: 80%;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+<!-- MAIN CONTENT -->
+<main class="profile-main">
+
+<!-- COVER + PROFILE HEADER -->
+<section class="profile-header-card">
+    <div class="profile-cover">
+        <button class="cover-edit-button" type="button">
+            <i class="bi bi-pencil"></i>
+            Edit Cover
+        </button>
+    </div>
+    <div class="profile-header-content">
+
+        <!-- Profile Image -->
+        <div class="profile-picture-container">
+            <img src="../UIU Research Collaboration Portal/IMAGES/pic1.jpg" alt="Profile Picture" class="profile-picture" onerror="this.src='../UIU Research Collaboration Portal/IMAGES/pic1.jpg';">
+            <button class="profile-photo-edit" type="button" title="Change profile photo">
+                <i class="bi bi-camera-fill"></i>
+            </button>
+        </div>
+
+        <!-- Basic Profile Information -->
+        <div class="profile-basic-info">
+            <div class="profile-name-row">
+                <h1>Kazi Shibli Zaman Rahil</h1>
+                <span class="profile-role">Student</span>
+            </div>
+            <p class="profile-department">
+                CSE Department
+                <span>||</span>
+                12th Trimester
+            </p>
+            <p class="profile-university">
+                <i class="bi bi-building"></i>
+                United International University
+                <span>||</span>
+                Dhaka
+            </p>
+            <div class="profile-stat-row">
+                <span>
+                    <i class="bi bi-mortarboard-fill"></i>
+                    CGPA
+                    <strong>
+                        3.80
+                    </strong>
+                </span>
+                <span>
+                    <i class="bi bi-calendar3"></i>
+                    Student ID
+                    <strong>
+                        22203379
+                    </strong>
+                </span>
+                <span class="available-status">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Available for Collaboration
+                </span>
+            </div>
+        </div>
+
+        <!-- Header Actions -->
+        <div class="profile-header-actions">
+            <button class="btn-profile-primary" type="button" onclick="enableEditing()">
+                <i class="bi bi-pencil-fill"></i>
+                Edit Profile
+            </button>
+            <button class="btn-profile-secondary" type="button">
+                <i class="bi bi-share"></i>
+                Share Profile
+            </button>
+        </div>
+    </div>
+
+    <!-- PROFILE NAVIGATION -->
+    <div class="profile-tabs">
+        <a href="#personal-section" class="profile-tab active">
+            Overview
+        </a>
+        <a href="#research-section"class="profile-tab">
+            Research & Skills
+        </a>
+        <a href="#projects-section" class="profile-tab">
+            Projects
+        </a>
+        <a href="#publications-section" class="profile-tab">
+            Publications
+        </a>
+        <a href="#experience-section" class="profile-tab">
+            Experience
+        </a>
+        <a href="#achievements-section" class="profile-tab">
+            Achievements
+        </a>
+        <a href="#activity-section" class="profile-tab">
+            Activity
+        </a>
+    </div>
+</section>
+
+<!-- PROFILE COMPLETION -->
+<section class="completion-card">
+    <div class="completion-left">
+        <div class="completion-circle">
+            <span id="completionPercentage">
+                80%
+            </span>
+        </div>
+        <div>
+            <h3>
+                Profile Completion
+            </h3>
+            <p>
+                Complete your profile to get
+                better research team matches.
+            </p>
+        </div>
+    </div>
+    <div class="completion-right">
+        <div class="completion-progress">
+            <div
+                id="mainCompletionProgress"
+                class="completion-progress-bar"
+                style="width:80%"
+            ></div>
+        </div>
+        <span id="completionMessage">
+            Almost There!
+        </span>
+    </div>
+</section>
+
+<!-- TWO COLUMN PROFILE CONTENT -->
+<div class="profile-content-grid">
+
+<!-- LEFT COLUMN -->
+<div class="profile-left-column">
+
+<!-- PERSONAL INFORMATION -->
+<section class="profile-section" id="personal-section">
+    <div class="section-header">
+        <div>
+            <h2>Personal Information</h2>
+            <p>
+                Basic information about yourself.
+            </p>
+        </div>
+        <button
+            class="section-edit-button"
+            type="button"
+            onclick="toggleSection('personalForm')"
+        >
+            <i class="bi bi-pencil"></i>
+        </button>
+    </div>
+    <div
+        id="personalForm"
+        class="section-form"
+    >
+        <div class="form-row">
+            <div class="form-group">
+                <label>
+                    First Name
+                </label>
+                <input
+                    type="text"
+                    class="form-control profile-input"
+                    value=""
+                    disabled
+                >
+            </div>
+            <div class="form-group">
+                <label>
+                    Last Name
+                </label>
+                <input
+                    type="text"
+                    class="form-control profile-input"
+                    value=""
+                    disabled
+                >
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>
+                    Date of Birth
+                </label>
+                <input
+                    type="date"
+                    class="form-control profile-input"
+                    disabled
+                >
+            </div>
+            <div class="form-group">
+                <label>
+                    Gender
+                </label>
+                <select
+                    class="form-select profile-input"
+                    disabled
+                >
+                    <option selected>
+                        Select Gender
+                    </option>
+                    <option>
+                        Male
+                    </option>
+                    <option>
+                        Female
+                    </option>
+                    <option>
+                        Other
+                    </option>
+                    <option>
+                        Prefer not to say
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                About Me
+            </label>
+            <textarea
+                class="form-control profile-input"
+                rows="4"
+                disabled
+            >Passionate about solving real-world problems using Artificial Intelligence and Machine Learning. Interested in innovative projects and collaborative research.</textarea>
+        </div>
+        <button
+            class="save-section-button"
+            type="button"
+            onclick="saveSection('personalForm')"
+        >
+            Save Changes
+        </button>
+    </div>
+</section>
+
+<!-- CONTACT INFORMATION -->
+<section class="profile-section">
+    <div class="section-header">
+        <div>
+            <h2>
+                Contact Information
+            </h2>
+            <p>
+                Contact details for collaboration.
+            </p>
+        </div>
+        <button
+            class="section-edit-button"
+            type="button"
+            onclick="toggleSection('contactForm')"
+        >
+            <i class="bi bi-pencil"></i>
+        </button>
+    </div>
+    <div
+        id="contactForm"
+        class="section-form"
+    >
+        <div class="form-row">
+            <div class="form-group">
+                <label>
+                    University Email
+                </label>
+                <input
+                    type="email"
+                    class="form-control profile-input"
+                    placeholder="yourname@bscse.uiu.ac.bd"
+                    disabled
+                >
+            </div>
+            <div class="form-group">
+                <label>
+                    Phone Number
+                </label>
+                <input
+                    type="tel"
+                    class="form-control profile-input"
+                    placeholder="+880 1XXXXXXXXX"
+                    disabled
+                >
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>
+                    Location
+                </label>
+                <input
+                    type="text"
+                    class="form-control profile-input"
+                    placeholder="Dhaka, Bangladesh"
+                    disabled
+                >
+            </div>
+            <div class="form-group">
+                <label>
+                    Preferred Contact
+                </label>
+                <select
+                    class="form-select profile-input"
+                    disabled
+                >
+                    <option>
+                        University Email
+                    </option>
+                    <option>
+                        Phone
+                    </option>
+                    <option>
+                        Platform Messages
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                LinkedIn Profile
+            </label>
+            <input
+                type="url"
+                class="form-control profile-input"
+                placeholder="LinkedIn profile link"
+                disabled
+            >
+        </div>
+
+        <div class="form-group">
+            <label>
+                GitHub Profile
+            </label>
+            <input
+                type="url"
+                class="form-control profile-input"
+                placeholder="GitHub profile link"
+                disabled
+            >
+        </div>
+        <button
+            class="save-section-button"
+            type="button"
+            onclick="saveSection('contactForm')"
+        >
+            Save Changes
+        </button>
+    </div>
+</section>
+
+<!-- ACADEMIC INFORMATION -->
+<section class="profile-section">
+    <div class="section-header">
+        <div>
+            <h2>
+                Academic Information
+            </h2>
+            <p>
+                Your educational background.
+            </p>
+        </div>
+        <button
+            class="section-edit-button"
+            type="button"
+            onclick="toggleSection('academicForm')"
+        >
+            <i class="bi bi-pencil"></i>
+        </button>
+    </div>
+    <div
+        id="academicForm"
+        class="section-form"
+    >
+        <div class="form-row">
+            <div class="form-group">
+                <label>
+                    University
+                </label>
+                <input
+                    type="text"
+                    class="form-control profile-input"
+                    value=""
+                    disabled
+                >
+            </div>
+            <div class="form-group">
+                <label>
+                    Department
+                </label>
+                <input
+                    type="text"
+                    class="form-control profile-input"
+                    value=""
+                    disabled
+                >
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>
+                    Program
+                </label>
+                <select
+                    class="form-select profile-input"
+                    disabled
+                >
+                    <option>
+                        B.Sc. in Computer Science & Engineering
+                    </option>
+                    <option>
+                        M.Sc. in Computer Science & Engineering
+                    </option>
+                    <option>
+                        B.Sc. in Data Science
+                    </option>
+                    <option>
+                        M.Sc. in Data Science
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>
+                    Current Trimester
+                </label>
+                <input
+                    type="text"
+                    class="form-control profile-input"
+                    placeholder="e.g. 12th Trimester"
+                    disabled
+                >
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>
+                    Student ID
+                </label>
+                <input
+                    type="text"
+                    class="form-control profile-input"
+                    value=""
+                    disabled
+                >
+            </div>
+            <div class="form-group">
+                <label>
+                    Current CGPA
+                </label>
+                <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="4"
+                    class="form-control profile-input"
+                    placeholder="0.00 - 4.00"
+                    disabled
+                >
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>
+                    Expected Graduation
+                </label>
+                <input
+                    type="month"
+                    class="form-control profile-input"
+                    disabled
+                >
+            </div>
+            <div class="form-group">
+                <label>
+                    Academic Status
+                </label>
+                <select
+                    class="form-select profile-input"
+                    disabled
+                >
+                    <option>
+                        Currently Studying
+                    </option>
+
+                    <option>
+                        Graduated
+                    </option>
+
+                    <option>
+                        On Leave
+                    </option>
+                </select>
+            </div>
+        </div>
+        <button
+            class="save-section-button"
+            type="button"
+            onclick="saveSection('academicForm')"
+        >
+            Save Changes
+        </button>
+    </div>
+</section>
+
+<!-- RESEARCH PROFILE -->
+<section
+    class="profile-section"
+    id="research-section"
+>
+    <div class="section-header">
+        <div>
+            <h2>
+                Research Profile
+            </h2>
+            <p>
+                Tell other researchers what you want to work on.
+            </p>
+        </div>
+        <button
+            class="section-edit-button"
+            type="button"
+            onclick="toggleSection('researchForm')"
+        >
+            <i class="bi bi-pencil"></i>
+        </button>
+    </div>
+    <div
+        id="researchForm"
+        class="section-form"
+    >
+        <div class="form-group">
+            <label>
+                Primary Research Domain
+            </label>
+            <select
+                class="form-select profile-input"
+                disabled
+            >
+                <option selected>
+                    Artificial Intelligence
+                </option>
+                <option>
+                    Big Data Analytics
+                </option>
+                <option>
+                    Bioinformatics
+                </option>
+                <option>
+                    Blockchain
+                </option>
+                <option>
+                    Computer Vision
+                </option>
+                <option>
+                    Cloud Computing
+                </option>
+                <option>
+                    Cyber Security
+                </option>
+                <option>
+                    Data Science
+                </option>
+                <option>
+                    Healthcare AI
+                </option>
+                <option>
+                    Human Computer Interaction
+                </option>
+                <option>
+                    Internet of Things
+                </option> 
+                <option>
+                    Mobile Computing
+                </option>
+                <option>
+                    Natural Language Processing
+                </option>
+                <option>
+                    Networking
+                </option>
+                <option>
+                    Robotics
+                </option>
+                <option>
+                    Software Engineering
+                </option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>
+                Research Interests
+            </label>
+            <div class="tag-input-area">
+                <span class="research-tag">
+                    Machine Learning
+                    <button type="button">
+                        ×
+                    </button>
+                </span>
+                <span class="research-tag">
+                    Computer Vision
+                    <button type="button">
+                        ×
+                    </button>
+                </span>
+                <span class="research-tag">
+                    IoT
+                    <button type="button">
+                        ×
+                    </button>
+                </span>
+                <span class="research-tag">
+                    Artificial Intelligence
+                    <button type="button">
+                        ×
+                    </button>
+                </span>
+                <span class="research-tag">
+                    Data Science
+                    <button type="button">
+                        ×
+                    </button>
+                </span>
+                <input
+                    type="text"
+                    placeholder="Add research interest..."
+                >
+            </div>
+        </div>
+        <div class="form-group">
+            <label>
+                Research Description
+            </label>
+            <textarea
+                class="form-control profile-input"
+                rows="4"
+                placeholder="Describe your research interests, goals and areas you want to explore..."
+                disabled
+            ></textarea>
+        </div>
+        <div class="form-group">
+            <label>
+                Research Methodologies
+            </label>
+            <div class="checkbox-grid">
+                <label>
+                    <input type="checkbox">
+                    Experimental Research
+                </label>
+                <label>
+                    <input type="checkbox">
+                    Data Analysis
+                </label>
+                <label>
+                    <input type="checkbox">
+                    Machine Learning
+                </label>
+                <label>
+                    <input type="checkbox">
+                    System Development
+                </label>
+                <label>
+                    <input type="checkbox">
+                    Survey Research
+                </label>
+                <label>
+                    <input type="checkbox">
+                    Literature Review
+                </label>
+            </div>
+        </div>
+        <button
+            class="save-section-button"
+            type="button"
+            onclick="saveSection('researchForm')"
+        >
+            Save Changes
+        </button>
+    </div>
+</section>
+
+<!-- SKILLS -->
+<section class="profile-section">
+    <div class="section-header">
+        <div>
+            <h2>
+                Skills
+            </h2>
+            <p>
+                Technical and research skills.
+            </p>
+        </div>
+        <button
+            class="section-edit-button"
+            type="button"
+            onclick="addSkill()"
+        >
+            <i class="bi bi-plus-lg"></i>
+        </button>
+    </div>
+    <div id="skillsContainer">
+        <div class="skill-row">
+            <div class="skill-name">
+                Python
+            </div>
+            <div class="skill-progress">
+                <div class="skill-progress-bar">
+                </div>
+            </div>
+            <select class="skill-level">
+                <option selected>
+                    Beginner
+                </option>
+                <option>
+                    Intermediate
+                </option>
+                <option>
+                    Advanced
+                </option>                
+                <option>
+                    Expert
+                </option>
+            </select>
+            <button
+                class="skill-delete"
+                type="button"
+            >
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        <div class="skill-row">
+            <div class="skill-name">
+                Keras
+            </div>
+            <div class="skill-progress">
+                <div
+                    class="skill-progress-bar"
+                    style="width:78%"
+                ></div>
+            </div>
+            <select class="skill-level">
+                <option selected>
+                    Beginner
+                </option>
+                <option>
+                    Intermediate
+                </option>
+                <option>
+                    Advanced
+                </option>                
+                <option>
+                    Expert
+                </option>
+            </select>
+            <button
+                class="skill-delete"
+                type="button"
+            >
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        <div class="skill-row">
+            <div class="skill-name">
+                SQL
+            </div>
+            <div class="skill-progress">
+                <div
+                    class="skill-progress-bar"
+                    style="width:88%"
+                ></div>
+            </div>
+            <select class="skill-level">
+                <option selected>
+                    Beginner
+                </option>
+                <option>
+                    Intermediate
+                </option>
+                <option>
+                    Advanced
+                </option>                
+                <option>
+                    Expert
+                </option>
+            </select>
+            <button
+                class="skill-delete"
+                type="button"
+            >
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        <div class="skill-row">
+            <div class="skill-name">
+                Data Analysis
+            </div>
+            <div class="skill-progress">
+                <div
+                    class="skill-progress-bar"
+                    style="width:70%"
+                ></div>
+            </div>
+            <select class="skill-level">
+                <option selected>
+                    Beginner
+                </option>
+                <option>
+                    Intermediate
+                </option>
+                <option>
+                    Advanced
+                </option>                
+                <option>
+                    Expert
+                </option>
+            </select>
+            <button
+                class="skill-delete"
+                type="button"
+            >
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- RESEARCH EXPERIENCE -->
+<section
+    class="profile-section"
+    id="experience-section"
+>
+    <div class="section-header">
+        <div>
+            <h2>
+                Research Experience
+            </h2>
+            <p>
+                Academic and research experience.
+            </p>
+        </div>
+        <button
+            class="add-item-button"
+            type="button"
+            onclick="addExperience()"
+        >
+            <i class="bi bi-plus-lg"></i>
+            Add Experience
+        </button>
+    </div>
+    <div id="experienceContainer">
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <h3>
+                    Research Assistant
+                </h3>
+                <span>
+                    UIU Research Lab
+                </span>
+                <small>
+                    Jan 2025 - Present
+                </small>
+                <p>
+                    Worked on machine learning based research,
+                    data preprocessing, model development and
+                    experimental analysis.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PROJECTS -->
+<section
+    class="profile-section"
+    id="projects-section"
+>
+    <div class="section-header">
+        <div>
+            <h2>
+                Projects
+            </h2>
+            <p>
+                Academic, research and personal projects.
+            </p>
+        </div>
+        <button
+            class="add-item-button"
+            type="button"
+            onclick="addProject()"
+        >
+            <i class="bi bi-plus-lg"></i>
+            Add Project
+        </button>
+    </div>
+    <div id="projectsContainer">
+        <article class="project-card">
+            <div class="project-card-top">
+                <div>
+                    <h3>
+                        Research Collaboration Portal
+                    </h3>
+                    <span class="project-type">
+                        Academic Project
+                    </span>
+                </div>
+                <button
+                    class="section-edit-button"
+                    type="button"
+                >
+                    <i class="bi bi-pencil"></i>
+                </button>
+            </div>
+            <p>
+                A web-based platform designed to help students
+                find research teammates and collaborate on
+                research projects.
+            </p>
+            <div class="project-tags">
+                <span>
+                    HTML
+                </span>
+                <span>
+                    CSS
+                </span>
+                <span>
+                    JavaScript
+                </span>
+                <span>
+                    PHP
+                </span>
+                <span>
+                    Laravel
+                </span>
+                <span>
+                    MySQL
+                </span>
+            </div>
+            <div class="project-links">
+                <a href="#">
+                    <i class="bi bi-github"></i>
+                    Source Code
+                </a>
+                <a href="#">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                    Live Project
+                </a>
+            </div>
+        </article>
+    </div>
+</section>
+
+<!-- PUBLICATIONS -->
+<section
+    class="profile-section"
+    id="publications-section"
+>
+    <div class="section-header">
+        <div>
+            <h2>
+                Publications & Papers
+            </h2>
+            <p>
+                Published and ongoing research work.
+            </p>
+        </div>
+        <button
+            class="add-item-button"
+            type="button"
+            onclick="addPublication()"
+        >
+            <i class="bi bi-plus-lg"></i>
+            Add Publication
+        </button>
+    </div>
+    <div id="publicationContainer">
+        <article class="publication-card">
+            <div class="publication-icon">
+                <i class="bi bi-file-earmark-text"></i>
+            </div>
+            <div class="publication-content">
+                <h3>
+                    Research Paper Title
+                </h3>
+                <p class="publication-authors">
+                    Author Name, Co-author Name
+                </p>
+                <p class="publication-venue">
+                    Conference / Journal Name · 2026
+                </p>
+                <span class="publication-status">
+                    Ongoing Research
+                </span>
+            </div>
+            <button
+                class="section-edit-button"
+                type="button"
+            >
+                <i class="bi bi-pencil"></i>
+            </button>
+        </article>
+    </div>
+</section>
+</div>
+
+<!-- RIGHT COLUMN -->
+<div class="profile-right-column">
+
+<!-- CONTACT SUMMARY -->
+<section class="profile-section compact-section">
+    <div class="section-header">
+        <h2>
+            Contact Info
+        </h2>
+        <button class="section-edit-button">
+            <i class="bi bi-pencil"></i>
+        </button>
+    </div>
+    <div class="contact-list">
+        <div>
+            <i class="bi bi-envelope-fill"></i>
+            <span>
+                yourname@bscse.uiu.ac.bd
+            </span>
+        </div>
+        <div>
+            <i class="bi bi-telephone-fill"></i>
+            <span>
+                +880 1XXXXXXXXX
+            </span>
+        </div>
+        <div>
+            <i class="bi bi-geo-alt-fill"></i>
+            <span>
+                Dhaka, Bangladesh
+            </span>
+        </div>
+        <div>
+            <i class="bi bi-linkedin"></i>
+            <span>
+                LinkedIn Profile
+            </span>
+        </div>
+        <div>
+            <i class="bi bi-github"></i>
+            <span>
+                GitHub Profile
+            </span>
+        </div>
+    </div>
+</section>
+
+<!-- RESEARCH PREFERENCES -->
+<section class="profile-section">
+    <div class="section-header">
+        <div>
+            <h2>
+                Research Preferences
+            </h2>
+            <p>
+                Help us find suitable research teammates.
+            </p>
+        </div>
+        <button class="section-edit-button">
+            <i class="bi bi-pencil"></i>
+        </button>
+    </div>
+    <div class="preference-list">
+        <div class="preference-item">
+            <span>
+                Looking for Team
+            </span>
+            <strong class="preference-green">
+                Yes
+            </strong>
+        </div>
+        <div class="preference-item">
+            <span>
+                Preferred Team Size
+            </span>
+            <strong>
+                2 - 4 Members
+            </strong>
+        </div>
+        <div class="preference-item">
+            <span>
+                Availability
+            </span>
+            <strong>
+                15 - 20 hrs/week
+            </strong>
+        </div>
+        <div class="preference-item">
+            <span>
+                Preferred Collaboration
+            </span>
+            <strong>
+                Online + In Person
+            </strong>
+        </div>
+        <div class="preference-item">
+            <span>
+                Preferred Project Type
+            </span>
+            <strong>
+                Research Project
+            </strong>
+        </div>
+    </div>
+</section>
+
+<!-- LANGUAGES -->
+<section class="profile-section">
+    <div class="section-header">
+        <div>
+            <h2>
+                Languages
+            </h2>
+            <p>
+                Languages you can communicate in.
+            </p>
+        </div>
+        <button
+            class="section-edit-button"
+            type="button"
+            onclick="addLanguage()"
+        >
+            <i class="bi bi-plus-lg"></i>
+        </button>
+    </div>
+    <div id="languageContainer">
+        <div class="language-row">
+            <div>
+                <strong>
+                    Bengali
+                </strong>
+                <small>
+                    Native
+                </small>
+            </div>
+            <div class="language-level">
+                Native
+            </div>
+        </div>
+        <div class="language-row">
+            <div>
+                <strong>
+                    English
+                </strong>
+                <small>
+                    Professional
+                </small>
+            </div>
+            <div class="language-level">
+                Advanced
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CERTIFICATIONS -->
+<section class="profile-section">
+    <div class="section-header">
+        <div>
+            <h2>
+                Certifications
+            </h2>
+            <p>
+                Professional and academic certifications.
+            </p>
+        </div>
+        <button
+            class="add-item-button"
+            type="button"
+            onclick="addCertification()"
+        >
+            <i class="bi bi-plus-lg"></i>
+            Add
+        </button>
+    </div>
+    <div id="certificationContainer">
+        <div class="certificate-item">
+            <div class="certificate-icon">
+                <i class="bi bi-award-fill"></i>
+            </div>
+            <div>
+                <strong>
+                    Certification Name
+                </strong>
+                <small>
+                    Issuing Organization · 2026
+                </small>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- AWARDS & ACHIEVEMENTS -->
+<section
+    class="profile-section"
+    id="achievements-section"
+>
+    <div class="section-header">
+        <div>
+            <h2>
+                Awards & Achievements
+            </h2>
+            <p>
+                Competitions, awards and recognitions.
+            </p>
+        </div>
+        <button
+            class="add-item-button"
+            type="button"
+            onclick="addAchievement()"
+        >
+            <i class="bi bi-plus-lg"></i>
+            Add
+        </button>
+    </div>
+    <div id="achievementContainer">
+        <div class="achievement-item">
+            <div class="achievement-icon">
+                <i class="bi bi-trophy-fill"></i>
+            </div>
+            <div>
+                <strong>
+                    Achievement Title
+                </strong>
+                <small>
+                    Organization · Year
+                </small>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- WORK EXPERIENCE -->
+<section class="profile-section">
+    <div class="section-header">
+        <div>
+            <h2>
+                Work Experience
+            </h2>
+            <p>
+                Internship, job and professional experience.
+            </p>
+        </div>
+        <button
+            class="add-item-button"
+            type="button"
+            onclick="addWorkExperience()"
+        >
+            <i class="bi bi-plus-lg"></i>
+            Add Experience
+        </button>
+    </div>
+    <div id="workContainer">
+        <div class="empty-state">
+            <i class="bi bi-briefcase"></i>
+            <p>
+                No work experience added yet.
+            </p>
+            <button
+                type="button"
+                onclick="addWorkExperience()"
+            >
+                Add Work Experience
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- EXTRACURRICULAR ACTIVITIES -->
+<section class="profile-section">
+    <div class="section-header">
+        <div>
+            <h2>
+                Extracurricular Activities
+            </h2>
+            <p>
+                Clubs, volunteering and student activities.
+            </p>
+        </div>
+        <button
+            class="add-item-button"
+            type="button"
+        >
+            <i class="bi bi-plus-lg"></i>
+            Add
+        </button>
+    </div>
+    <textarea
+        class="form-control"
+        rows="4"
+        placeholder="Describe your extracurricular activities..."
+    ></textarea>
+</section>
+
+<!-- CV / RESUME -->
+<section class="profile-section">
+    <div class="section-header">
+        <div>
+            <h2>
+                CV / Resume
+            </h2>
+            <p>
+                Upload your latest CV or resume.
+            </p>
+        </div>
+    </div>
+    <div class="cv-upload-area">
+        <i class="bi bi-file-earmark-pdf"></i>
+        <h3>
+            Upload CV
+        </h3>
+        <p>
+            PDF format recommended
+        </p>
+        <label class="cv-upload-button">
+            <i class="bi bi-upload"></i>
+            Choose File
+            <input
+                type="file"
+                id="cvUpload"
+                accept=".pdf,.doc,.docx"
+                hidden
+            >
+        </label>
+        <span id="cvFileName"></span>
+    </div>
+</section>
+
+<!-- AVAILABILITY -->
+<section class="profile-section">
+    <div class="section-header">
+        <div>
+            <h2>
+                Availability
+            </h2>
+            <p>
+                When are you available for research collaboration?
+            </p>
+        </div>
+    </div>
+    <div class="availability-grid">
+        <label>
+            <input type="checkbox">
+            Saturday
+        </label>
+        <label>
+            <input type="checkbox">
+            Sunday
+        </label>
+        <label>
+            <input type="checkbox">
+            Monday
+        </label>
+        <label>
+            <input type="checkbox">
+            Tuesday
+        </label>
+        <label>
+            <input type="checkbox">
+            Wednesday
+        </label>
+        <label>
+            <input type="checkbox">
+            Thursday
+        </label>
+        <label>
+            <input type="checkbox">
+            Friday
+        </label>
+    </div>
+    <div class="form-row availability-time">
+        <div class="form-group">
+            <label>
+                Available From
+            </label>
+            <input
+                type="time"
+                class="form-control"
+            >
+        </div>
+        <div class="form-group">
+            <label>
+                Available Until
+            </label>
+            <input
+                type="time"
+                class="form-control"
+            >
+        </div>
+    </div>
+</section>
+
+<!-- PROFILE VISIBILITY -->
+<section class="profile-section">
+    <div class="section-header">
+        <div>
+            <h2>
+                Profile Visibility
+            </h2>
+            <p>
+                Control who can view your profile.
+            </p>
+        </div>
+    </div>
+    <div class="visibility-options">
+        <label class="visibility-option">
+            <input
+                type="radio"
+                name="visibility"
+                checked
+            >
+            <div>
+                <strong>
+                    Public
+                </strong>
+                <small>
+                    Visible to all registered researchers.
+                </small>
+            </div>
+        </label>
+        <label class="visibility-option">
+            <input
+                type="radio"
+                name="visibility"
+            >
+            <div>
+                <strong>
+                    University Only
+                </strong>
+                <small>
+                    Visible only to UIU users.
+                </small>
+            </div>
+        </label>
+        <label class="visibility-option">
+            <input
+                type="radio"
+                name="visibility"
+            >
+            <div>
+                <strong>
+                    Private
+                </strong>
+                <small>
+                    Only you can view your profile.
+                </small>
+            </div>
+        </label>
+    </div>
+</section>
+
+<!-- PROFILE ACTIONS -->
+<section class="profile-actions-card">
+    <button
+        type="button"
+        class="save-profile-button"
+        onclick="saveEntireProfile()"
+    >
+        <i class="bi bi-check-circle-fill"></i>
+        Save Profile
+    </button>
+    <button
+        type="button"
+        class="preview-profile-button"
+        onclick="previewProfile()"
+    >
+        <i class="bi bi-eye"></i>
+        Preview Profile
+    </button>
+    <button
+        type="button"
+        class="cancel-profile-button"
+    >
+        Cancel
+    </button>
+</section>
+</div>
+</div>
+
+<!-- ACTIVITY SECTION -->
+<section
+    class="profile-section full-width-section"
+    id="activity-section"
+>
+    <div class="section-header">
+        <div>
+            <h2>
+                Recent Activity
+            </h2>
+            <p>
+                Your recent research collaboration activity.
+            </p>
+        </div>
+    </div>
+    <div class="activity-list">
+        <div class="activity-item">
+            <div class="activity-icon">
+                <i class="bi bi-person-plus-fill"></i>
+            </div>
+            <div>
+                <strong>
+                    Joined a research team
+                </strong>
+                <small>
+                    Recently
+                </small>
+            </div>
+        </div>
+        <div class="activity-item">
+            <div class="activity-icon">
+                <i class="bi bi-file-earmark-text-fill"></i>
+            </div>
+            <div>
+                <strong>
+                    Added a research project
+                </strong>
+                <small>
+                    Recently
+                </small>
+            </div>
+        </div>
+        <div class="activity-item">
+            <div class="activity-icon">
+                <i class="bi bi-pencil-fill"></i>
+            </div>
+            <div>
+                <strong>
+                    Updated profile information
+                </strong>
+                <small>
+                    Recently
+                </small>
+            </div>
+        </div>
+    </div>
+</section>
+</main>
+</div>
+
+<!-- Bootstrap JS -->
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+
+<!-- PROFILE JS -->
+<script>
+
+// SCROLL TO SECTION
+function scrollToSection(sectionId) {
+
+    const section = document.getElementById(sectionId);
+
+    if (section) {
+
+        section.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    }
+
+}
+
+// TOGGLE SECTION EDITING
+function toggleSection(formId) {
+
+    const form = document.getElementById(formId);
+
+    if (!form) return;
+
+    const inputs = form.querySelectorAll(
+        "input, textarea, select"
+    );
+
+    const currentlyDisabled =
+        Array.from(inputs).some(
+            input => input.disabled
+        );
+
+    inputs.forEach(input => {
+
+        input.disabled = !currentlyDisabled;
+
+    });
+
+}
+
+// ENABLE ALL EDITING
+function enableEditing() {
+
+    const inputs = document.querySelectorAll(
+        ".profile-input"
+    );
+
+    inputs.forEach(input => {
+
+        input.disabled = false;
+
+    });
+
+    const firstInput =
+        document.querySelector(".profile-input");
+
+    if (firstInput) {
+
+        firstInput.focus();
+
+    }
+
+}
+
+// SAVE SECTION
+function saveSection(formId) {
+
+    const form = document.getElementById(formId);
+
+    if (!form) return;
+
+    const inputs = form.querySelectorAll(
+        "input, textarea, select"
+    );
+
+    inputs.forEach(input => {
+
+        input.disabled = true;
+
+    });
+
+    showToast(
+        "Changes saved successfully."
+    );
+
+    updateProfileCompletion();
+
+}
+
+// ADD EXPERIENCE
+function addExperience() {
+
+    const container =
+        document.getElementById(
+            "experienceContainer"
+        );
+
+    const item =
+        document.createElement("div");
+
+    item.className =
+        "timeline-item";
+
+    item.innerHTML = `
+
+        <div class="timeline-dot"></div>
+
+        <div class="timeline-content">
+
+            <h3>
+                New Research Experience
+            </h3>
+
+            <span>
+                Organization / Research Lab
+            </span>
+
+            <small>
+                Start Date - End Date
+            </small>
+
+            <p>
+                Add your research responsibilities,
+                contributions and achievements here.
+            </p>
+
+        </div>
+
+    `;
+
+    container.appendChild(item);
+
+    showToast(
+        "New research experience added."
+    );
+
+}
+
+// ADD PROJECT
+function addProject() {
+
+    const container =
+        document.getElementById(
+            "projectsContainer"
+        );
+
+    const project =
+        document.createElement("article");
+
+    project.className =
+        "project-card";
+
+    project.innerHTML = `
+
+        <div class="project-card-top">
+
+            <div>
+
+                <h3>
+                    New Project
+                </h3>
+
+                <span class="project-type">
+                    Academic Project
+                </span>
+
+            </div>
+
+            <button
+                class="section-edit-button"
+                type="button"
+            >
+
+                <i class="bi bi-pencil"></i>
+
+            </button>
+
+        </div>
+
+        <p>
+            Add a description of your project,
+            objectives and contribution.
+        </p>
+
+        <div class="project-tags">
+
+            <span>
+                Technology
+            </span>
+
+            <span>
+                Research
+            </span>
+
+        </div>
+
+    `;
+
+    container.appendChild(project);
+
+    showToast(
+        "New project added."
+    );
+
+}
+
+// ADD PUBLICATION
+function addPublication() {
+
+    const container =
+        document.getElementById(
+            "publicationContainer"
+        );
+
+    const publication =
+        document.createElement("article");
+
+    publication.className =
+        "publication-card";
+
+    publication.innerHTML = `
+
+        <div class="publication-icon">
+
+            <i class="bi bi-file-earmark-text"></i>
+
+        </div>
+
+        <div class="publication-content">
+
+            <h3>
+                New Research Publication
+            </h3>
+
+            <p class="publication-authors">
+                Add authors
+            </p>
+
+            <p class="publication-venue">
+                Journal / Conference · Year
+            </p>
+
+            <span class="publication-status">
+                Ongoing
+            </span>
+
+        </div>
+
+    `;
+
+    container.appendChild(publication);
+
+    showToast(
+        "New publication added."
+    );
+
+}
+
+// ADD SKILL
+function addSkill() {
+
+    const container =
+        document.getElementById(
+            "skillsContainer"
+        );
+
+    const row =
+        document.createElement("div");
+
+    row.className =
+        "skill-row";
+
+    row.innerHTML = `
+
+        <div class="skill-name">
+            New Skill
+        </div>
+
+        <div class="skill-progress">
+
+            <div
+                class="skill-progress-bar"
+                style="width:50%"
+            ></div>
+
+        </div>
+
+        <select class="skill-level">
+
+            <option>
+                Beginner
+            </option>
+
+            <option selected>
+                Intermediate
+            </option>
+
+            <option>
+                Advanced
+            </option>
+
+            <option>
+                Expert
+            </option>
+
+        </select>
+
+        <button
+            class="skill-delete"
+            type="button"
+            onclick="this.closest('.skill-row').remove(); updateProfileCompletion();"
+        >
+
+            <i class="bi bi-trash"></i>
+
+        </button>
+
+    `;
+
+    container.appendChild(row);
+
+    showToast(
+        "New skill added."
+    );
+
+}
+
+// ADD LANGUAGE
+function addLanguage() {
+
+    const container =
+        document.getElementById(
+            "languageContainer"
+        );
+
+    const language =
+        document.createElement("div");
+
+    language.className =
+        "language-row";
+
+    language.innerHTML = `
+
+        <div>
+
+            <strong>
+                New Language
+            </strong>
+
+            <small>
+                Communication Level
+            </small>
+
+        </div>
+
+        <div class="language-level">
+            Intermediate
+        </div>
+
+    `;
+
+    container.appendChild(language);
+
+    showToast(
+        "New language added."
+    );
+
+}
+
+// ADD CERTIFICATION
+function addCertification() {
+
+    const container =
+        document.getElementById(
+            "certificationContainer"
+        );
+
+    const certificate =
+        document.createElement("div");
+
+    certificate.className =
+        "certificate-item";
+
+    certificate.innerHTML = `
+
+        <div class="certificate-icon">
+
+            <i class="bi bi-award-fill"></i>
+
+        </div>
+
+        <div>
+
+            <strong>
+                New Certification
+            </strong>
+
+            <small>
+                Issuing Organization · Year
+            </small>
+
+        </div>
+
+    `;
+
+    container.appendChild(certificate);
+
+    showToast(
+        "New certification added."
+    );
+
+}
+
+// ADD ACHIEVEMENT
+function addAchievement() {
+
+    const container =
+        document.getElementById(
+            "achievementContainer"
+        );
+
+    const achievement =
+        document.createElement("div");
+
+    achievement.className =
+        "achievement-item";
+
+    achievement.innerHTML = `
+
+        <div class="achievement-icon">
+
+            <i class="bi bi-trophy-fill"></i>
+
+        </div>
+
+        <div>
+
+            <strong>
+                New Achievement
+            </strong>
+
+            <small>
+                Organization · Year
+            </small>
+
+        </div>
+
+    `;
+
+    container.appendChild(achievement);
+
+    showToast(
+        "New achievement added."
+    );
+
+}
+
+// ADD WORK EXPERIENCE
+function addWorkExperience() {
+
+    const container =
+        document.getElementById(
+            "workContainer"
+        );
+
+    const emptyState =
+        container.querySelector(
+            ".empty-state"
+        );
+
+    if (emptyState) {
+
+        emptyState.remove();
+
+    }
+
+
+    const experience =
+        document.createElement("div");
+
+    experience.className =
+        "timeline-item";
+
+    experience.innerHTML = `
+
+        <div class="timeline-dot"></div>
+
+        <div class="timeline-content">
+
+            <h3>
+                New Work Experience
+            </h3>
+
+            <span>
+                Company / Organization
+            </span>
+
+            <small>
+                Start Date - End Date
+            </small>
+
+            <p>
+                Describe your position,
+                responsibilities and achievements.
+            </p>
+
+        </div>
+
+    `;
+
+    container.appendChild(experience);
+
+    showToast(
+        "New work experience added."
+    );
+
+}
+
+// CV FILE UPLOAD
+const cvUpload =
+    document.getElementById("cvUpload");
+
+if (cvUpload) {
+
+    cvUpload.addEventListener(
+        "change",
+        function () {
+
+            const file =
+                this.files[0];
+
+            const fileName =
+                document.getElementById(
+                    "cvFileName"
+                );
+
+            if (file) {
+
+                fileName.textContent =
+                    file.name;
+
+                showToast(
+                    "CV selected successfully."
+                );
+
+            }
+
+        }
+    );
+
+}
+
+// PROFILE COMPLETION
+function updateProfileCompletion() {
+
+    const sections =
+        document.querySelectorAll(
+            ".profile-section"
+        );
+
+    let completed = 0;
+
+    let total = sections.length;
+
+
+    sections.forEach(section => {
+
+        const inputs =
+            section.querySelectorAll(
+                "input, textarea, select"
+            );
+
+        let hasData = false;
+
+
+        inputs.forEach(input => {
+
+            if (
+                input.value &&
+                input.value.trim() !== ""
+            ) {
+
+                hasData = true;
+
+            }
+
+            if (
+                input.type === "checkbox" &&
+                input.checked
+            ) {
+
+                hasData = true;
+
+            }
+
+        });
+
+
+        if (hasData) {
+
+            completed++;
+
+        }
+
+    });
+
+
+    let percentage =
+        Math.round(
+            (completed / total) * 100
+        );
+
+
+    if (percentage < 80) {
+
+        percentage = 80;
+
+    }
+
+
+    if (percentage > 100) {
+
+        percentage = 100;
+
+    }
+
+
+    document.getElementById(
+        "completionPercentage"
+    ).textContent =
+        percentage + "%";
+
+
+    document.getElementById(
+        "mainCompletionProgress"
+    ).style.width =
+        percentage + "%";
+
+
+    document.getElementById(
+        "sidebarCompletion"
+    ).textContent =
+        percentage + "%";
+
+
+    document.getElementById(
+        "sidebarProgress"
+    ).style.width =
+        percentage + "%";
+
+
+    let message =
+        "Complete Your Profile";
+
+
+    if (percentage >= 95) {
+
+        message =
+            "Profile Complete!";
+
+    }
+    else if (percentage >= 80) {
+
+        message =
+            "Almost There!";
+
+    }
+
+
+    document.getElementById(
+        "completionMessage"
+    ).textContent =
+        message;
+
+}
+
+// SAVE ENTIRE PROFILE
+function saveEntireProfile() {
+
+    const inputs =
+        document.querySelectorAll(
+            ".profile-input"
+        );
+
+    inputs.forEach(input => {
+
+        input.disabled = true;
+
+    });
+
+
+    updateProfileCompletion();
+
+
+    showToast(
+        "Your profile has been saved successfully."
+    );
+
+}
+
+// PROFILE PREVIEW
+function previewProfile() {
+
+    showToast(
+        "Profile preview will open here."
+    );
+
+}
+
+// TOAST MESSAGE
+function showToast(message) {
+
+    const toast =
+        document.createElement("div");
+
+    toast.className =
+        "profile-toast";
+
+    toast.innerHTML = `
+
+        <i class="bi bi-check-circle-fill"></i>
+
+        <span>
+            ${message}
+        </span>
+
+    `;
+
+    document.body.appendChild(toast);
+
+
+    setTimeout(() => {
+
+        toast.classList.add(
+            "show"
+        );
+
+    }, 50);
+
+
+    setTimeout(() => {
+
+        toast.classList.remove(
+            "show"
+        );
+
+        setTimeout(() => {
+
+            toast.remove();
+
+        }, 300);
+
+    }, 2500);
+
+}
+
+// PROFILE TAB ACTIVE STATE
+const profileTabs =
+    document.querySelectorAll(
+        ".profile-tab"
+    );
+
+profileTabs.forEach(tab => {
+
+    tab.addEventListener(
+        "click",
+        function () {
+
+            profileTabs.forEach(item => {
+
+                item.classList.remove(
+                    "active"
+                );
+
+            });
+
+            this.classList.add(
+                "active"
+            );
+
+        }
+    );
+
+});
+
+// INITIAL PROFILE COMPLETION
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        updateProfileCompletion();
+
+    }
+);
+</script>
+
+</body>
+</html>

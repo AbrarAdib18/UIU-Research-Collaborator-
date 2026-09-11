@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Research Connect || UIU ResearchCollab</title>
+
+    <!-- Bootstrap-5 CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- RESEARCH CONNECT CSS -->
+    <link rel="stylesheet" href="CSS/research-connect.css">
+</head>
+
+<body>
+
+    <!-- =========================================================
+         TOP BAR
+    ========================================================== -->
+    <div class="top-bar">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+
+                <div class="col-6">
+                    <div class="portal-title">
+                        UIU Research Collaboration Portal
+                    </div>
+                </div>
+
+                <div class="col-6 text-end">
+                    <div class="portal-tagline">
+                        Connecting Minds. Creating Research.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- =========================================================
+         1ST NAVBAR
+    ========================================================== -->
+    <header class="dashboard-header">
+
+        <!-- HEADER LEFT -->
+        <div class="dashboard-header-left">
+
+            <!-- LOGO -->
+            <a href="index.html" class="dashboard-logo-link">
+                <img
+                    src="../UIU Research Collaboration Portal/IMAGES/logo.jpg"
+                    alt="UIU ResearchCollab Logo"
+                    class="dashboard-logo">
+            </a>
+
+            <!-- WEBSITE NAME -->
+            <div class="dashboard-brand">
+                <h1>UIU ResearchCollab</h1>
+
+                <p>
+                    Connecting Minds. Creating Research.
+                </p>
+            </div>
+
+        </div>
+
+
+        <!-- HEADER RIGHT -->
+        <div class="dashboard-header-right">
+
+            <!-- SEARCH -->
+            <div class="dashboard-search">
+
+                <input
+                    type="text"
+                    placeholder="Search for researchers, papers, communities..."
+                    aria-label="Search">
+
+                <button type="button" aria-label="Search">
+                    <i class="bi bi-search"></i>
+                </button>
+
+            </div>
+
+
+            <!-- NOTIFICATION -->
+            <div class="header-icon notification-icon">
+
+                <button type="button" aria-label="Notifications">
+                    <i class="bi bi-bell"></i>
+
+                    <span class="notification-badge">
+                        3
+                    </span>
+                </button>
+
+            </div>
+
+
+            <!-- MESSAGE -->
+            <div class="header-icon message-icon">
+
+                <button type="button" aria-label="Messages">
+                    <i class="bi bi-chat-dots"></i>
+
+                    <span class="notification-badge">
+                        2
+                    </span>
+                </button>
+
+            </div>
+
+
+            <!-- DIVIDER -->
+            <div class="header-divider"></div>
+
+
+            <!-- USER PROFILE -->
+            <div class="dashboard-user">
+
+                <img
+                    src="../UIU Research Collaboration Portal/IMAGES/pic1.jpg"
+                    alt="User Profile"
+                    class="user-avatar">
+
+                <!-- USER INFORMATION -->
+                <div class="user-information">
+
+                    <h3 class="user-first-name">
+                        Rahil
+                    </h3>
+
+                    <p>
+                        CSE Dept.
+                    </p>
+
+                </div>
+
+
+                <!-- DROPDOWN BUTTON -->
+                <button
+                    class="user-dropdown-button"
+                    type="button"
+                    aria-label="User menu">
+
+                    <i class="bi bi-chevron-down"></i>
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =========================================================
+         BODY WRAPPER
+    ========================================================== -->
+    <div class="dashboard-wrapper">
+
+
+        <!-- =====================================================
+             LEFT SIDEBAR
+        ====================================================== -->
+        <aside class="dashboard-sidebar">
+
+            <!-- SIDEBAR NAVIGATION -->
+            <nav class="sidebar-navigation">
+
+
+                <!-- DASHBOARD -->
+                <a href="dashboard.html" class="sidebar-link">
+
+                    <i class="bi bi-house-fill"></i>
+
+                    <span>
+                        Dashboard
+                    </span>
+
+                </a>
+
+
+                <!-- MY PROFILE -->
+                <a href="profile.html" class="sidebar-link">
+
+                    <i class="bi bi-person-fill"></i>
+
+                    <span>
+                        My Profile
+                    </span>
+
+                </a>
+
+
+                <!-- RESEARCH CONNECT -->
+                <a href="research-connect.html" class="sidebar-link active">
+
+                    <i class="bi bi-people"></i>
+
+                    <span>
+                        Research Connect
+                    </span>
+
+                </a>
+
+
+                <!-- RESEARCH OPPORTUNITIES -->
+                <a href="opportunities.html" class="sidebar-link">
+
+                    <i class="bi bi-file-earmark-text"></i>
+
+                    <span>
+                        Research Opportunities
+                    </span>
+
+                </a>
+
+
+                <!-- MY TEAMS -->
+                <a href="my-teams.html" class="sidebar-link">
+
+                    <i class="bi bi-people-fill"></i>
+
+                    <span>
+                        My Teams
+                    </span>
+
+                </a>
+
+
+                <!-- COMMUNITIES -->
+                <a href="communities.html" class="sidebar-link">
+
+                    <i class="bi bi-diagram-3"></i>
+
+                    <span>
+                        Communities
+                    </span>
+
+                </a>
+
+
+                <!-- MESSAGES -->
+                <a href="messages.html" class="sidebar-link">
+
+                    <i class="bi bi-chat-fill"></i>
+
+                    <span>
+                        Messages
+                    </span>
+
+                    <span class="sidebar-count">
+                        2
+                    </span>
+
+                </a>
+
+
+                <!-- RESEARCH REPOSITORIES -->
+                <a href="repository.html" class="sidebar-link">
+
+                    <i class="bi bi-database-fill"></i>
+
+                    <span>
+                        Research Repositories
+                    </span>
+
+                </a>
+
+
+                <!-- SAVED ITEMS -->
+                <a href="saved-items.html" class="sidebar-link">
+
+                    <i class="bi bi-bookmark"></i>
+
+                    <span>
+                        Saved Items
+                    </span>
+
+                </a>
+
+
+                <!-- NOTIFICATIONS -->
+                <a href="notifications.html" class="sidebar-link">
+
+                    <i class="bi bi-bell"></i>
+
+                    <span>
+                        Notifications
+                    </span>
+
+                    <span class="sidebar-count">
+                        3
+                    </span>
+
+                </a>
+
+
+                <!-- CALENDAR -->
+                <a href="calendar.html" class="sidebar-link">
+
+                    <i class="bi bi-calendar3"></i>
+
+                    <span>
+                        Calendar
+                    </span>
+
+                </a>
+
+
+                <!-- SETTINGS -->
+                <a href="settings.html" class="sidebar-link">
+
+                    <i class="bi bi-gear"></i>
+
+                    <span>
+                        Settings
+                    </span>
+
+                </a>
+
+            </nav>
+
+
+
+            <!-- =================================================
+                 PROFILE COMPLETION CARD
+            ================================================== -->
+            <div class="sidebar-profile-card">
+
+                <h3>
+                    Complete Your Profile
+                </h3>
+
+                <p>
+                    Get better matches by
+                    completing your profile.
+                </p>
+
+                <a
+                    href="profile.html"
+                    class="sidebar-update-button">
+
+                    Update Profile
+
+                </a>
+
+
+                <div class="sidebar-completion">
+
+                    <div class="completion-header">
+
+                        <span>
+                            Profile Completion
+                        </span>
+
+                        <strong>
+                            80%
+                        </strong>
+
+                    </div>
+
+
+                    <div class="completion-progress">
+
+                        <div
+                            class="completion-progress-bar"
+                            style="width: 80%;">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </aside>
+
+
+
+        <!-- =====================================================
+             MAIN CONTENT
+        ====================================================== -->
+        <main class="research-connect-main">
+
+
+            <!-- =================================================
+                 PAGE HEADER
+            ================================================== -->
+            <div class="research-connect-header">
+
+                <div class="research-connect-title">
+
+                    <h2>
+                        Research Connect
+                    </h2>
+
+                    <p>
+                        Discover the most compatible research collaborators based on your interests, skills, and goals.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 MAIN CONTENT GRID
+            ================================================== -->
+            <div class="research-connect-grid">
+
+
+                <!-- =================================================
+                     LEFT / CENTER CONTENT
+                ================================================== -->
+                <section class="matches-content">
+
+
+                    <!-- TOP ROW -->
+                    <div class="matches-top-row">
+
+                        <!-- TABS -->
+                        <div class="match-tabs">
+
+                            <a
+                                href="#"
+                                class="match-tab active">
+
+                                Recommended for You
+
+                            </a>
+
+                            <a
+                                href="#"
+                                class="match-tab">
+
+                                Top Matches
+
+                            </a>
+
+                            <a
+                                href="#"
+                                class="match-tab">
+
+                                New Researchers
+
+                            </a>
+
+                            <a
+                                href="#"
+                                class="match-tab">
+
+                                Recently Active
+
+                            </a>
+
+                        </div>
+
+
+                        <!-- HOW IT WORKS -->
+                        <a
+                            href="#"
+                            class="how-it-works">
+
+                            How it works?
+
+                        </a>
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         RECOMMENDED MATCHES
+                    ================================================== -->
+                    <div class="recommended-section">
+
+                        <h3 class="section-title">
+                            Top Recommended Matches
+                        </h3>
+
+
+
+                        <!-- MATCH CARD 1 -->
+                        <div class="researcher-match-card">
+
+
+                            <!-- MATCH SCORE -->
+                            <div class="match-score-small">
+
+                                <strong>
+                                    89%
+                                </strong>
+
+                                <span>
+                                    Match
+                                </span>
+
+                            </div>
+
+
+                            <!-- RESEARCHER IMAGE -->
+                            <div class="researcher-avatar-wrapper">
+
+                                <img
+                                    src="../UIU Research Collaboration Portal/IMAGES/pic2.jpg"
+                                    alt="Researcher"
+                                    class="researcher-avatar">
+
+                            </div>
+
+
+                            <!-- RESEARCHER INFORMATION -->
+                            <div class="researcher-information">
+
+                                <div class="researcher-name-row">
+
+                                    <h4>
+                                        Abrar Habib Adib
+                                    </h4>
+
+                                    <span class="researcher-role">
+                                        Student
+                                    </span>
+
+                                </div>
+
+
+                                <div class="researcher-meta">
+
+                                    <span>
+                                        CSE Department
+                                    </span>
+
+                                    <span class="meta-divider">
+                                        ||
+                                    </span>
+
+                                    <span>
+                                        12th Trimester
+                                    </span>
+
+                                </div>
+
+
+                                <!-- SKILLS -->
+                                <div class="researcher-tags">
+
+                                    <span class="skill-tag">
+                                        Machine Learning
+                                    </span>
+
+                                    <span class="skill-tag">
+                                        Python
+                                    </span>
+
+                                    <span class="more-tag">
+                                        +5
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- ACTION BUTTONS -->
+                            <div class="researcher-actions">
+
+                                <a
+                                    href="profile.html"
+                                    class="view-profile-button">
+
+                                    View Profile
+
+                                </a>
+
+                                <button
+                                    type="button"
+                                    class="invite-button">
+
+                                    Invite
+                                    <i class="bi bi-plus-lg"></i>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- MATCH CARD 2 -->
+                        <div class="researcher-match-card">
+
+
+                            <!-- MATCH SCORE -->
+                            <div class="match-score-small">
+
+                                <strong>
+                                    95%
+                                </strong>
+
+                                <span>
+                                    Match
+                                </span>
+
+                            </div>
+
+
+                            <!-- RESEARCHER IMAGE -->
+                            <div class="researcher-avatar-wrapper">
+
+                                <img
+                                    src="../UIU Research Collaboration Portal/IMAGES/pic3.jpg"
+                                    alt="Researcher"
+                                    class="researcher-avatar">
+
+                            </div>
+
+
+                            <!-- RESEARCHER INFORMATION -->
+                            <div class="researcher-information">
+
+                                <div class="researcher-name-row">
+
+                                    <h4>
+                                        Rasel Mahmud
+                                    </h4>
+
+                                    <span class="researcher-role">
+                                        Student
+                                    </span>
+
+                                </div>
+
+
+                                <div class="researcher-meta">
+
+                                    <span>
+                                        CSE Department
+                                    </span>
+
+                                    <span class="meta-divider">
+                                        ||
+                                    </span>
+
+                                    <span>
+                                        12th Trimester
+                                    </span>
+
+                                </div>
+
+
+                                <!-- SKILLS -->
+                                <div class="researcher-tags">
+
+                                    <span class="skill-tag">
+                                        Software Developer
+                                    </span>
+
+                                    <span class="skill-tag">
+                                        PhP
+                                    </span>
+
+                                    <span class="more-tag">
+                                        +4
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- ACTION BUTTONS -->
+                            <div class="researcher-actions">
+
+                                <a
+                                    href="profile.html"
+                                    class="view-profile-button">
+
+                                    View Profile
+
+                                </a>
+
+                                <button
+                                    type="button"
+                                    class="invite-button">
+
+                                    Invite
+                                    <i class="bi bi-plus-lg"></i>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- MATCH CARD 3 -->
+                        <div class="researcher-match-card">
+
+
+                            <!-- MATCH SCORE -->
+                            <div class="match-score-small">
+
+                                <strong>
+                                    91%
+                                </strong>
+
+                                <span>
+                                    Match
+                                </span>
+
+                            </div>
+
+
+                            <!-- RESEARCHER IMAGE -->
+                            <div class="researcher-avatar-wrapper">
+
+                                <img
+                                    src="../UIU Research Collaboration Portal/IMAGES/pic4.jpg"
+                                    alt="Researcher"
+                                    class="researcher-avatar">
+
+                            </div>
+
+
+                            <!-- RESEARCHER INFORMATION -->
+                            <div class="researcher-information">
+
+                                <div class="researcher-name-row">
+
+                                    <h4>
+                                        Nahiun Sajid
+                                    </h4>
+
+                                    <span class="researcher-role">
+                                        Student
+                                    </span>
+
+                                </div>
+
+
+                                <div class="researcher-meta">
+
+                                    <span>
+                                        CSE Department
+                                    </span>
+
+                                    <span class="meta-divider">
+                                        ||
+                                    </span>
+
+                                    <span>
+                                        12th Trimester
+                                    </span>
+
+                                </div>
+
+
+                                <!-- SKILLS -->
+                                <div class="researcher-tags">
+
+                                    <span class="skill-tag">
+                                        Project Management
+                                    </span>
+
+                                    <span class="skill-tag">
+                                        C programming
+                                    </span>
+
+                                    <span class="more-tag">
+                                        +2
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- ACTION BUTTONS -->
+                            <div class="researcher-actions">
+
+                                <a
+                                    href="profile.html"
+                                    class="view-profile-button">
+
+                                    View Profile
+
+                                </a>
+
+                                <button
+                                    type="button"
+                                    class="invite-button">
+
+                                    Invite
+                                    <i class="bi bi-plus-lg"></i>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- VIEW MORE -->
+                        <div class="view-more-wrapper">
+
+                            <button
+                                type="button"
+                                class="view-more-button">
+
+                                View More Matches
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         IMPROVE MATCH SCORE
+                    ================================================== -->
+                    <div class="improve-match-card">
+
+                        <div class="improve-match-content">
+
+                            <h3>
+                                Improve Your Match Score
+                            </h3>
+
+                            <p>
+                                Add more details to your profile to get better and more accurate matches.
+                            </p>
+
+                        </div>
+
+
+                        <div class="improve-progress-area">
+
+                            <div class="improve-progress">
+
+                                <div
+                                    class="improve-progress-bar"
+                                    style="width: 85%;">
+
+                                </div>
+
+                            </div>
+
+                            <strong>
+                                85%
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     RIGHT SIDEBAR
+                ================================================== -->
+                <aside class="research-connect-right">
+
+
+                    <!-- =================================================
+                         MATCH SCORE CARD
+                    ================================================== -->
+                    <div class="your-match-card">
+
+                        <div class="your-match-content">
+
+                            <h3>
+                                Your match score is
+                            </h3>
+
+                            <strong>
+                                85%
+                            </strong>
+
+                            <p>
+                                Keep your profile
+                                updated to get better
+                                matches!
+                            </p>
+
+                        </div>
+
+
+                        <!-- CIRCULAR SCORE -->
+                        <div class="score-circle">
+
+                            <div class="score-circle-inner">
+
+                                <i class="bi bi-people-fill"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         FILTER MATCHES
+                    ================================================== -->
+                    <div class="filter-card">
+
+                        <div class="filter-card-header">
+
+                            <h3>
+                                Filter Matches
+                            </h3>
+
+                            <button
+                                type="button"
+                                class="clear-filter">
+
+                                Clear All
+
+                            </button>
+
+                        </div>
+
+
+                        <!-- RESEARCH INTERESTS -->
+                        <div class="filter-group">
+
+                            <h4>
+                                Research Interests
+                            </h4>
+
+
+                            <label class="filter-checkbox">
+
+                                <input
+                                    type="checkbox"
+                                    checked>
+
+                                <span>
+                                    Artificial Intelligence
+                                </span>
+
+                            </label>
+
+
+                            <label class="filter-checkbox">
+
+                                <input
+                                    type="checkbox"
+                                    checked>
+
+                                <span>
+                                    Machine Learning
+                                </span>
+
+                            </label>
+
+
+                            <label class="filter-checkbox">
+
+                                <input
+                                    type="checkbox">
+
+                                <span>
+                                    Computer Vision
+                                </span>
+
+                            </label>
+
+
+                            <label class="filter-checkbox">
+
+                                <input
+                                    type="checkbox"
+                                    checked>
+
+                                <span>
+                                    Data Science
+                                </span>
+
+                            </label>
+
+
+                            <label class="filter-checkbox">
+
+                                <input
+                                    type="checkbox">
+
+                                <span>
+                                    Cyber Security
+                                </span>
+
+                            </label>
+
+
+                            <label class="filter-checkbox">
+
+                                <input
+                                    type="checkbox">
+
+                                <span>
+                                    Bioinformatics
+                                </span>
+
+                            </label>
+
+
+                            <a
+                                href="#"
+                                class="see-more">
+
+                                See More
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         SKILLS FILTER
+                    ================================================== -->
+                    <div class="filter-card skills-filter-card">
+
+                        <div class="filter-card-header">
+
+                            <h3>
+                                Skills
+                            </h3>
+
+                            <button
+                                type="button"
+                                class="clear-filter">
+
+                                Clear All
+
+                            </button>
+
+                        </div>
+
+
+                        <!-- SEARCH SKILLS -->
+                        <div class="skills-search">
+
+                            <input
+                                type="text"
+                                placeholder="Search skills...">
+
+                        </div>
+
+
+                        <!-- SKILLS -->
+                        <div class="filter-group skills-group">
+
+                            <label class="filter-checkbox">
+
+                                <input
+                                    type="checkbox"
+                                    checked>
+
+                                <span>
+                                    Python
+                                </span>
+
+                            </label>
+
+
+                            <label class="filter-checkbox">
+
+                                <input
+                                    type="checkbox"
+                                    checked>
+
+                                <span>
+                                    TensorFlow
+                                </span>
+
+                            </label>
+
+
+                            <label class="filter-checkbox">
+
+                                <input
+                                    type="checkbox">
+
+                                <span>
+                                    PyTorch
+                                </span>
+
+                            </label>
+
+
+                            <label class="filter-checkbox">
+
+                                <input
+                                    type="checkbox"
+                                    checked>
+
+                                <span>
+                                    SQL
+                                </span>
+
+                            </label>
+
+
+                            <a
+                                href="#"
+                                class="see-more">
+
+                                See More
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         ACADEMIC LEVEL
+                    ================================================== -->
+                    <div class="select-filter-group">
+
+                        <label>
+                            Academic Level
+                        </label>
+
+                        <select>
+
+                            <option>
+                                Any Level
+                            </option>
+
+                            <option>
+                                Undergraduate
+                            </option>
+
+                            <option>
+                                Graduate
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         DEPARTMENT
+                    ================================================== -->
+                    <div class="select-filter-group">
+
+                        <label>
+                            Department
+                        </label>
+
+                        <select>
+
+                            <option>
+                                Any Department
+                            </option>
+
+                            <option>
+                                CSE Department
+                            </option>
+
+                            <option>
+                                EEE Department
+                            </option>
+
+                            <option>
+                                BBA Department
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <!-- APPLY FILTER -->
+                    <button
+                        type="button"
+                        class="apply-filter-button">
+
+                        Apply Filter
+
+                    </button>
+
+                </aside>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+
+    <!-- =========================================================
+         BOOTSTRAP JS
+    ========================================================== -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+</body>
+</html>

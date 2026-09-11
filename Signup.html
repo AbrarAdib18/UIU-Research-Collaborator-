@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGNUP || UIU ResearchCollab</title>
+
+        <!-- Bootstrap-5 CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- INDEX CSS -->
+    <link rel="stylesheet" href="CSS/signup.css">
+</head>
+<body class="auth-body">
+
+    <!-- ANIMATED BACKGROUND -->
+    <div class="auth-background">
+        <div class="auth-grid"></div>
+        <div class="auth-orb auth-orb-1"></div>
+        <div class="auth-orb auth-orb-2"></div>
+        <div class="auth-orb auth-orb-3"></div>
+        <div class="auth-particle particle-1"></div>
+        <div class="auth-particle particle-2"></div>
+        <div class="auth-particle particle-3"></div>
+        <div class="auth-particle particle-4"></div>
+        <div class="auth-particle particle-5"></div>
+        <div class="auth-particle particle-6"></div>
+    </div>
+
+    <!-- SIGNUP CARD -->
+    <main class="auth-container">
+        <section class="auth-card signup-card">
+
+            <!-- LOGO -->
+            <div class="auth-logo">
+                <div class="auth-logo-circle">
+                    <img src="../UIU Research Collaboration Portal/IMAGES/logo.jpg" alt="UIU ResearchCollab Logo">
+                </div>
+
+            </div>
+
+            <!-- HEADING -->
+            <div class="auth-heading">
+                <h1>Create Your Account</h1>
+                <p>
+                    Join
+                    <strong>UIU ResearchCollab</strong>
+                    and start connecting with researchers.
+                </p>
+            </div>
+
+            <!-- SIGNUP FORM -->
+            <form class="auth-form" id="signupForm" novalidate>
+
+                <!-- FULL NAME -->
+                <div class="auth-input-group">
+                    <label for="signup-name">Full Name</label>
+                    <div class="auth-input-wrapper">
+
+                        <!-- User Icon -->
+                        <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <circle
+                                cx="12"
+                                cy="8"
+                                r="4"
+                            />
+                            <path
+                                d="M4 21c0-4 3.5-7 8-7s8 3 8 7"
+                            />
+                        </svg>
+                        <input
+                            type="text"
+                            id="signup-name"
+                            name="name"
+                            placeholder="Enter your full name"
+                            autocomplete="name"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- UNIVERSITY EMAIL -->
+                <div class="auth-input-group">
+                    <label for="signup-email">University Email</label>
+                    <div class="auth-input-wrapper">
+
+                        <!-- Email Icon -->
+                        <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <rect
+                                x="3"
+                                y="5"
+                                width="18"
+                                height="14"
+                                rx="2"
+                            />
+                            <polyline
+                                points="3 7 12 13 21 7"
+                            />
+                        </svg>
+                        <input
+                            type="email"
+                            id="signup-email"
+                            name="email"
+                            placeholder="yourname@bscse.uiu.ac.bd"
+                            autocomplete="email"
+                            required
+                        >
+                    </div>
+
+                    <!-- Email Error -->
+                    <small
+                        id="emailError"
+                        class="validation-message"
+                    ></small>
+                </div>
+
+                <!-- STUDENT ID -->
+                <div class="auth-input-group">
+                    <label for="student-id">Student ID</label>
+                    <div class="auth-input-wrapper">
+
+                        <!-- ID Icon -->
+                        <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <rect
+                                x="3"
+                                y="4"
+                                width="18"
+                                height="17"
+                                rx="2"
+                            />
+                            <line
+                                x1="8"
+                                y1="2"
+                                x2="8"
+                                y2="6"
+                            />
+                            <line
+                                x1="16"
+                                y1="2"
+                                x2="16"
+                                y2="6"
+                            />
+                            <line
+                                x1="3"
+                                y1="10"
+                                x2="21"
+                                y2="10"
+                            />
+                        </svg>
+                        <input
+                            type="text"
+                            id="student-id"
+                            name="student_id"
+                            placeholder="Enter your student ID"
+                            autocomplete="off"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="auth-input-group">
+                    <label for="signup-password">Password</label>
+                    <div class="auth-input-wrapper">
+
+                        <!-- Lock Icon -->
+                        <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <rect
+                                x="3"
+                                y="11"
+                                width="18"
+                                height="10"
+                                rx="2"
+                            />
+                            <path
+                                d="M7 11V7a5 5 0 0110 0v4"
+                            />
+                        </svg>
+                        <input
+                            type="password"
+                            id="signup-password"
+                            name="password"
+                            placeholder="Create a password"
+                            autocomplete="new-password"
+                            minlength="8"
+                            required
+                        >
+
+                        <!-- Password Toggle -->
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            id="passwordToggle"
+                            aria-label="Show password"
+                        >
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path
+                                    d="M2 12s3.5-7 10-7
+                                    10 7 10 7-3.5 7-10 7
+                                    S2 12 2 12z"
+                                />
+                                <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="3"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Password Requirements -->
+                    <small
+                        id="passwordError"
+                        class="validation-message"
+                    ></small>
+                </div>
+
+                <!-- TERMS & CONDITIONS -->
+                <label class="auth-terms">
+
+                    <input
+                        type="checkbox"
+                        id="terms"
+                        name="terms"
+                        required
+                    >
+                    <span>
+                        I agree to the
+                        <a href="#">
+                            Terms & Conditions
+                        </a>
+                        and
+                        <a href="#">
+                            Privacy Policy
+                        </a>.
+                    </span>
+                </label>
+
+                <!-- SIGNUP BUTTON -->
+                <button
+                    type="submit"
+                    class="auth-submit-btn"
+                    id="signupButton"
+                >
+                    <span>
+                        Create Account
+                    </span>
+                    <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                    >
+                        <path d="M5 12h14"/>
+                        <path d="M13 6l6 6-6 6"/>
+                    </svg>
+                    <span class="button-glow"></span>
+                </button>
+            </form>
+
+            <!-- DIVIDER -->
+            <div class="auth-divider">
+                <span>
+                    OR
+                </span>
+            </div>
+
+            <!-- LOGIN LINK -->
+            <div class="auth-bottom">
+                <p>
+                    Already have an account?
+                    <a href="Index.html">
+                        Login
+                    </a>
+                </p>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="auth-footer">
+                <span>
+                    UIU ResearchCollab
+                </span>
+                <span>
+                    •
+                </span>
+                <span>
+                    Connecting Minds. Creating Research.
+                </span>
+            </div>
+        </section>
+    </main>
+
+
+
+    <!-- Bootstrap JS -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+    <!-- SIGNUP JS -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // ELEMENTS
+            const signupForm =
+                document.getElementById("signupForm");
+
+            const emailInput =
+                document.getElementById("signup-email");
+
+            const passwordInput =
+                document.getElementById("signup-password");
+
+            const passwordToggle =
+                document.getElementById("passwordToggle");
+
+            const emailError =
+                document.getElementById("emailError");
+
+            const passwordError =
+                document.getElementById("passwordError");
+
+            // ONLY @bscse.uiu.ac.bd
+            const universityEmailPattern =
+                /^[a-zA-Z0-9._%+-]+@bscse\.uiu\.ac\.bd$/;
+
+            /* =================================================
+               PASSWORD
+               MINIMUM 8 CHARACTERS
+               AT LEAST 1 SPECIAL CHARACTER
+               ================================================= */
+            const passwordPattern =
+                /^(?=.*[^A-Za-z0-9]).{8,}$/;
+
+            // PASSWORD SHOW / HIDE
+            passwordToggle.addEventListener(
+                "click",
+                function () {
+
+                    if (
+                        passwordInput.type === "password"
+                    ) {
+
+                        passwordInput.type = "text";
+
+                        passwordToggle.setAttribute(
+                            "aria-label",
+                            "Hide password"
+                        );
+
+                    } else {
+
+                        passwordInput.type = "password";
+
+                        passwordToggle.setAttribute(
+                            "aria-label",
+                            "Show password"
+                        );
+
+                    }
+
+                }
+            );
+
+            // EMAIL VALIDATION
+            emailInput.addEventListener(
+                "input",
+                function () {
+
+                    const email =
+                        emailInput.value.trim();
+
+
+                    if (email === "") {
+
+                        emailError.textContent = "";
+
+                        emailInput.setCustomValidity("");
+
+                        return;
+
+                    }
+
+
+                    if (
+                        !universityEmailPattern.test(email)
+                    ) {
+
+                        emailError.textContent =
+                            "Use your university email ending with @bscse.uiu.ac.bd.";
+
+                        emailInput.setCustomValidity(
+                            "Invalid university email."
+                        );
+
+                    } else {
+
+                        emailError.textContent = "";
+
+                        emailInput.setCustomValidity("");
+
+                    }
+
+                }
+            );
+
+            // PASSWORD VALIDATION
+            passwordInput.addEventListener(
+                "input",
+                function () {
+
+                    const password =
+                        passwordInput.value;
+
+
+                    if (password === "") {
+
+                        passwordError.textContent = "";
+
+                        passwordInput.setCustomValidity("");
+
+                        return;
+
+                    }
+
+
+                    if (password.length < 8) {
+
+                        passwordError.textContent =
+                            "Password must contain at least 8 characters.";
+
+                        passwordInput.setCustomValidity(
+                            "Password must contain at least 8 characters."
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (
+                        !passwordPattern.test(password)
+                    ) {
+
+                        passwordError.textContent =
+                            "Password must contain at least 1 special character.";
+
+                        passwordInput.setCustomValidity(
+                            "Password must contain at least 1 special character."
+                        );
+
+                        return;
+
+                    }
+
+                    /* Password is valid */
+                    passwordError.textContent =
+                        "";
+                    passwordInput.setCustomValidity("");
+
+                }
+            );
+
+            // FORM SUBMISSION
+            signupForm.addEventListener(
+                "submit",
+                function (event) {
+
+
+                    const email =
+                        emailInput.value.trim();
+
+                    const password =
+                        passwordInput.value;
+
+                    // EMAIL CHECK
+                    if (
+                        !universityEmailPattern.test(email)
+                    ) {
+
+                        event.preventDefault();
+
+                        emailError.textContent =
+                            "Please use a valid @bscse.uiu.ac.bd university email.";
+
+                        emailInput.setCustomValidity(
+                            "Invalid university email."
+                        );
+
+                        emailInput.focus();
+
+                        return;
+
+                    }
+
+                    // PASSWORD LENGTH CHECK
+                    if (password.length < 8) {
+
+                        event.preventDefault();
+
+                        passwordError.textContent =
+                            "Password must contain at least 8 characters.";
+
+                        passwordInput.setCustomValidity(
+                            "Password must contain at least 8 characters."
+                        );
+
+                        passwordInput.focus();
+
+                        return;
+
+                    }
+
+                    // SPECIAL CHARACTER CHECK
+                    if (
+                        !/(?=.*[^A-Za-z0-9])/.test(password)
+                    ) {
+
+                        event.preventDefault();
+
+                        passwordError.textContent =
+                            "Password must contain at least 1 special character.";
+
+                        passwordInput.setCustomValidity(
+                            "Password must contain at least 1 special character."
+                        );
+
+                        passwordInput.focus();
+
+                        return;
+
+                    }
+
+                    // BROWSER VALIDATION
+                    if (!signupForm.checkValidity()) {
+
+                        event.preventDefault();
+
+                        signupForm.classList.add(
+                            "was-validated"
+                        );
+
+                        return;
+
+                    }
+
+
+                    /* -----------------------------------------
+                       FORM IS VALID
+                       ----------------------------------------- */
+
+                    /*
+                        At this stage the form satisfies:
+
+                        ✓ Full name entered
+                        ✓ @bscse.uiu.ac.bd email
+                        ✓ Student ID entered
+                        ✓ Password >= 8 characters
+                        ✓ At least 1 special character
+                        ✓ Terms accepted
+
+                        Later, Laravel/PHP will handle
+                        the actual registration and database
+                        insertion.
+                    */
+
+                }
+            );
+        });
+    </script>
+
+</body>
+</html>

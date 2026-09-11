@@ -1,0 +1,41 @@
+# VS Code
+.vscode/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+
+# Local-only database credentials override (optional; config/database.php
+# itself ships with safe XAMPP defaults and stays tracked)
+config/database.local.php
+
+# Node dependencies
+node_modules/
+
+# Uploaded user content — ignore the actual files, keep the folders and
+# their security stubs (index.php 403 guards, .htaccess deny rules) tracked
+uploads/avatars/*
+uploads/cv/*
+uploads/resources/*
+uploads/team-files/*
+uploads/communities/*
+!uploads/avatars/index.php
+!uploads/cv/index.php
+!uploads/resources/index.php
+!uploads/team-files/index.php
+!uploads/team-files/.htaccess
+!uploads/communities/index.php
+!uploads/**/.gitkeep
+
+# Generated test screenshots / local test output
+.runtime-test-screenshots/
+*.runtime-test.png
+# Claude local state
+.claude/scheduled_tasks.lock

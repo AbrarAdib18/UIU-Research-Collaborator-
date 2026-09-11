@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard || UIU ResearchCollab</title>
+
+        <!-- Bootstrap-5 CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- DASHBOARD CSS -->
+    <link rel="stylesheet" href="CSS/dashboard.css">
+</head>
+<body>
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-6">
+                    <div class="portal-title">
+                        UIU Research Collaboration Portal
+                    </div>
+                </div>
+                <div class="col-6 text-end">
+                    <div class="portal-tagline">
+                        Connecting Minds. Creating Research.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- 1ST NAVBAR -->
+<header class="dashboard-header">
+    <div class="dashboard-header-left">
+
+        <!-- LOGO -->
+        <a href="index.html" class="dashboard-logo-link">
+            <img src="../UIU Research Collaboration Portal/IMAGES/logo.jpg" alt="UIU ResearchCollab Logo" class="dashboard-logo">
+        </a>
+
+        <!-- WEBSITE NAME -->
+        <div class="dashboard-brand">
+            <h1>UIU ResearchCollab</h1>
+            <p>
+                Connecting Minds. Creating Research.
+            </p>
+        </div>
+    </div>
+
+
+    <!-- NAVBAR RIGHT -->
+    <div class="dashboard-header-right">
+
+        <!-- SEARCH -->
+        <div class="dashboard-search">
+            <input
+                type="text"
+                placeholder="Search for researchers, papers, communities..." aria-label="Search">
+            <button type="button"><i class="bi bi-search"></i></button>
+        </div>
+
+        <!-- NOTIFICATION -->
+        <div class="header-icon notification-icon">
+            <button type="button">
+                <i class="bi bi-bell"></i>
+                <span class="notification-badge">3</span>
+            </button>
+        </div>
+
+        <!-- MESSAGE -->
+        <div class="header-icon message-icon">
+            <button type="button">
+                <i class="bi bi-chat-dots"></i>
+                <span class="notification-badge">2</span>
+            </button>
+        </div>
+  
+        <!-- DIVIDER -->
+        <div class="header-divider"></div>
+     
+        <!-- USER PROFILE -->
+        <div class="dashboard-user">
+            <img src="../UIU Research Collaboration Portal/IMAGES/pic1.jpg" alt="User Profile" class="user-avatar">
+
+            <!-- USER INFORMATION -->
+            <div class="user-information">
+
+                <!--
+                    CURRENTLY STATIC
+
+                    Later in Laravel:
+
+                    {{ Auth::user()->first_name }}
+
+                -->
+
+                <h3 class="user-first-name">Rahil</h3>
+                <p>
+                    CSE Dept.
+                </p>
+            </div>
+
+            <!-- DROPDOWN BUTTON -->
+            <button
+                class="user-dropdown-button" type="button" aria-label="User menu">
+                <i class="bi bi-chevron-down"></i>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- BODY -->
+<div class="dashboard-wrapper">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="dashboard-sidebar">
+
+        <!-- SIDEBAR NAVIGATION -->
+        <nav class="sidebar-navigation">
+
+            <!-- DASHBOARD -->
+            <a href="dashboard.html" class="sidebar-link active"> <i class="bi bi-house-fill"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <!-- MY PROFILE -->
+            <a href="profile.html" class="sidebar-link"> <i class="bi bi-person-fill"></i>
+                <span>My Profile</span>
+            </a>
+
+            <!-- RESEARCH CONNECT -->
+            <a href="research-connect.html" class="sidebar-link"> <i class="bi bi-people"></i>
+                <span>Research Connect</span>
+            </a>
+
+            <!-- RESEARCH OPPORTUNITIES -->
+            <a href="opportunities.html" class="sidebar-link"> <i class="bi bi-file-earmark-text"></i>
+                <span>Research Opportunities</span>
+            </a>
+
+            <!-- MY TEAMS -->
+            <a href="my-teams.html" class="sidebar-link"> <i class="bi bi-people-fill"></i>
+                <span>My Teams</span>
+            </a>
+
+            <!-- COMMUNITIES -->
+            <a href="communities.html" class="sidebar-link"> <i class="bi bi-diagram-3"></i>
+                <span>Communities</span>
+            </a>
+
+            <!-- MESSAGES -->
+            <a href="messages.html" class="sidebar-link"> <i class="bi bi-chat-fill"></i>
+                <span>Messages</span>
+                <span class="sidebar-count">2</span>
+            </a>
+
+            <!-- RESEARCH REPOSITORIES -->
+            <a href="repository.html" class="sidebar-link"> <i class="bi bi-database-fill"></i>
+                <span>Research Repositories</span>
+            </a>
+
+            <!-- SAVED ITEMS -->
+            <a href="saved-items.html" class="sidebar-link"> <i class="bi bi-bookmark"></i>
+                <span>Saved Items</span>
+            </a>
+
+            <!-- NOTIFICATIONS -->
+            <a href="notifications.html" class="sidebar-link"> <i class="bi bi-bell"></i>
+                <span>Notifications</span>
+                <span class="sidebar-count">3</span>
+            </a>
+
+            <!-- CALENDAR -->
+            <a href="calendar.html" class="sidebar-link"> <i class="bi bi-calendar3"></i>
+                <span>Calendar</span>
+            </a>
+
+            <!-- SETTINGS -->
+            <a href="settings.html" class="sidebar-link"> <i class="bi bi-gear"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+
+        <!-- PROFILE CARD -->
+        <div class="sidebar-profile-card">
+            <h3>Complete Your Profile</h3>
+            <p>
+                Get better matches by
+                completing your profile.
+            </p>
+            <a href="profile.html" class="sidebar-update-button">
+                Update Profile
+            </a>
+            <div class="sidebar-completion">
+                <div class="completion-header">
+                    <span>Profile Completion</span>
+                    <strong>80%</strong>
+                </div>
+                <div class="completion-progress">
+                    <div class="completion-progress-bar" 
+                    style="width: 80%;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="dashboard-main">
+
+        <!-- MAIN GRID -->
+        <div class="dashboard-content-grid">
+
+            <!-- CENTER CONTENT -->
+            <section class="dashboard-center">
+
+                <!-- WELCOME SECTION -->
+                <div class="welcome-section">
+                    <h2>Welcome Back,
+                        <span class="user-first-name">Rahil</span>!
+                    </h2>
+                    <p>
+                        Here's what's happening in your
+                        research journey today.
+                    </p>
+                </div>
+
+                <!-- DASHBOARD STATS -->
+                <div class="dashboard-statistics">
+
+                    <!-- TEAM INVITATIONS -->
+                    <div class="dashboard-stat-card">
+                        <div class="stat-card-icon blue">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div class="stat-card-content">
+                            <strong>12</strong>
+                            <span>Team Invitations</span>
+                            <a href="#">View All</a>
+                        </div>
+                    </div>
+
+                    <!-- RECENT PAPERS -->
+                    <div class="dashboard-stat-card">
+                        <div class="stat-card-icon purple">
+                            <i class="bi bi-file-earmark-text-fill"></i>
+                        </div>
+                        <div class="stat-card-content">
+                            <strong>24</strong>
+                            <span>Recent Papers</span>
+                            <a href="#repository.html">View All</a>
+                        </div>
+                    </div>
+
+                    <!-- OPPORTUNITIES -->
+                    <div class="dashboard-stat-card">
+                        <div class="stat-card-icon green">
+                            <i class="bi bi-briefcase-fill"></i>
+                        </div>
+                        <div class="stat-card-content">
+                            <strong>8</strong>
+                            <span>Opportunities</span>
+                            <a href="#opportunities.html">View All</a>
+                        </div>
+                    </div>
+
+                    <!-- COMMUNITIES -->
+                    <div class="dashboard-stat-card">
+                        <div class="stat-card-icon orange">
+                            <i class="bi bi-globe2"></i>
+                        </div>
+                        <div class="stat-card-content">
+                            <strong>5</strong>
+                            <span>Communities</span>
+                            <a href="#communities.html">View All</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RECOMMENDED COLLABORATORS -->
+                <section class="dashboard-section">
+                    <div class="section-title-row">
+                        <h2>Top Recommended Collaborators</h2>
+                        <a href="#research-connect.html">View All Matches</a>
+                    </div>
+                    <div class="collaborators-grid">
+
+                        <!-- COLLABORATOR 1 -->
+                        <div class="collaborator-card">
+                            <div class="collaborator-header">
+                                <img src="../UIU Research Collaboration Portal/IMAGES/pic2.jpg" alt="Research Collaborator">
+                                <div>
+                                    <h3>Abrar Habib Adib</h3>
+                                    <p>
+                                        CSE Department
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- MATCH SCORE -->
+                            <div class="match-score">
+                                <span>88% Match</span>
+                            </div>
+
+                            <!-- INTERESTS -->
+                            <p class="collaborator-interests">
+                                Interested in AI,
+                                Data Science, Software,
+                                Blockchain
+                            </p>
+                            <div class="collaborator-actions">
+
+                                <!-- INVITE - LEFT -->
+                                <button
+                                    type="button"
+                                    class="invite-button">
+                                    <i class="bi bi-person-plus"></i>
+                                    Invite
+                                </button>
+
+                                <!-- VIEW PROFILE - RIGHT -->
+                                <a href="profile.html" class="profile-button">
+                                    View Profile
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- COLLABORATOR 2 -->
+                        <div class="collaborator-card">
+                            <div class="collaborator-header">
+                                <img src="../UIU Research Collaboration Portal/IMAGES/pic3.jpg" alt="Research Collaborator">
+                                <div>
+                                    <h3>MD Rasel Ali</h3>
+                                    <p>
+                                        CSE Department
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- MATCH SCORE -->
+                            <div class="match-score">
+                                <span>96% Match</span>
+                            </div>
+
+                            <!-- INTERESTS -->
+                            <p class="collaborator-interests">
+                                Interested in Cyber Security,
+                                Networking, Python,
+                                Machine Learning
+                            </p>
+                            <div class="collaborator-actions">
+
+                                <!-- INVITE - LEFT -->
+                                <button
+                                    type="button"
+                                    class="invite-button">
+                                    <i class="bi bi-person-plus"></i>
+                                    Invite
+                                </button>
+
+                                <!-- VIEW PROFILE - RIGHT -->
+                                <a href="profile.html" class="profile-button">
+                                    View Profile
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- RESEARCH OPPORTUNITIES -->
+                <section class="dashboard-section opportunities-dashboard-section">
+                    <div class="section-title-row">
+                        <h2>Latest Research Opportunities</h2>
+                        <a href="opportunities.html">View All Opportunities</a>
+                    </div>
+                    <div class="dashboard-opportunity-grid">
+
+                        <!-- OPPORTUNITY 1 -->
+                        <div class="dashboard-opportunity-card">
+                            <span class="opportunity-badge fydp">FYDP</span>
+                            <h3>AI-Based Plant Disease Detection</h3>
+                            <div class="opportunity-members">
+                                <i class="bi bi-people-fill"></i>
+                                Need 2 - 3 Members
+                            </div>
+                            <div class="opportunity-tags">
+                                <span>AI</span>
+                                <span>Deep Learning</span>
+                                <span>Computer Vision</span>
+                            </div>
+                            <div class="opportunity-card-footer">
+                                <span>Deadline: 20 Aug 2026</span>
+                                <a href="opportunity-details.html">View Details<i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- OPPORTUNITY 2 -->
+                        <div class="dashboard-opportunity-card">
+                            <span class="opportunity-badge fydp">FYDP</span>
+                            <h3>AI-Based Plant Disease Detection</h3>
+                            <div class="opportunity-members">
+                                <i class="bi bi-people-fill"></i>
+                                Need 2 - 3 Members
+                            </div>
+                            <div class="opportunity-tags">
+                                <span>AI</span>
+                                <span>Deep Learning</span>
+                                <span>Computer Vision</span>
+                            </div>
+                            <div class="opportunity-card-footer">
+                                <span>Deadline: 20 Aug 2026</span>
+                                <a href="opportunity-details.html">View Details<i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+           
+                <!-- QUICK ACTIONS -->
+                <section class="quick-actions-section">
+                    <div class="section-title-row">
+                        <h2>Quick Actions</h2>
+                        <a href="#">View All Actions</a>
+                    </div>
+                    <div class="quick-actions">
+
+                        <!-- FIND COLLABORATORS -->
+                        <a href="research-connect.html" class="quick-action"> <i class="bi bi-people-fill"></i>
+                            <span>Find Collaborators</span>
+                        </a>
+
+                        <!-- UPLOAD PAPER -->
+                        <a href="upload-paper.html" class="quick-action"> <i class="bi bi-file-earmark-plus-fill"></i>
+                            <span>Upload Papers</span>
+                        </a>
+
+                        <!-- CREATE TEAM -->
+                        <a href="create-team.html" class="quick-action"> <i class="bi bi-globe2"></i>
+                            <span>Create Team</span>
+                        </a>
+                    </div>
+                </section>
+            </section>
+
+            <!-- RIGHT SIDEBAR -->
+            <aside class="dashboard-right-sidebar">
+
+                <!-- PROFILE CARD -->
+                <div class="right-dashboard-card profile-completion-card">
+                    <h2>Profile Completion</h2>
+                    <div class="profile-completion-content">
+
+                        <!-- CIRCLE -->
+                        <div class="completion-circle">
+                            <span>80%</span>
+                        </div>
+
+                        <!-- INFO -->
+                        <div class="completion-message">
+                            <h3>Almost There!</h3>
+                            <p>
+                                Complete your profile to get
+                                better recommendations.
+                            </p>
+                        </div>
+                    </div>
+                    <a href="profile.html" class="update-profile-button">Update Profile</a>
+                </div>
+
+                <!-- UPCOMING EVENTS -->
+                <div class="right-dashboard-card events-card">
+                    <h2>Upcoming Events</h2>
+
+                    <!-- EVENT 1 -->
+                    <div class="event-item">
+                        <div class="event-icon">
+                            <i class="bi bi-calendar3"></i>
+                        </div>
+                        <div class="event-content">
+                            <h3>Research Workspace: Deep Learning</h3>
+                            <p>
+                                <i class="bi bi-calendar3"></i>
+                                22 Aug, 2026
+                            </p>
+                            <p>
+                                <i class="bi bi-clock"></i>
+                                10:00 AM - 01:00 PM
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- EVENT 2 -->
+                    <div class="event-item">
+                        <div class="event-icon">
+                            <i class="bi bi-calendar3"></i>
+                        </div>
+                        <div class="event-content">
+                            <h3>Research Workspace: Deep Learning</h3>
+                            <p>
+                                <i class="bi bi-calendar3"></i>
+                                22 Aug, 2026
+                            </p>
+                            <p>
+                                <i class="bi bi-clock"></i>
+                                10:00 AM - 01:00 PM
+                            </p>
+                        </div>
+                    </div>
+                    <a href="calendar.html" class="view-all-link">View All Events</a>
+                </div>
+               
+                <!-- RECENT MESSAGES -->
+                <div class="right-dashboard-card messages-card">
+                    <h2>Recent Messages</h2>
+
+                    <!-- MESSAGE 1 -->
+                    <div class="recent-message">
+                        <img src="../UIU Research Collaboration Portal/IMAGES/pic4.jpg" alt="Nahiun Sajid">
+                        <div class="message-content">
+                            <h3>Nahiun Sajid</h3>
+                            <p>
+                                Hi, Rahil! I'm interested ...
+                            </p>
+                        </div>
+                        <div class="message-meta">
+                            <span>2m ago</span>
+                            <strong>2</strong>
+                        </div>
+                    </div>
+
+                    <!-- MESSAGE 2 -->
+                    <div class="recent-message">
+                        <img src="../UIU Research Collaboration Portal/IMAGES/pic4.jpg" alt="Nahiun Sajid">
+                        <div class="message-content">
+                            <h3>Nahiun Sajid</h3>
+                            <p>
+                                Hi, Rahil! I'm interested ...
+                            </p>
+                        </div>
+                        <div class="message-meta">
+                            <span>2m ago</span>
+                            <strong>2</strong>
+                        </div>
+                    </div>
+                    <a href="messages.html" class="view-all-link">View All Messages</a>
+                </div>
+            </aside>
+        </div>
+    </main>
+</div>
+
+<!-- Bootstrap JS -->
+<script
+src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+
+</body>
+</html>

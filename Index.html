@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UIU ResearchCollab</title>
+
+        <!-- Bootstrap-5 CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- INDEX CSS -->
+    <link rel="stylesheet" href="CSS/style.css">
+</head>
+<body>
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-6">
+                    <div class="portal-title">
+                        UIU Research Collaboration Portal
+                    </div>
+                </div>
+                <div class="col-6 text-end">
+                    <div class="portal-tagline">
+                        Connecting Minds. Creating Research.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1ST NAVBAR -->
+    <nav class="main-navbar">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+
+                <!-- LOGO -->
+                <div class="col-auto">
+                    <a href="index.html" class="logo-link">
+                        <img src="../UIU Research Collaboration Portal/IMAGES/logo.jpg" alt="UIU ResearchCollab Logo" class="website-logo">
+                    </a>
+                </div>
+
+                <!-- MAIN MENU -->
+                <div class="col">
+                    <div class="main-menu">
+                        <a href="index.html" class="nav-item active">HOME</a>
+                        <a href="#" class="nav-item">ABOUT</a>
+                        <a href="#" class="nav-item">RESEARCH</a>
+                        <a href="#" class="nav-item">COMMUNITY</a>
+                    </div>
+                </div>
+
+                <!-- SEARCH -->
+                <div class="col-auto">
+                    <div class="search-box">
+                        <input type="text" placeholder="Search..." aria-label="Search">
+                        <button type="button"><i class="bi bi-search"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+  
+    <!-- 2ND NAVBAR -->
+    <div class="secondary-navbar">
+        <div class="container-fluid">
+            <div class="secondary-menu">
+                <!-- HOME ICON -->
+                <a href="index.html" class="secondary-item home-icon">
+                    <i class="bi bi-house-fill"></i>
+                </a>
+
+                <!-- RESEARCH DOMAINS -->
+                <div class="secondary-item dropdown-item-custom dropdown">
+                    <button
+                        class="research-domain-btn"
+                        type="button"
+                        id="researchDomainDropdown"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        RESEARCH DOMAINS
+                        <i class="bi bi-caret-down-fill"></i>
+                    </button>
+
+                    <!-- DROPDOWN -->
+                    <div
+                        class="research-domain-menu dropdown-menu"
+                        aria-labelledby="researchDomainDropdown">
+                        <div class="research-domain-scroll">
+
+                            <!-- DOMAIN-1 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-cpu"></i>
+                                <span>Artificial Intelligence</span>
+                            </a>
+
+                            <!-- DOMAIN-2 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-database-fill"></i>
+                                <span>Big Data Analytics</span>
+                            </a>
+
+                            <!-- DOMAIN-3 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-bezier2"></i>
+                                <span>Bioinformatics</span>
+                            </a>
+
+                            <!-- DOMAIN-4 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-link-45deg"></i>
+                                <span>Blockchain</span>
+                            </a>
+
+                            <!-- DOMAIN-5 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-eye-fill"></i>
+                                <span>Computer Vision</span>
+                            </a>
+
+                            <!-- DOMAIN-6 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-cloud-fill"></i>
+                                <span>Cloud Computing</span>
+                            </a>
+
+                            <!-- DOMAIN-7 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-shield-lock-fill"></i>
+                                <span>Cyber Security</span>
+                            </a>
+
+                            <!-- DOMAIN-8 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-bar-chart-fill"></i>
+                                <span>Data Science</span>
+                            </a>
+
+                            <!-- DOMAIN-9 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-heart-pulse-fill"></i>
+                                <span>Healthcare AI</span>
+                            </a>
+
+                            <!-- DOMAIN-10 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-person-video3"></i>
+                                <span>Human Computer Interaction</span>
+                            </a>
+
+                            <!-- DOMAIN-11 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-wifi"></i>
+                                <span>Internet of Things</span>
+                            </a>
+
+                            <!-- DOMAIN-12 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-phone-fill"></i>
+                                <span>Mobile Computing</span>
+                            </a>
+
+                            <!-- DOMAIN-13 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-chat-square-text-fill"></i>
+                                <span>Natural Language Processing</span>
+                            </a>
+
+                            <!-- DOMAIN-14 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-diagram-3-fill"></i>
+                                <span>Networking</span>
+                            </a>
+
+                            <!-- DOMAIN-15 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-robot"></i>
+                                <span>Robotics</span>
+                            </a>
+
+                            <!-- DOMAIN-16 -->
+                            <a href="#" class="research-domain-item">
+                                <i class="bi bi-code-slash"></i>
+                                <span>Software Engineering</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STATS -->
+                <a href="#" class="secondary-item">STATISTICS</a>
+
+                <!-- FAQ -->
+                <a href="#" class="secondary-item">FAQs</a>
+
+                <!-- LOGIN -->
+                <a href="login.html" class="secondary-item login-item">LOGIN</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN SECTION -->
+    <section class="main-section">
+        <div class="container">
+            <div class="row align-items-center">
+
+                <!-- MAIN TEXT -->
+                <div class="col-lg-6 col-md-6">
+                    <div class="main-content">
+                        <h1>Find the Right<span>Research Team.</span></h1>
+                        <h5>Connecting Minds. Creating Research.</h5>
+                        <p>
+                            UIU ResearchCollab helps you discover the
+                            right collaborators, share ideas, and build
+                            impactful research together.
+                        </p>
+
+                        <!-- MAIN BUTTONS -->
+                        <div class="main-buttons">
+                            <a href="Dashboard.html"class="btn btn-primary-custom">Get Started<i class="bi bi-arrow-right"></i></a>
+                            <a href="#research-opportunities"class="btn btn-outline-custom">Explore Research</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MAIN IMAGE -->
+                <div class="col-lg-6 col-md-6">
+                    <div class="main-image-container">
+                        <img src="../UIU Research Collaboration Portal/IMAGES/img-1.png" alt="Students collaborating on research" class="main-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WHY CHOOSE US -->
+    <section class="features-section">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Why Choose UIU ResearchCollab?</h2>
+            </div>
+            <div class="row feature-row">
+
+                <!-- FEATURE 1 -->
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="feature-card">
+                        <div class="feature-icon blue">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <h4>Research Connect</h4>
+                        <p>
+                            Find the most compatible research
+                            collaborators based on interests
+                            and skills.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FEATURE 2 -->
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="feature-card">
+                        <div class="feature-icon orange">
+                            <i class="bi bi-megaphone-fill"></i>
+                        </div>
+                        <h4>Research Opportunities</h4>
+                        <p>
+                            Discover and apply for research
+                            projects and team openings.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FEATURE 3 -->
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="feature-card">
+                        <div class="feature-icon green">
+                            <i class="bi bi-globe2"></i>
+                        </div>
+                        <h4>Communities</h4>
+                        <p>
+                            Join domain-specific communities
+                            and engage in meaningful discussions.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FEATURE 4 -->
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="feature-card">
+                        <div class="feature-icon purple">
+                            <i class="bi bi-book-fill"></i>
+                        </div>
+                        <h4>Open Repository</h4>
+                        <p>
+                            Access and share research papers,
+                            datasets, and resources for free.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FEATURE 5 -->
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="feature-card">
+                        <div class="feature-icon teal">
+                            <i class="bi bi-person-workspace"></i>
+                        </div>
+                        <h4>Team Workspace</h4>
+                        <p>
+                            Collaborate with your team using
+                            tasks, files, and schedules.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FEATURE 6 -->
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="feature-card">
+                        <div class="feature-icon pink">
+                            <i class="bi bi-person-vcard-fill"></i>
+                        </div>
+                        <h4>Research Profile</h4>
+                        <p>
+                            Showcase your skills, publications,
+                            and experience to the research community.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="statistics-section" id="statistics">
+        <div class="container">
+            <div class="row statistics-row">
+
+                <!-- STAT 1 -->
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div class="stat-number">
+                            250+
+                        </div>
+                        <div class="stat-label">
+                            Researchers
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STAT 2 -->
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-diagram-3-fill"></i>
+                        </div>
+                        <div class="stat-number">
+                            80+
+                        </div>
+                        <div class="stat-label">
+                            Research Groups
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STAT 3 -->
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-file-earmark-text-fill"></i>
+                        </div>
+                        <div class="stat-number">
+                            120+
+                        </div>
+                        <div class="stat-label">
+                            Published Papers
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STAT 4 -->
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-grid-fill"></i>
+                        </div>
+                        <div class="stat-number">
+                            15+
+                        </div>
+                        <div class="stat-label">
+                            Research Domains
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RESEARCH DOMAINS -->
+    <section class="domains-section">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Explore Research Domains</h2>
+            </div>
+
+            <!-- DOMAIN CAROUSEL -->
+            <div class="domains-carousel">
+
+                <!-- LEFT-BUTTON -->
+                <button
+                    class="domain-nav-btn domain-prev" id="domainPrev" aria-label="Previous research domains">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+
+                <!-- VIEWPORT -->
+                <div class="domains-viewport" id="domainsViewport">
+                    <div class="domains-track" id="domainsTrack">
+
+                        <!-- DOMAIN-1 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-cpu"></i>
+                            </div>
+                            <span>Artificial Intelligence</span>
+                        </div>
+
+                        <!-- DOMAIN-2 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-database-fill"></i>
+                            </div>
+                            <span>Big Data Analytics</span>
+                        </div>
+
+                        <!-- DOMAIN-3 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-bezier2"></i>
+                            </div>
+                            <span>Bioinformatics</span>
+                        </div>
+
+
+    
+                        <!-- DOMAIN-4 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-link-45deg"></i>
+                            </div>
+                            <span>Blockchain</span>
+                        </div>
+                        
+                        <!-- DOMAIN-5 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-eye-fill"></i>
+                            </div>
+                            <span>Computer Vision</span>
+                        </div>
+
+                        <!-- DOMAIN-6 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-cloud-fill"></i>
+                            </div>
+                            <span>Cloud Computing</span>
+                        </div>
+
+                        <!-- DOMAIN-7 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-shield-lock-fill"></i>
+                            </div>
+                            <span>Cyber Security</span>
+                        </div>
+
+                        <!-- DOMAIN-8 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-bar-chart-fill"></i>
+                            </div>
+                            <span>Data Science</span>
+                        </div>
+
+                        <!-- DOMAIN-9 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-heart-pulse-fill"></i>
+                            </div>
+                            <span>Healthcare AI</span>
+                        </div>
+
+                        <!-- DOMAIN-10 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-person-video3"></i>
+                            </div>
+                            <span>Human Computer Interaction</span>
+                        </div>
+
+                        <!-- DOMAIN-11 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-wifi"></i>
+                            </div>
+                            <span>Internet of Things</span>
+                        </div>
+
+                        <!-- DOMAIN-12 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-phone-fill"></i>
+                            </div>
+                            <span>Mobile Computing</span>
+                        </div>
+
+                        <!-- DOMAIN-13 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-chat-square-text-fill"></i>
+                            </div>
+                            <span>Natural Language Processing</span>
+                        </div>
+
+                        <!-- DOMAIN-14 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-diagram-3-fill"></i>
+                            </div>
+                            <span>Networking</span>
+                        </div>
+
+                        <!-- DOMAIN-15 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-robot"></i>
+                            </div>
+                            <span>Robotics</span>
+                        </div>
+
+                        <!-- DOMAIN-16 -->
+                        <div class="domain-item">
+                            <div class="domain-icon">
+                                <i class="bi bi-code-slash"></i>
+                            </div>
+                            <span>Software Engineering</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT-BUTTON -->
+                <button
+                    class="domain-nav-btn domain-next" id="domainNext" aria-label="Next research domains">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- RESEARCH OPPORTUNITIES -->
+    <section class="opportunities-section" id="research-opportunities">
+        <div class="container">
+            <div class="section-heading">
+                <h2>Latest Research Opportunities</h2>
+            </div>
+            <div class="row justify-content-center">
+
+                <!-- CARD-1 -->
+                <div class="col-lg-5 col-md-6">
+                    <div class="opportunity-card">
+                        <span class="opportunity-badge fydp">FYDP</span>
+                        <h3>AI-Based Plant Disease Detection</h3>
+                        <div class="opportunity-info">
+                            <span>
+                                <i class="bi bi-people-fill"></i>
+                                Need 2 - 3 Members
+                            </span>
+                        </div>
+                        <div class="opportunity-tags">
+                            <span>AI</span>
+                            <span>Deep Learning</span>
+                            <span>Computer Vision</span>
+                        </div>
+                        <div class="opportunity-footer">
+                            <span>Deadline: 20 Aug 2026</span>
+                            <a href="opportunity-details.html">View Details
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD-2 -->
+                <div class="col-lg-5 col-md-6">
+                    <div class="opportunity-card">
+                        <span class="opportunity-badge personal">Personal Project</span>
+                        <h3>Blockchain Security for IoT Networks</h3>
+                        <div class="opportunity-info">
+                            <span>
+                                <i class="bi bi-people-fill"></i>
+                                Need 1 Member
+                            </span>
+                        </div>
+                        <div class="opportunity-tags">
+                            <span>Blockchain</span>
+                            <span>Security</span>
+                            <span>IoT</span>
+                        </div>
+                        <div class="opportunity-footer">
+                            <span>Deadline: 25 Aug 2026</span>
+                            <a href="opportunity-details.html">View Details
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW ALL -->
+            <div class="text-center view-all-wrapper">
+                <a href="opportunities.html" class="view-all-btn"> View All Opportunities</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+
+                <!-- BRAND -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-brand">
+                        <img src="../UIU Research Collaboration Portal/IMAGES/logo.jpg" alt="UIU ResearchCollab Logo">
+                        <div>
+                            <h3>UIU ResearchCollab</h3>
+                            <p>
+                                Connecting Minds.<br>
+                                Creating Research.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QUICK LINKS -->
+                <div class="col-lg-2 col-md-6">
+                    <div class="footer-column">
+                        <h4>Quick Links</h4>
+                        <a href="index.html">Home</a>
+                        <a href="#">About Us</a>
+                        <a href="#">Research Domains</a>
+                        <a href="#">Communities</a>
+                        <a href="#">FAQs</a>
+                    </div>
+                </div>
+
+                <!-- SUPPORT -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="footer-column">
+                        <h4>Support</h4>
+                        <a href="#">Help Center</a>
+                        <a href="#">How It Works</a>
+                        <a href="#">Guidelines</a>
+                        <a href="#">Contact Us</a>
+                    </div>
+                </div>
+
+                <!-- LEGAL -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COPYRIGHT -->
+            <div class="footer-bottom">
+                <p>
+                    © 2026 UIU ResearchCollab. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+    <!-- RESEARCH DOMAIN CAROUSEL -->
+    <script>
+    const domainsTrack = document.getElementById("domainsTrack");
+    const domainsViewport = document.getElementById("domainsViewport");
+    const domainPrev = document.getElementById("domainPrev");
+    const domainNext = document.getElementById("domainNext");
+    let domainPosition = 0;
+
+    // NUMBER OF ITEMS AT ONE CLICK
+    const domainsToMove = 1;
+    
+    // UPDATE THE CAROUSEL POSITION
+    function updateDomainCarousel() {
+        const domainItems =
+            domainsTrack.querySelectorAll(".domain-item");
+        if (domainItems.length === 0) {
+            return;
+        }
+
+        const firstItem = domainItems[0];
+        const itemWidth = firstItem.offsetWidth;
+        const trackStyle = window.getComputedStyle(domainsTrack);
+        const gap = parseFloat(trackStyle.gap) || 0;
+        const moveDistance = (itemWidth + gap) * domainPosition;
+        domainsTrack.style.transform = `translateX(-${moveDistance}px)`;
+        updateDomainButtons();
+    }
+
+
+    // ENABLE OR DISABLE
+    function updateDomainButtons() {
+        const domainItems = domainsTrack.querySelectorAll(".domain-item");
+        const viewportWidth = domainsViewport.offsetWidth;
+        const firstItem = domainItems[0];
+        const itemWidth = firstItem.offsetWidth;
+        const trackStyle = window.getComputedStyle(domainsTrack);
+        const gap = parseFloat(trackStyle.gap) || 0;
+        const totalTrackWidth = (itemWidth * domainItems.length) + (gap * (domainItems.length - 1));
+        const maxPosition = Math.ceil((totalTrackWidth - viewportWidth) / (itemWidth + gap));
+
+        // LEFT BUTTON
+        
+        if (domainPosition <= 0) {
+            domainPrev.disabled = true;
+        } else {
+            domainPrev.disabled = false;
+        }
+
+        // RIGHT BUTTON
+        if (domainPosition >= maxPosition) {
+            domainNext.disabled = true;
+        } else {
+            domainNext.disabled = false;
+        }
+    }
+
+    // NEXT BUTTON
+    domainNext.addEventListener("click", function () {
+        domainPosition += domainsToMove;
+        updateDomainCarousel();
+    });
+
+    // PREVIOUS BUTTON
+    domainPrev.addEventListener("click", function () {
+        domainPosition -= domainsToMove;
+        if (domainPosition < 0) {
+            domainPosition = 0;
+        }
+        updateDomainCarousel();
+    });
+
+    // RECALCULATE WINDOW SIZE
+    window.addEventListener("resize", function () {
+        updateDomainCarousel();
+    });
+
+    // INITIAL STATE
+    updateDomainCarousel();
+</script>
+
+</body>
+</html>

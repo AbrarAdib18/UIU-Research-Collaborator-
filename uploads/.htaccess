@@ -1,0 +1,9 @@
+# Prevent execution of any script that somehow ends up in uploads/,
+# and disable directory listing. Applies to all subfolders.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phar|pl|py|cgi|asp|aspx|sh|exe)$">
+    Require all denied
+</FilesMatch>
+Options -Indexes
