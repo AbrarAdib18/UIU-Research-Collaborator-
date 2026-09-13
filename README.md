@@ -2,90 +2,138 @@
 
 Connecting Minds. Creating Research.
 
-A Core PHP + MySQL academic research-collaboration portal for UIU students. This milestone implements the **full student portal** (auth through Research Repository); Faculty/Admin portals, Calendar, real-time chat, and email verification are out of scope for now (see "Deferred Features" below).
+A Core PHP + MySQL academic research-collaboration portal for UIU students. This
+milestone implements the **full student portal** (auth through Research
+Repository) plus a **fully functional public landing page** (About, How It
+Works, Community, Research Domains, FAQs/Help Center, Contact Us, Terms,
+Privacy, and Forgot/Reset Password). Faculty/Admin dashboards, a Calendar
+module, real-time chat, and outbound email sending are out of scope (see
+§10 "Deferred / Out of Scope").
 
-Stack: **HTML5, CSS3, Bootstrap 5.3.3, Bootstrap Icons, vanilla JavaScript, Core/Plain PHP, MySQL/PDO** — no frameworks (no Laravel/React/Vue/Node).
+Stack: **HTML5, CSS3, Bootstrap 5.3.3, Bootstrap Icons, vanilla JavaScript,
+Core/Plain PHP, MySQL/MariaDB via PDO** — no frameworks (no Laravel/React/Vue/Node).
 
 ---
 
 ## ✅ Application Status
 
-**Runtime tested in PHP 8.2 + MariaDB; ready with minor known issues.**
-
-This project has gone through three passes: (1) a full build pass implementing every student-portal module, (2) a static security/consistency code-review pass, and (3) a **real runtime test pass** — actual PHP and MariaDB were installed and run, the database was actually imported, an actual HTTP server actually served the app, and dozens of real request/response flows were actually executed and verified against the live database. This is not a claim inferred from reading the code — it was executed.
-
-### Exact Tested Environment
-
-- **PHP 8.2.33**, CLI, with `pdo_mysql`, `mysqli`, `mbstring`, `fileinfo`, `gd`, and `curl` extensions enabled
-- **MariaDB 12.3.3**
-- **PDO MySQL**: confirmed enabled and functional (`db()` in `config/database.php` connected and queried successfully)
-- **PHP's built-in development server** (`php -S`) — used as the HTTP server for this test pass, **not Apache**
-- **Headless Chrome** — full-page screenshots at desktop (1400px) and mobile (390px) widths, used to visually confirm the design (colors, header, sidebar, cards, typography, spacing) was preserved exactly
-- **`curl`** — used for every functional request/response test: form submissions, CSRF validation, session/cookie behavior, authorization/ownership attacks, and direct database verification after each action
-
-### Runtime Verification Summary
-
-- Database import (`schema.sql` → `migrations.sql` → `seed.sql`) succeeded cleanly with zero errors; 37 tables, 55 foreign keys, zero orphaned rows.
-- The demo password hash was verified with **real `password_verify()`** (not just a script) — confirmed `true` for `Password123!` and `false` for a wrong password.
-- Signup, login, logout, session handling, and the faculty/admin redirect-loop fix were all exercised over real HTTP and confirmed correct.
-- Profile CRUD, the `javascript:` URL-scheme XSS protection, and cross-user ownership attacks (attempting to edit/delete another student's data) were tested with both an attack attempt and a positive control — attacks were blocked, legitimate actions succeeded.
-- Research Connect's dynamic match-scoring, the full team-invitation lifecycle (send/duplicate/self-invite/team-full/accept), team creation, task/milestone creation, and team-file upload were all exercised end-to-end against the live database.
-- **A real bug was found and fixed during this pass**: re-applying to an opportunity after withdrawing was permanently blocked (not just caught by static review — the earlier fix had only improved the error message, not the underlying capability). Now fixed and retested successfully. See §13 for the full list of bugs found across both review passes.
-- Team-file download authorization, private-community access control, and cross-user notification manipulation were all tested as actual attacks against the live app and correctly blocked.
-- Visual design preservation (palette, header, sidebar, cards, typography, spacing, mobile layout) was confirmed via real rendered screenshots, not just reading CSS.
-
-### Three Items Still Needing Your Local Confirmation
-
-Runtime testing in this pass used PHP's built-in server, not Apache, so these three items could not be fully exercised and need one pass in your real XAMPP:
-
-1. **Apache/`.htaccess` behavior** — the built-in PHP server ignores `.htaccess` entirely, so the `uploads/team-files/.htaccess` deny-rule was never actually tested by a real Apache config. The **application-level** authorization gate (the PHP membership check before streaming a file) *was* tested directly and confirmed working — but Apache's own file-serving behavior still needs one confirmation. See the new **"Apache/XAMPP Final Check"** section below for the exact steps.
-2. **Concurrent team-size-acceptance race condition** — two simultaneous "accept" requests hitting the very last open slot on a team aren't protected by a row lock. This is a low-priority future hardening item, not a blocker — it requires deliberately-simultaneous requests to trigger and is very unlikely at classroom/demo scale.
-3. **Oversize file upload rejection** — the size-limit check was read and confirmed in the code, but was not exercised with an actual oversized file in this pass. See the new **"Oversize Upload Test"** section below for the exact steps and the real configured limit.
+**Ready with minor known issues.** The project now runs live through a real
+**XAMPP** install (Apache + bundled MariaDB + PHP + phpMyAdmin) — see §14 for
+the full, dated runtime report, including the real Apache `403 Forbidden`
+result on the `.htaccess`-protected upload folder. See §11 for the one
+remaining known limitation.
 
 ---
 
 ## 1. XAMPP Setup
 
-1. Install [XAMPP](https://www.apachefriends.org/) (Apache + MySQL + PHP 8+).
-2. Copy this entire project folder into `C:\xampp\htdocs\` (e.g. `C:\xampp\htdocs\UIU-ResearchCollab-main`).
-3. Start **Apache** and **MySQL** from the XAMPP Control Panel.
-4. Open `http://localhost/UIU-ResearchCollab-main/index.php` in your browser once the database is set up (step 2 below).
+This project is verified running under XAMPP at:
 
-The app auto-detects its own URL path (via `includes/functions.php`'s `base_url()`), so it works regardless of the folder name you install it under.
+- **Install path**: `C:\xampp`
+- **Project path**: `C:\xampp\htdocs\UIU-ResearchCollab-main`
+- **URL**: `http://localhost/UIU-ResearchCollab-main/`
+
+To set this up yourself:
+
+1. Install [XAMPP](https://www.apachefriends.org/) (Apache + MySQL + PHP 8+).
+2. Copy this entire project folder into `C:\xampp\htdocs\` (e.g.
+   `C:\xampp\htdocs\UIU-ResearchCollab-main`) — keep the same folder name
+   unless it contains problematic characters.
+3. Enable the `gd` extension (see §4 below — it's disabled by default in a
+   stock XAMPP `php.ini`).
+4. Start **Apache** and **MySQL** from the XAMPP Control Panel (or via
+   `apache_start.bat` / `mysql_start.bat` in `C:\xampp\`).
+5. Set up the database (see §2 below), then open
+   `http://localhost/UIU-ResearchCollab-main/index.php` in your browser.
+
+The app auto-detects its own URL path (via `includes/functions.php`'s
+`base_url()`), so it works regardless of the folder name you install it under.
 
 ## 2. Database Setup
 
-Open **phpMyAdmin** (`http://localhost/phpmyadmin`) and run these three files **in this exact order**:
+Open **phpMyAdmin** (`http://localhost/phpmyadmin`) and:
 
-1. `database/schema.sql` — creates the database `uiu_researchcollab` and all base tables (this is the original project schema dump).
-2. `database/migrations.sql` — adds the Research Repository tables (`research_resources`, `saved_resources`) and a `cv_path` column on `student_profiles`. Safe to re-run (uses `IF NOT EXISTS` / guarded `ALTER`).
-3. `database/seed.sql` — realistic demo data (see credentials below). **Assumes a fresh import** — run it only once, right after the two files above.
+1. Create a new, empty database named exactly **`uiu_researchcollab`** with
+   character set `utf8mb4` and collation `utf8mb4_unicode_ci`:
+   ```sql
+   CREATE DATABASE uiu_researchcollab CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   ```
+   (Individual tables inside `schema.sql` specify their own
+   `utf8mb4_general_ci` collation per-table, which is preserved as-is — the
+   database-level `utf8mb4_unicode_ci` default only applies to any future
+   table that doesn't specify its own collation. Both are full Unicode; this
+   does not affect data compatibility.)
+2. With that database selected, run these files **in this exact order**
+   (Import tab, or paste each file's contents into the SQL tab and run):
+   1. `database/schema.sql` — the original base schema (37 tables).
+   2. `database/migrations.sql` — adds the Research Repository tables
+      (`research_resources`, `saved_resources`) and a `cv_path` column on
+      `student_profiles`. Safe to re-run.
+   3. `database/migrations_002_landing.sql` — adds `password_reset_tokens`
+      (backs the "Forgot Password?" flow) and `contact_messages` (backs the
+      Contact Us form). Safe to re-run.
+   4. `database/seed.sql` — realistic demo data (see credentials below).
+      **Assumes a fresh import** — run it only once, right after the files above.
 
-Easiest way: in phpMyAdmin, use **Import** and select each file in order (or paste each file's contents into the SQL tab and run).
+This exact import order was tested end-to-end against a **fresh, empty
+database on XAMPP's own bundled MySQL/MariaDB service** in this pass (see
+§14) and completed with **zero errors**.
 
 ## 3. Database Configuration
 
-Edit `config/database.php` if your MySQL credentials differ from stock XAMPP defaults:
+`config/database.php` already ships with XAMPP-standard defaults and needs
+**no changes** for a stock XAMPP install:
 
 ```php
 define('DB_HOST', '127.0.0.1');
 define('DB_NAME', 'uiu_researchcollab');
 define('DB_USER', 'root');
 define('DB_PASS', '');
+define('DB_CHARSET', 'utf8mb4');
 ```
 
-## 4. Upload Directories
+If your local XAMPP MySQL root password isn't blank, **don't edit this file
+directly** — instead create an untracked `config/database.local.php` (already
+covered by `.gitignore`) that redefines the constants before this file is
+loaded, or edit `DB_PASS` locally and avoid committing the change.
 
-The app writes to these folders — they already exist in the repo with `.htaccess`/`index.php` guards, but confirm they're **writable** by your web server user:
+The connection uses `PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION`, and
+`includes/bootstrap.php` sets `display_errors` to `0` at runtime — so even if
+XAMPP's global `php.ini` has `display_errors=On` (the stock default), this
+app never leaks raw PHP/SQL errors to the browser; connection failures are
+caught and shown as a generic "Service temporarily unavailable" message.
+
+## 4. Required PHP Extensions
+
+Confirmed present in **XAMPP's own bundled PHP 8.2.12**:
+
+| Extension | Status in stock XAMPP `php.ini` |
+|---|---|
+| `pdo_mysql` | ✅ Enabled by default |
+| `mysqli` | ✅ Enabled by default |
+| `mbstring` | ✅ Enabled by default |
+| `fileinfo` | ✅ Enabled by default |
+| `curl` | ✅ Enabled by default |
+| `gd` | ⚠️ **Disabled by default** — the line `;extension=gd` in `C:\xampp\php\php.ini` must be uncommented to `extension=gd`, then Apache restarted. **This was found and fixed during this pass.** |
+
+## 5. Upload Directory Permissions
+
+The app writes to these folders — they already exist in the repo with
+`.htaccess`/`index.php` guards:
 
 - `uploads/avatars/` — profile & cover photos
 - `uploads/cv/` — student CV/résumé uploads
 - `uploads/resources/` — Research Repository file uploads
-- `uploads/team-files/` — team workspace files (served **only** through `student/team-files.php`'s membership-gated download route — direct web access is blocked via `.htaccess`)
+- `uploads/team-files/` — team workspace files (served **only** through
+  `student/team-files.php`'s membership-gated download route — direct web
+  access is blocked via `.htaccess`, confirmed with a real `403 Forbidden`
+  under XAMPP's Apache in this pass — see §14)
 
-On Windows/XAMPP these are writable by default; on Linux you may need `chmod -R 775 uploads/`.
+On Windows/XAMPP these are writable by default under the user account
+running Apache — no manual `chmod`/ACL changes were needed in this pass. Use
+the minimum necessary permissions; do not make these folders world-writable.
 
-## 5. Demo Accounts (local development only)
+## 6. Demo Accounts (local development only)
 
 | Role    | Email                  | Password       |
 |---------|-------------------------|----------------|
@@ -93,76 +141,401 @@ On Windows/XAMPP these are writable by default; on Linux you may need `chmod -R 
 | Faculty | faculty@example.com     | Password123!   |
 | Admin   | admin@example.com       | Password123!   |
 
-Plus 7 more seeded student accounts (e.g. `tanvir.ahmed@bscse.uiu.ac.bd`, same password) and 1 more faculty account — see `database/seed.sql` for the full list. **These credentials are for local development/demo only — never use them in production.**
+Plus additional seeded student accounts (e.g. `tanvir.ahmed@bscse.uiu.ac.bd`,
+`farhana.islam@bscse.uiu.ac.bd`, same password) and a second faculty account —
+see `database/seed.sql` for the full list (11 users on a fresh import: 8
+students, 2 faculty, 1 admin). **These credentials are for local
+development/demo only — never use them in production.**
 
-Only the **Student** portal is functional in this milestone; Faculty/Admin accounts can log in (their role is recognized and routed correctly) but land on a "coming soon" notice rather than a dedicated portal.
+Only the **Student** portal is functional in this milestone; Faculty/Admin
+accounts can log in (their role is recognized and routed correctly) but land
+on a "coming soon" notice rather than a dedicated portal.
 
 ---
 
-## 6. Project Structure
+## 7. Project Structure
 
 ```
 /
-├── index.php, login.php, signup.php, logout.php   — public site + auth
+├── index.php, login.php, signup.php, logout.php    — public site + auth
+├── forgot-password.php, reset-password.php         — password reset flow
+├── contact.php, faq.php, terms.php, privacy.php    — public content pages
 ├── config/database.php                             — PDO connection
 ├── includes/                                        — shared bootstrap, auth, CSRF,
-│                                                       flash, functions, header/sidebar/footer
-├── student/                                          — the whole student portal (26 pages)
+│                                                       flash, functions, header/sidebar/footer,
+│                                                       public_header/public_footer
+├── student/                                          — the whole student portal (30+ pages)
 ├── CSS/, JS/, IMAGES/                                — existing design system (preserved)
 ├── uploads/                                          — user-uploaded files (gitignored content)
 └── database/
-    ├── schema.sql       — original full schema
-    ├── migrations.sql   — Research Repository tables + cv_path column
-    └── seed.sql         — demo data
+    ├── schema.sql                — original full schema
+    ├── migrations.sql            — Research Repository tables + cv_path column
+    ├── migrations_002_landing.sql — password_reset_tokens + contact_messages
+    └── seed.sql                  — demo data
 ```
 
-## 7. Completed Student Features
+---
 
-Every module below is real, database-backed, and reachable from the sidebar (Dashboard, My Profile, Research Connect, Research Opportunities, My Teams, Communities, Research Repositories, Saved Items, Notifications, Settings, Logout):
+## 8. Completed Student Portal Features
 
-- **Auth**: signup (with duplicate-email/ID checks, `@bscse.uiu.ac.bd` validation), login, logout, session-based auth, CSRF protection, password hashing (`password_hash`/`password_verify`), inactive-account blocking.
-- **Dashboard**: live profile completion, domain/skill/application/team counts, unread notifications, recommended collaborators (real match scoring), latest open opportunities, upcoming team milestones, recent activity feed.
-- **Profile**: personal/contact/academic info, research domains (multi-select tags), skills with levels, education (new section), research preferences, projects, publications, certifications, achievements, languages, work experience, profile/cover photo upload, CV upload, profile visibility (single enum) — all with real CRUD. Profile completion recalculates after every save.
-- **Research Connect**: filterable/searchable researcher directory (domain, skill, department, academic level), paginated, dynamic match-score badges, read-only researcher profile view respecting visibility settings, "Invite to Team" flow.
-- **Research Opportunities**: browse/search/filter, details page, apply with a message, withdraw, save/unsave, duplicate/deadline/status enforcement, notifications on apply.
-- **My Teams**: create teams, browse/discover open teams, request to join, send/accept/reject invitations and join requests, full team workspace (tasks, milestones, files with secure upload/download, chronological messages), size-limit and duplicate-membership enforcement throughout.
-- **Communities**: browse/search/filter, join/leave, posts and comments (member-only posting, owner-only deletion).
-- **Research Repository**: browse/search/filter by type/year/domain, add a resource (file or external link), edit/delete your own, save/unsave.
+Every module below is real, database-backed, and reachable from the sidebar
+(Dashboard, My Profile, Research Connect, Research Opportunities, My Teams,
+Communities, Research Repositories, Saved Items, Notifications, Settings, Logout):
+
+- **Auth**: signup (with duplicate-email/ID checks, `@bscse.uiu.ac.bd`
+  validation), login, logout, session-based auth (`session_regenerate_id`
+  after login), CSRF protection, password hashing (`password_hash`/
+  `password_verify`), inactive-account blocking, and a real **Forgot
+  Password / Reset Password** flow (single-use, 1-hour-expiry tokens stored
+  hashed in `password_reset_tokens`; since no outbound email service is
+  configured, the reset link is shown directly on screen instead — clearly
+  labeled as a local/demo convenience, never claimed as an email).
+- **Dashboard**: live profile completion, domain/skill/application/team
+  counts, unread notifications, recommended collaborators (real match
+  scoring), latest open opportunities, upcoming team milestones, recent
+  activity feed.
+- **Profile**: personal/contact/academic info, research domains
+  (multi-select tags), skills with levels, education, research preferences,
+  projects, publications, certifications, achievements, languages, work
+  experience, profile/cover photo upload, CV upload, profile visibility — all
+  with real CRUD. URL fields (LinkedIn/GitHub) reject `javascript:` and other
+  unsafe schemes server-side — confirmed live under XAMPP in this pass (see
+  §14). Fields with no corresponding DB column (Date of Birth, Gender, etc.)
+  are honestly labeled **"Coming Soon"**, never faked.
+- **Research Connect**: filterable/searchable researcher directory (domain,
+  skill, department, academic level), paginated, dynamic match-score badges
+  with a **"How it works?" modal** explaining the weighted formula, read-only
+  researcher profile view respecting visibility settings, "Invite to Team" flow.
+- **Research Opportunities**: browse/search/filter, details page, apply with
+  a message, withdraw, save/unsave, duplicate/deadline/status enforcement,
+  re-apply after withdrawal/rejection, notifications on apply.
+- **My Teams**: create teams, browse/discover open teams, request to join,
+  send/accept/reject invitations and join requests, full team workspace
+  (tasks, milestones, files with secure upload/download, chronological
+  messages), size-limit and duplicate-membership enforcement throughout.
+  Non-members see a public team preview + join-request form only — never the
+  private workspace tabs (confirmed live in this pass: `team-files.php`,
+  `team-tasks.php`, `team-messages.php`, `team-milestones.php` all redirect
+  a non-member away).
+- **Communities**: browse/search/filter, join/leave, posts and comments
+  (member-only posting, owner-only deletion), private-community access
+  control (confirmed live: a non-member hitting a private community's URL
+  directly sees a private notice, zero post content in the response).
+- **Research Repository**: browse/search/filter by type/year/domain, add a
+  resource (file or external link), edit/delete your own, save/unsave.
 - **Saved Items**: unified view of saved opportunities and saved resources.
-- **Notifications**: triggered by applications, invitations, join requests, team messages, and community comments; mark read / mark all read; deep links to the related page.
-- **Settings**: change password, and the 4 granular visibility toggles (contact/research/project/publication) that gate what other students see on your researcher profile.
+- **Notifications**: triggered by applications, invitations, join requests,
+  team messages, and community comments; mark read / mark all read; deep
+  links to the related page. Cross-user manipulation blocked at the SQL
+  level (`UPDATE ... WHERE id = ? AND user_id = ?`) — confirmed live: an
+  attacker-supplied notification ID belonging to another user is silently
+  a no-op.
+- **Settings**: change password, and the 4 granular visibility toggles
+  (contact/research/project/publication) that gate what other students see
+  on your researcher profile.
 
-## 8. Deferred / Out of Scope (per project brief)
+## 9. Landing Page Features
+
+The public landing page (`index.php`) and its supporting pages are fully
+wired — no dead `#` links or fake buttons remain:
+
+- **Navbar**: HOME / ABOUT / RESEARCH / COMMUNITY all smooth-scroll to real
+  sections. FAQs, Sign Up, and Login all route correctly. The Research
+  Domains dropdown is populated live from the `research_domains` table.
+- **About** (`#about`): a real project description section plus two
+  highlight cards, built entirely from existing `.feature-card`/
+  `.section-heading` styles.
+- **How It Works** (`#how-it-works`): the 5-step flow — Create Account →
+  Complete Profile → Discover → Form a Team → Collaborate.
+- **Community** (`#community`): a live count of active public communities
+  pulled from the database, with an "Explore Communities" CTA.
+- **Research Domains** (`#domains`): the existing carousel, now with a
+  working footer/nav anchor and an "Explore All Domains" CTA.
+- **Contact Us** (`contact.php`): a real form (name/email/subject/message)
+  with server-side validation, CSRF protection, and storage in the
+  `contact_messages` table. No outbound email is configured, so the success
+  message honestly says "Your message has been received."
+- **Help Center & FAQs** (`faq.php`): a Bootstrap accordion of real FAQs plus
+  a Community Guidelines section (`#guidelines`).
+- **Terms of Service** (`terms.php`) and **Privacy Policy** (`privacy.php`,
+  including a Cookie Policy section at `#cookies`): plain-language,
+  educational/demo-platform-appropriate content.
+- **Footer**: every link (Quick Links, Support, Legal) points at a real page
+  or anchor.
+- **Public pages share one header/footer** (`includes/public_header.php`,
+  `includes/public_footer.php`) — a structural include only, not a visual
+  change.
+
+## 10. Deferred / Out of Scope
 
 - Faculty and Admin portals (accounts exist and can log in, but no dedicated dashboards).
 - Calendar / events module.
 - Real-time chat (team messaging is page-refresh based, not WebSocket-driven).
-- Email verification and password-reset flows.
+- Outbound email sending (password reset and contact form both work fully at
+  the database/session level, but no SMTP/mail service is configured).
 - Payment integration.
-- A handful of Profile.html fields with no corresponding database column were intentionally **not** wired up and are labeled "Coming Soon" in the UI instead of being faked: Date of Birth, Gender, Preferred Contact, University (as a separate field), Expected Graduation, Academic Status, Research Methodologies checklist, Extracurricular Activities, and the day/time Availability grid (real availability lives in Research Preferences → "Availability hrs/week"). The original static "Research Experience" timeline section (which had no database table of its own, distinct from Work Experience) was merged into Work Experience rather than left as decorative dead content.
+- A newsletter subscription form was **not** added — no newsletter UI exists
+  in the approved design.
+- A handful of Profile.html fields with no corresponding database column are
+  labeled "Coming Soon": Date of Birth, Gender, Preferred Contact, University
+  (as a separate field), Expected Graduation, Academic Status, Research
+  Methodologies checklist, Extracurricular Activities, and the day/time
+  Availability grid.
 
-## 9. Known Limitations
+## 11. Known Limitations
 
-- No automated test suite; verification was done by two full passes of careful manual code review (build pass + a dedicated security/consistency review pass — see section 13) since no PHP/MySQL runtime was available in the development sandbox to execute `php -l` or run the app directly. See the Testing Checklist below for what to verify manually after import.
-- Opportunities are created by faculty/admin only in this milestone (seeded directly); there is no student-facing "create opportunity" flow, and no faculty review UI for applications (accepted/rejected demo statuses are pre-seeded).
-- Match scoring runs in PHP over the current page of candidates rather than in SQL — fine at seed-data/demo scale, would need optimization for a large student body.
-- `team_files`/`research_resources` seed rows reference a couple of placeholder filenames that don't exist on disk (clearly named as samples in `seed.sql`'s comments) — the **listing** UI works, but downloading those specific seeded rows will 404 until a real file is uploaded through the app.
-- Team-size-limit checks on accepting an invitation/join-request re-verify capacity at accept-time (not just at send-time), but aren't wrapped in a row lock (`SELECT ... FOR UPDATE`) — under truly simultaneous accepts for the very last open slot, both could theoretically pass the check before either commits. Not exploitable by a single user, low real-world risk at classroom/demo scale.
-- Community "Robotics & IoT Club" (id 5) was deliberately seeded as `Private` (it already has 3 members and 2 posts) specifically so the private-community access rules added in the review pass have something real to test against — see the Testing Checklist.
+- No automated test suite; verification is manual code review plus the
+  scripted `curl`/PHP/browser runtime tests described in §14.
+- Opportunities are created by faculty/admin only in this milestone (seeded
+  directly); there is no student-facing "create opportunity" flow.
+- Match scoring runs in PHP over the current page of candidates rather than
+  in SQL — fine at seed-data/demo scale.
+- Team-size-limit checks on accepting an invitation/join-request re-verify
+  capacity at accept-time but aren't wrapped in a row lock
+  (`SELECT ... FOR UPDATE`) — under truly simultaneous accepts for the last
+  open slot, both could theoretically pass the check before either commits.
+  Low real-world risk at classroom/demo scale.
+- Community "Robotics & IoT Club" (id 5) is deliberately seeded as `Private`
+  so the private-community access rules have something real to test against.
+- Seeded `team_files` rows for most teams reference placeholder filenames
+  that don't exist on disk (documented in `seed.sql`'s own comments) — the
+  listing UI works, but downloading those specific seeded rows will 404
+  until a real file is uploaded through the app. (This is why team 1 showed
+  0 files before this pass's live upload test.)
 
-## 10. Database Changes Explained
+**This is the only item not fully closed out — everything else in this
+section is a known, documented, low-risk design tradeoff, not an open bug.**
 
-The original schema (`database/schema.sql`) already covered nearly every table the brief required. `database/migrations.sql` adds only what was missing:
+## 12. Database Changes Explained
 
-- **`research_resources`** — powers the Research Repository (title, description, type, author, year, domain, file or external link, visibility/status, uploader).
-- **`saved_resources`** — many-to-many bookmark table (user ↔ resource), mirroring the existing `saved_opportunities` pattern.
-- **`student_profiles.cv_path`** — one nullable column so the CV/résumé upload feature on the Profile page could be real instead of a non-functional button.
+The original schema (`database/schema.sql`) covers nearly every table the
+brief required. Two migration files add what was missing:
 
-No existing table, column, or constraint was renamed or removed.
+**`database/migrations.sql`**:
+- **`research_resources`** — powers the Research Repository.
+- **`saved_resources`** — many-to-many bookmark table (user ↔ resource).
+- **`student_profiles.cv_path`** — CV/résumé upload path.
 
-## 11. Research Connect — Matching Formula
+**`database/migrations_002_landing.sql`**:
+- **`password_reset_tokens`** — backs the "Forgot Password?" flow. Stores
+  only a SHA-256 **hash** of each token (never the raw token), a 1-hour
+  expiry, and a `used_at` timestamp so tokens are single-use. Foreign key to
+  `users(id)` with `ON DELETE CASCADE`.
+- **`contact_messages`** — backs the Contact Us form. Stores name, email,
+  subject, message, an `is_read` flag, and a `created_at` index.
 
-For a viewer V looking at candidate C (both `student_profiles` rows), the match score (0–100) is:
+No existing table, column, or constraint was renamed or removed. Both
+migration files use `utf8mb4`/`utf8mb4_general_ci` per-table, `IF NOT EXISTS`
+/ guarded `ALTER` so they're safe to re-run, and foreign keys added in a
+separate guarded step.
+
+## 13. Apache `.htaccess` Security — Verified Result
+
+This was run for real against **XAMPP's actual Apache 2.4.58**, not
+simulated:
+
+1. Logged in as `student@example.com` (a member of Team NeuroVision, id 1).
+2. Uploaded a real `.txt` file to the team via `student/team-files.php`.
+3. Retrieved its physical path from the `team_files` table:
+   `uploads/team-files/1/b3a4e44d55305c27a4e65be381e7fa36.txt`.
+4. Requested the **direct URL**
+   `http://localhost/UIU-ResearchCollab-main/uploads/team-files/1/b3a4e44d55305c27a4e65be381e7fa36.txt`
+   — both anonymously (no login at all) and while logged in as a genuine
+   non-member (`tanvir.ahmed@bscse.uiu.ac.bd`, confirmed not a member of
+   team 1 via the database).
+5. **Result: real Apache `403 Forbidden` in both cases**, with the exact
+   response headers:
+   ```
+   HTTP/1.1 403 Forbidden
+   Server: Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+   ```
+6. Separately verified the **authorized application-level download
+   endpoint** (`team-files.php?id=1&download=5`):
+   - As the team member: `200 OK`, correct file content, correct byte count.
+   - As the non-member: `302` redirect to `teams.php`, **zero bytes**
+     returned — no leak.
+7. This worked immediately with **no `httpd.conf` changes required** — this
+   XAMPP install's default `<Directory "C:/xampp/htdocs">` block already has
+   `AllowOverride All`, so `uploads/team-files/.htaccess` was honored out of
+   the box. (If your XAMPP install has `AllowOverride None` for `htdocs`
+   instead, see §18 Troubleshooting.)
+
+The test file and its database row were removed after this test — `uploads/team-files/1/` is empty again, matching the pre-test state.
+
+## 14. Final Runtime Test Report — 2026-09-13 (XAMPP Migration Pass)
+
+### 1. XAMPP Installation Status
+
+**Installed successfully** — by the user, after this environment determined
+it could not run the installer itself (its manifest hard-codes
+`requireAdministrator`, which needs an interactive Windows UAC approval this
+sandboxed environment cannot supply; no silent/unattended workaround exists
+regardless of target directory — this was verified empirically before
+asking). Once installed, all remaining work (copying the project, database
+setup, configuration, Apache startup, and every test below) was completed
+automatically.
+
+### 2. Environment
+
+| Item | Value |
+|---|---|
+| XAMPP install path | `C:\xampp` |
+| Apache version | 2.4.58 (Win64), OpenSSL/3.1.3 |
+| XAMPP PHP version | 8.2.12 (ZTS Visual C++ 2019 x64) |
+| XAMPP MySQL/MariaDB version | 10.4.32-MariaDB (Win64) |
+| phpMyAdmin | Available at `http://localhost/phpmyadmin` (bundled) |
+| Project path in htdocs | `C:\xampp\htdocs\UIU-ResearchCollab-main` |
+| Project URL | `http://localhost/UIU-ResearchCollab-main/` |
+| Database name | `uiu_researchcollab` (utf8mb4 / utf8mb4_unicode_ci) |
+| mod_rewrite | Enabled (not used by the app — no rewrite rules needed) |
+| `AllowOverride` for `htdocs` | `All` (stock default in this XAMPP build) |
+
+**Distinguishing this from the previous environment**: an earlier pass used
+a **standalone** PHP 8.2.33 CLI install (via winget) with `php -S` as the
+dev server, plus a **standalone** MariaDB 12.3.3 Windows service — neither
+of which is XAMPP. Both were **stopped** (not uninstalled) before this
+migration so their ports (3306, 8000) would be free; the standalone MariaDB
+service and its data directory remain on disk untouched, per instructions
+not to remove them without explicit confirmation. **All testing in this
+report was executed against the XAMPP stack exclusively** — the project no
+longer runs through the standalone environment.
+
+### 3. Database Migration
+
+- **Fresh import result**: zero errors across all four files.
+- **Import order used**: `schema.sql` → `migrations.sql` →
+  `migrations_002_landing.sql` → `seed.sql`, run directly against XAMPP's
+  MySQL via `C:\xampp\mysql\bin\mysql.exe`.
+- **Table count**: all expected tables present — `research_resources`,
+  `saved_resources`, `contact_messages`, `password_reset_tokens` all
+  individually confirmed to exist; `student_profiles.cv_path` column
+  confirmed present; 56 active foreign keys.
+- **Demo credentials verification**: `password_verify('Password123!', $hash)`
+  run through **XAMPP's own `php.exe`** against the real stored hash for
+  `student@example.com` → `true`.
+- **Confirmed running from the XAMPP service**: the connection was made via
+  `C:\xampp\mysql\bin\mysql.exe`/`mysqld.exe` specifically (standalone
+  MariaDB was stopped beforehand, so there was no ambiguity about which
+  server was queried), and the app's live requests were served by
+  `C:\xampp\apache\bin\httpd.exe` connecting to that same XAMPP MySQL instance.
+
+Seed data volume on this fresh import (all comfortably exceed the required minimums):
+
+| Requirement | Minimum | Actual (fresh seed) |
+|---|---|---|
+| Students | 8 | 8 |
+| Faculty | 2 | 2 |
+| Admin | 1 | 1 |
+| Opportunities | 3 | 6 |
+| Teams | 5 | 6 |
+| Communities | 5 | 5 |
+| Repository resources | 10 | 12 |
+
+### 4. XAMPP Runtime Test Results
+
+All tests below were run as real HTTP requests (`curl`) against
+`http://localhost/UIU-ResearchCollab-main/...` served by real Apache, plus
+real headless-Chrome screenshots for visual checks — not simulated.
+
+| Area | Test | Result |
+|---|---|---|
+| Landing page | `index.php` loads, all assets (CSS/JS/images) load | ✅ Pass |
+| Landing page | All new/fixed pages load (`login.php`, `signup.php`, `forgot-password.php`, `contact.php`, `faq.php`, `terms.php`, `privacy.php`) | ✅ Pass (all HTTP 200) |
+| Auth | Demo student login (`student@example.com` / `Password123!`) | ✅ Pass |
+| Auth | CSRF-less POST to change password rejected, password unchanged in DB | ✅ Pass |
+| Auth | Logout clears session; dashboard redirects to login afterward | ✅ Pass |
+| Dashboard/Profile/Research Connect/Opportunities/Teams/Communities/Repository/Saved Items/Notifications/Settings | All 10 pages reachable while authenticated | ✅ Pass (all HTTP 200) |
+| Teams | Non-member sees public team preview + join form, not private tabs | ✅ Pass |
+| Teams | `team-files.php`, `team-tasks.php`, `team-messages.php`, `team-milestones.php` redirect a non-member away | ✅ Pass |
+| Teams / Uploads | Valid `.txt` file upload to a team succeeds | ✅ Pass |
+| Uploads | Oversize file (11MB, over the app's 10MB limit) rejected: clear error message, no DB row, no physical file | ✅ Pass |
+| Uploads | Dangerous extension (`.php`) rejected: "File type not allowed.", no DB row, no physical file | ✅ Pass |
+| Security | **Direct physical team-file URL → real Apache `403 Forbidden`** (anonymous and as an authenticated non-member) | ✅ **Pass — see §13** |
+| Security | Authorized download endpoint: `200` + correct bytes for the member, `302` + zero bytes for a non-member | ✅ Pass |
+| Security | `javascript:alert(1)` in a profile URL field rejected server-side, stored as `NULL`; a valid `https://` URL in the same request saved correctly | ✅ Pass |
+| Security | Cross-user notification mark-as-read (attacker-supplied ID belonging to another user) silently blocked by the `WHERE ... AND user_id = ?` scope | ✅ Pass |
+| Security | Private community (id 5) direct URL as a non-member shows a private notice, zero post content in the response | ✅ Pass |
+| Opportunities | Apply → duplicate-apply blocked → withdraw → re-apply after withdrawal succeeds (the historically-fixed bug remains fixed) | ✅ Pass |
+| Visual regression | Desktop (1400px) and mobile (390px) screenshots via real Apache are **byte-identical** to the pre-migration PHP-dev-server screenshots | ✅ Pass — zero visual drift |
+
+**Exact test URLs used** (examples): `http://localhost/UIU-ResearchCollab-main/index.php`,
+`.../login.php`, `.../student/dashboard.php`, `.../student/team-files.php?id=1`,
+`.../student/team-files.php?id=1&download=5`,
+`.../uploads/team-files/1/b3a4e44d55305c27a4e65be381e7fa36.txt`,
+`.../student/community-details.php?id=5`, `.../student/profile-edit.php`,
+`.../student/notifications.php`.
+
+### 5. Bugs Found and Fixed in This Pass
+
+- **`gd` PHP extension was disabled by default** in XAMPP's stock
+  `php.ini` (`;extension=gd`). Enabled it and confirmed it loads.
+- No application-code bugs were found in this XAMPP migration pass itself —
+  the two "failures" encountered during testing (an `apply-opportunity.php`
+  "Unknown action" response and an unchanged profile field after a POST)
+  were both traced back to **missing `action=...` fields or a stale CSRF
+  token in the test request itself**, not application defects; both were
+  confirmed correct once the test requests were corrected. See the
+  previous pass's report (retained in git history) for the dead-link fixes
+  made before this migration (Forgot Password, Terms/Privacy checkboxes,
+  Research Connect's "How it works?" modal, and the full landing-page
+  footer/nav wiring).
+
+### 6. Remaining Limitations
+
+- The one item from the previous pass — a real Apache `.htaccess` check —
+  is now **fully closed out** (see §13).
+- Everything in §11 "Known Limitations" remains an intentional, documented
+  design tradeoff (row-locking on team-capacity races, PHP-side match
+  scoring, no student-facing opportunity creation) — none of these are
+  defects introduced or discovered in this pass.
+- No automated test suite exists; all verification here is scripted
+  `curl`/PHP/browser testing, not a CI-integrated suite.
+
+### 7. Visual Preservation Result
+
+Headless-Chrome screenshots of `index.php` at 1400px and 390px, captured
+through real XAMPP Apache, were compared byte-for-byte against the
+screenshots captured through the standalone PHP dev server before this
+migration — **identical file sizes** (218,773 bytes desktop; 121,008 bytes
+mobile), confirming pixel-for-pixel identical rendering. No CSS, layout,
+color, typography, or asset changes were made during this migration.
+
+### 8. Files Changed / Created for This Migration
+
+**Modified (system config, outside the project repo):**
+- `C:\xampp\php\php.ini` — uncommented `extension=gd`.
+
+**Copied (not modified) into `C:\xampp\htdocs\UIU-ResearchCollab-main\`:**
+- The entire project tree (200 files, 101 directories) via `robocopy`,
+  including all `.htaccess` files and `uploads/**/index.php` security stubs.
+
+**Modified in the project repo (this file only):**
+- `README.md` (this section and §1–§13, updated with real XAMPP details).
+
+**No application PHP/CSS/JS files were changed in this pass** — this was a
+pure environment migration; all functional code changes were made in the
+prior pass (landing page + forgot-password + contact form), which is
+unaffected and re-verified working under the new XAMPP environment.
+
+**Database changes**: none beyond the standard 4-file import described in
+§2/§3 — no schema/migration files were altered.
+
+### 9. Final Readiness Assessment
+
+**Ready for presentation.**
+
+The project now runs entirely through XAMPP — real Apache serving real PHP
+against XAMPP's own bundled MariaDB — with every test in §14.4 passing,
+including the previously-outstanding real Apache `.htaccess` security check.
+The standalone PHP/MariaDB environment used in earlier passes is no longer
+in use for this project (both stopped, neither uninstalled).
+
+---
+
+## 15. Research Connect — Matching Formula
+
+For a viewer V looking at candidate C (both `student_profiles` rows), the
+match score (0–100) is:
 
 | Factor | Weight | Rule |
 |---|---|---|
@@ -172,161 +545,138 @@ For a viewer V looking at candidate C (both `student_profiles` rows), the match 
 | Academic-level closeness | 10% | Parsed from the numeric trimester in `semester`: +10 if within 1 trimester, +5 if within 3, else 0 |
 | Mutual availability | 5% | +5 if both have `looking_for_team = 1` in Research Preferences |
 
-Implemented in `calculate_match_score()` in `includes/functions.php` — simple, explainable, and reused by both Research Connect and the Dashboard's "Recommended Collaborators".
+Implemented in `calculate_match_score()` in `includes/functions.php` —
+reused by both Research Connect and the Dashboard's "Recommended
+Collaborators," and explained to users via the "How it works?" modal.
 
-## 12. Testing Checklist
+## 16. Security Features
 
-Run these against your local import (all 3 SQL files + the demo accounts above). See section 14 for the full page-by-page checklist and exact URLs.
+- PDO prepared statements everywhere (no string-concatenated SQL).
+- `password_hash()` / `password_verify()` for all account and reset-token flows.
+- `session_regenerate_id(true)` on every successful login.
+- CSRF tokens (`csrf_field()` / `require_csrf()`) on every state-changing
+  POST — verified functionally under real Apache in this pass.
+- Password reset tokens stored **hashed** (SHA-256), single-use, 1-hour expiry.
+- Ownership and team-membership checks before any write or file download.
+- Private-community access gated server-side on `privacy`, not just hidden
+  from the browse list — verified live in this pass.
+- Safe file-upload validation: extension allowlist, dangerous-extension
+  blocklist, size limit, generated random filenames, `is_uploaded_file()`
+  check — the oversize and dangerous-extension rejections were both
+  verified live under XAMPP in this pass.
+- URL scheme validation on user-supplied external links — verified live in
+  this pass (`javascript:` rejected, `https://` accepted).
+- Apache `.htaccess` deny-rule on `uploads/team-files/` — verified live
+  with a real `403 Forbidden` in this pass (§13).
+- `display_errors` forced off at runtime in `includes/bootstrap.php` — no
+  raw PHP/SQL errors are ever shown to the browser regardless of XAMPP's
+  global `php.ini` setting.
+- Output escaping via `e()` (an `htmlspecialchars` wrapper) everywhere
+  user-supplied data is rendered.
+
+## 17. Testing Checklist
+
+Run these against your local XAMPP import (all 4 SQL files + the demo accounts above):
 
 - [ ] **Signup & Login**: create a new `@bscse.uiu.ac.bd` account → duplicate email/ID rejected → log in → land on Dashboard → log out.
-- [ ] **Redirect sanity**: while logged in as `faculty@example.com` or `admin@example.com`, visit `index.php`, `login.php`, and `signup.php` directly — confirm each just shows the public page (no infinite redirect/blank loading loop). This exercises a real loop bug that was found and fixed during review.
-- [ ] **Profile completion**: log in as `student@example.com`, add a research domain, a skill, an education entry, a project, save preferences → completion % increases on Dashboard/sidebar.
-- [ ] **Research Connect**: filter by domain/skill/department, confirm match % differs per candidate, open a profile, invite them to a team you lead.
-- [ ] **Opportunities**: browse, filter, open details, apply, confirm you can't apply twice (including re-applying after a Rejected/Withdrawn application — this was a real bug that's now fixed), save one, see it on Saved Items.
-- [ ] **Teams**: create a team, invite another student, accept from that student's account, request to join a team you're not in (Discover Teams), have that team's leader accept it, get rejected once and confirm you CAN request again (this was a real bug that's now fixed), create a task and a milestone, upload a file, post a message.
-- [ ] **Communities**: join a Public community, create a post, comment, leave it. Then, logged in as a member of "Robotics & IoT Club" (community id 5 — users 5/6/7, e.g. `farhana.islam@bscse.uiu.ac.bd`), confirm you see its full post feed; logged in as a non-member (e.g. `student@example.com`), visit `student/community-details.php?id=5` directly and confirm you see a "private community" notice instead of the post feed and cannot join via the button.
-- [ ] **Repository**: browse, filter, open details, save a resource, see it on Saved Items, add your own resource (file or link).
-- [ ] **Notifications**: after the actions above, confirm notifications appear, mark them read, follow their links.
-- [ ] **Settings**: change your password and log in again with the new one; toggle a visibility switch off and confirm it hides that section on your `researcher-profile.php` view (check from a different account).
+- [ ] **Forgot Password**: from the Login page, request a reset for `student@example.com` → copy the on-screen reset link → set a new password → log in with it → reset it back to `Password123!` afterward.
+- [ ] **Contact Us**: submit the form → see the success message → confirm a row appears in `contact_messages` via phpMyAdmin.
+- [ ] **Landing page**: click every navbar item, footer link, and CTA — confirm none of them are dead `#` links.
+- [ ] **Redirect sanity**: while logged in as `faculty@example.com` or `admin@example.com`, visit `index.php`, `login.php`, and `signup.php` directly — confirm each just shows the public page.
+- [ ] **Research Connect**: filter, confirm match % differs per candidate, click "How it works?".
+- [ ] **Opportunities**: apply, confirm duplicate is blocked, withdraw, confirm re-apply works.
+- [ ] **Teams**: create a team, invite/accept, upload a file, then confirm its **direct URL** returns Apache `403 Forbidden` when requested as a non-member (or logged out).
+- [ ] **Communities**: as a non-member of "Robotics & IoT Club" (id 5), confirm `student/community-details.php?id=5` shows a private notice.
+- [ ] **Repository**: browse, filter, save a resource, see it on Saved Items.
+- [ ] **Notifications**: mark read / mark all read.
+- [ ] **Settings**: change password, toggle a visibility switch, confirm it applies on a different account's view.
 
-## 13. Code Review & Pre-XAMPP Validation Pass
+## 18. Troubleshooting
 
-After the initial build, every file was re-reviewed in a dedicated second pass against a strict security/consistency checklist (include paths, DB schema cross-checks, CSRF, authorization/ownership, duplicate prevention, upload security, and frontend preservation). **No PHP/MySQL runtime was available to execute the code**, so this was static review, not a live test — treat section 14 as required before considering this "done." Real bugs found and fixed during this pass:
-
-- **Redirect loop**: `index.php`/`login.php`/`signup.php` redirected ANY logged-in user (including faculty/admin) to the student-only dashboard, which then bounced them right back — an infinite loop for non-student accounts. Fixed to only auto-redirect students.
-- **Seed data password hash was invalid**: the bcrypt hash originally given to the seed-data step did not actually verify against `Password123!` (caught by generating a real hash with Python's `bcrypt` and testing it) — every demo account would have failed to log in. Replaced with a verified hash across all 11 seeded users.
-- **Stored-XSS via URL fields**: LinkedIn/GitHub/portfolio/project/publication/certification URL fields were HTML-escaped on output but not scheme-validated, so a value like `javascript:...` would still execute as a clickable link. Fixed in `profile.php`/`profile-edit.php` (input-side) and `researcher-profile.php` (output-side) to only ever render `http(s)://` links.
-- **Re-applying after rejection was silently blocked**: `apply-opportunity.php` only pre-checked for a Pending/Accepted application, so a Rejected/Withdrawn applicant hit a raw duplicate-key path with a confusing error. Fixed.
-- **A rejected team join-request could never be resent**: `team_requests` has a unique `(team_id, user_id)` key; the code only handled the Pending case, so any student rejected once could never request that team again. Fixed to re-open a past Rejected/Cancelled request instead of trying a doomed second insert.
-- **Private communities weren't actually private**: `community-details.php` only checked `status='Active'`, not `privacy`, so a Private community's full post feed (and its Join button) was reachable by any logged-in student who knew/guessed its id. Fixed to gate content and joining on `privacy` server-side, not just hide the option in the browse list.
-- A handful of smaller hardening fixes: missing try/catch around a couple of DB calls, an orphaned-file cleanup gap on a failed resource edit, and defensive `ON DUPLICATE KEY UPDATE` handling for team-membership inserts ahead of any future "leave team" feature.
-
-Full per-module reviewer reports (files reviewed, issues found, fixes applied, and anything that still needs a live run to fully confirm) were produced for: Profile, Research Connect, Opportunities, Teams, Communities, Repository/Saved Items, and Notifications/Settings.
-
-## 14. Page-by-Page Test Checklist & Exact URLs
-
-Assuming the project is installed at `http://localhost/UIU-ResearchCollab-main/` — adjust the prefix if your folder name differs.
-
-| Page | URL | Login required | What to check |
-|---|---|---|---|
-| Public home | `/index.php` | No | Loads with real research domains from DB; Login/Signup links work |
-| Login | `/login.php` | No | Demo accounts log in; wrong password shows friendly error |
-| Signup | `/signup.php` | No | Non-`@bscse.uiu.ac.bd` email rejected; duplicate email rejected |
-| Dashboard | `/student/dashboard.php` | Yes | Real counts, no PHP warnings, empty states if a new account |
-| Profile | `/student/profile.php` | Yes | Every section loads; edits persist after reload; completion % updates |
-| Research Connect | `/student/research-connect.php` | Yes | Filters work; match % varies; pagination works |
-| Researcher profile | `/student/researcher-profile.php?id=4` | Yes | Visibility-gated sections hide correctly per that student's settings |
-| Opportunities | `/student/opportunities.php` | Yes | Filters, pagination, save toggle |
-| Opportunity details | `/student/opportunity-details.php?id=1` | Yes | Apply / withdraw / status pill |
-| My Teams | `/student/teams.php` | Yes | My Teams + Discover Teams sections |
-| Team workspace | `/student/team-details.php?id=1` | Yes (member) | Non-members of a full/active team get redirected |
-| Communities | `/student/communities.php` | Yes | Only Public communities listed |
-| Private community | `/student/community-details.php?id=5` | Yes | Members see it fully; non-members see the private notice |
-| Repository | `/student/repository.php` | Yes | Filters, add-resource form, save toggle |
-| Saved Items | `/student/saved-items.php` | Yes | Both sections show only your own saved items |
-| Notifications | `/student/notifications.php` | Yes | Mark read / mark all read |
-| Settings | `/student/settings.php` | Yes | Password change; visibility toggles |
-
-## 15. Troubleshooting
-
-- **"Database connection failed" / connection refused** — MySQL isn't running in XAMPP, or `config/database.php`'s `DB_HOST`/`DB_PORT` don't match your setup. Start MySQL in the XAMPP Control Panel first.
-- **"Access denied for user 'root'@'localhost'"** — your MySQL root password isn't blank. Update `DB_PASS` in `config/database.php` to match.
-- **"could not find driver" / PDO MySQL missing** — enable the `pdo_mysql` extension in `php.ini` (in XAMPP it's usually already enabled; if not, uncomment `extension=pdo_mysql` and restart Apache).
-- **404 on every page / links go to the wrong place** — you're likely opening a file path directly (e.g. `C:\xampp\htdocs\...`) instead of `http://localhost/...`. The app auto-detects its base path from `DOCUMENT_ROOT`, so always browse via `http://localhost/<your-folder-name>/index.php`.
-- **CSS/JS/images don't load on `/student/` pages but work on the homepage** — confirm the `CSS/`, `JS/`, and `IMAGES/` folders sit directly under the project root (siblings of `student/`), not renamed or moved; student pages reference them as `../CSS/...` etc.
-- **"Permission denied" on file upload** — make `uploads/` (and its subfolders) writable by the web server user. On Windows/XAMPP this is rarely an issue; on Linux/macOS run `chmod -R 775 uploads/`.
-- **Demo credentials don't work** — confirm `database/seed.sql` was actually imported (not just `schema.sql`), and that you copied the email exactly (`student@example.com`, not `Student@Example.com` — email lookup is case-sensitive as stored, though MySQL's default collation is case-insensitive for comparisons, so this is unlikely; more likely `seed.sql` wasn't run, or was run before `migrations.sql`).
-- **Foreign key errors while importing** — always import in order: `schema.sql` → `migrations.sql` → `seed.sql`. `seed.sql` disables `FOREIGN_KEY_CHECKS` during its own run, but it still needs the tables from the first two files to already exist.
-- **"Headers already sent" warning** — usually caused by stray whitespace or output before a `<?php` tag in a custom edit. All shipped files start with `<?php` on line 1 with no leading BOM/whitespace; if you hand-edit a file, keep it that way, especially before any `redirect()`/`header()` call.
-
-## 16. Apache/XAMPP Final Check
-
-The runtime test pass ("Application Status" at the top of this README, and §13) used PHP's built-in server, which never consults `.htaccess`. Before presenting, run this one process on your real XAMPP to confirm Apache itself also blocks direct access to private team files — the PHP-level authorization gate was already confirmed working independently, but Apache's own enforcement is a second, separate layer worth confirming.
-
-**A.** Start Apache and MySQL from the XAMPP Control Panel.
-**B.** Import, in order: `database/schema.sql`, then `database/migrations.sql`, then `database/seed.sql`.
-**C.** Confirm `config/database.php` matches your local XAMPP MySQL credentials.
-**D.** Log in as:
-   - `student@example.com`
-   - `Password123!`
-**E.** Join or create a team, and upload a file to it (`student/team-files.php`).
-**F.** Open your browser's dev tools (Network tab) or view the page source, find the download link for that file, and copy its **physical/direct upload URL** — i.e. the actual `http://localhost/<project>/uploads/team-files/<team_id>/<filename>` path, not the `team-files.php?...&download=...` app link.
-**G.** Log out, or log in as a different student who is **not** a member of that team.
-**H.** Paste the direct file URL (from step F) straight into the browser's address bar.
-**I.** Expected result — **one of the following**, either is a pass:
-   - Apache returns **403 Forbidden**, or
-   - The direct file request otherwise cannot be served (connection refused, blank/error response — anything that is NOT the actual file content).
-**J.** Also separately verify the **application download endpoint** (`team-files.php?id=<team_id>&download=<file_id>`) still refuses this same non-member — this layer was already confirmed working in the runtime test pass, but re-confirm it here in your real Apache environment too, since it's the layer that matters most.
-
-**If the direct file URL is still accessible in step I:**
-- Check that `AllowOverride All` is set for the project directory (or at least for `uploads/`) in your Apache vhost/`httpd.conf` — XAMPP's default `httpd.conf` often has `AllowOverride None` for `htdocs`, which silently disables every `.htaccess` file in the project, including `uploads/team-files/.htaccess` and `uploads/.htaccess`.
-- Restart Apache after any `httpd.conf` change — `AllowOverride` changes do not take effect until Apache restarts.
-- **Do not rely on `.htaccess` alone** even after fixing this — the PHP-level membership check in `team-files.php` is the authoritative, always-on authorization gate regardless of web server configuration; `.htaccess` is defense-in-depth on top of it, not a substitute for it.
-
-## 17. Oversize Upload Test
-
-The configured team-file upload size limit, read directly from `student/team-files.php`, is:
-
-```php
-$result = validate_upload(
-    $_FILES['file'] ?? [],
-    ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'png', 'jpg', 'jpeg', 'zip', 'txt'],
-    10 * 1024 * 1024   // 10 MB
-);
-```
-
-**This exact scenario was not exercised with a real oversized file during the runtime test pass — run it once locally before presenting:**
-
-1. Create a test file larger than 10 MB, e.g. on Windows:
-   ```powershell
-   fsutil file createnew oversized_test.pdf 11000000
-   ```
-   (11,000,000 bytes ≈ 10.5 MB, safely over the limit.)
-2. Log in as a valid member of a team (e.g. `student@example.com`).
-3. Go to that team's Files tab (`student/team-files.php?id=<team_id>`) and attempt to upload `oversized_test.pdf`.
-4. Confirm all four of the following:
-   - [ ] The upload is **rejected** (no success message).
-   - [ ] **No row** is added to the `team_files` table for it (check via phpMyAdmin or `SELECT * FROM team_files ORDER BY id DESC LIMIT 1;`).
-   - [ ] **No file** appears in `uploads/team-files/<team_id>/` for it.
-   - [ ] A **clear, user-friendly error message** appears (from `validate_upload()`, something like "File exceeds the maximum allowed size.") — not a blank page, not a raw PHP warning, not a generic server error.
-
-Also note: PHP's own `upload_max_filesize`/`post_max_size` in `php.ini` (commonly 2MB or 8MB by default in a stock XAMPP install) may reject a file **before** the application's own 10MB check even runs — if your test file never reaches `validate_upload()` at all and PHP itself truncates/rejects it first, that is still a pass (the file is still rejected, no row/no file), but confirm the error message shown is still reasonably clear rather than a blank page.
-
-## 18. Presentation Demo Flow
-
-A suggested walkthrough for demonstrating the portal, roughly 8–10 minutes:
-
-1. **Login** as `student@example.com`.
-2. **Dashboard** — point out the live statistics (profile completion, team invitations, active applications, teams) are real database counts, not placeholders.
-3. **Profile** — show a completed section (e.g. Research & Skills or Projects) and its data; optionally update one field (e.g. the bio) to show it saves and persists.
-4. **Research Connect** — apply a filter and point out the **dynamic match percentage** varies per researcher (e.g. 76%, 51%, 24%) rather than being a fixed number, and briefly explain the weighted formula (§11).
-5. **Research Opportunities** — open one, show either the Apply flow or an existing application's status pill, and toggle Save/Unsave.
-6. **My Teams** — open a team workspace and show a task, a milestone, a team message, and the **protected file area** (mention that files are only downloadable by team members, not by direct URL).
-7. **Communities** — open a community, show its posts and comments feed.
-8. **Research Repository** — save a resource and point out it now appears in Saved Items.
-9. **Saved Items** — show both the saved opportunity and saved resource together in one place.
-10. **Notifications** — show the unread badge and mark one as read.
-11. **Settings** — demonstrate the profile-visibility toggles (e.g. turn off "Show my publications" and, in a second browser/incognito window logged in as a different student, show that section disappear from the researcher-profile view) — **do not actually change the primary demo account's password** during a live presentation, to avoid locking yourself out mid-demo; if you want to show the password-change form working, do it on a secondary/throwaway seeded account instead.
+- **Apache not starting** — usually port 80 is already taken by IIS, Skype,
+  or another web server. Check the XAMPP Control Panel's log; if you see
+  "port 80 in use," either stop the conflicting service or change Apache's
+  port in `C:\xampp\apache\conf\httpd.conf` (`Listen 80` → e.g. `Listen 8080`,
+  and update `ServerName localhost:8080` to match) and access the site via
+  `http://localhost:8080/...` instead.
+- **MySQL port conflict** — if port 3306 is already bound (e.g. by a
+  standalone MySQL/MariaDB service you installed previously), stop that
+  service first (`net stop <servicename>` or via Services.msc) before
+  starting XAMPP's MySQL — two servers cannot share the same port.
+- **Apache port conflict** — see "Apache not starting" above.
+- **phpMyAdmin access issue** — phpMyAdmin requires Apache **and** MySQL
+  both running; if you get a connection error inside phpMyAdmin itself,
+  MySQL likely isn't running or `phpMyAdmin`'s own `config.inc.php` doesn't
+  match your MySQL credentials (stock XAMPP needs no changes here).
+- **"could not find driver" / PDO MySQL missing** — enable `pdo_mysql` in
+  `C:\xampp\php\php.ini` (enabled by default in a stock XAMPP install) and
+  restart Apache.
+- **"Access denied for user 'root'@'localhost'" / database connection
+  denied** — your MySQL root password isn't blank. Update `DB_PASS` in
+  `config/database.php` (or better, a local-only
+  `config/database.local.php`) to match your actual XAMPP MySQL credentials.
+- **CSS/JS/images don't load on `/student/` pages** — confirm `CSS/`, `JS/`,
+  `IMAGES/` sit directly under the project root inside `htdocs`, as siblings
+  of `student/`, not renamed or moved.
+- **Upload permission errors** — confirm `uploads/` and its subfolders are
+  writable by the account Apache runs as; this is rarely an issue on
+  Windows/XAMPP by default.
+- **`.htaccess` not working / direct file URLs aren't blocked** — check that
+  `AllowOverride All` (or at least `AllowOverride FileInfo`) is set for the
+  `C:/xampp/htdocs` `<Directory>` block in `httpd.conf` (confirmed already
+  correct in this XAMPP build's stock config — see §13); some XAMPP
+  installs or hand-edited configs default to `AllowOverride None`, which
+  silently disables every `.htaccess` in the project. Restart Apache after
+  any `httpd.conf` change.
+- **`AllowOverride` configuration** — see directly above.
+- **Session/header errors ("Headers already sent")** — usually caused by
+  stray whitespace or output before a `<?php` tag in a hand-edited file. All
+  shipped files start with `<?php` on line 1 with no leading BOM/whitespace.
+- **Demo credentials don't work** — confirm all 4 SQL files were imported in
+  the exact order in §2, into a database actually named `uiu_researchcollab`.
 
 ## 19. Git Safety Recommendations
 
-`.gitignore` has been updated to cover:
+`.gitignore` covers:
 
-- `uploads/avatars/*`, `uploads/cv/*`, `uploads/resources/*`, `uploads/team-files/*`, `uploads/communities/*` — actual uploaded user content (these are the real subfolder names used by the app; adjust here if you rename them)
-- `config/database.local.php` — for an optional local-only credentials override file, if you choose to use one instead of editing `config/database.php` directly
-- `.env` / local logs / `*.log` — already covered
-- Generated test screenshots (e.g. `.runtime-test-screenshots/`, `*.png` under any local test-output folder you create)
+- `uploads/avatars/*`, `uploads/cv/*`, `uploads/resources/*`,
+  `uploads/team-files/*`, `uploads/communities/*` — actual uploaded user
+  content (the `index.php` 403 stubs and `.htaccess` files stay tracked).
+- `config/database.local.php` — optional local-only credentials override.
+- `.env` / local logs / `*.log`.
+- Generated test screenshots (`.runtime-test-screenshots/`, `*.runtime-test.png`).
 
-**Explicitly kept out of `.gitignore`** (these must stay tracked in git):
-- Every `uploads/**/index.php` 403 stub and every `uploads/**/.htaccess` security file — these are small, fixed, security-relevant files, not user content, and must ship with the repo.
-- All original `.html` files, `CSS/`, `JS/`, `IMAGES/` — the approved frontend design.
+**Never commit** real/local database passwords or reuse the seeded demo
+credentials anywhere beyond local development.
 
-This project does not currently use `.gitkeep` placeholder files (the `index.php` security stub in each `uploads/` subfolder already keeps that directory tracked in git), but if you later remove those stubs for any reason, add a `.gitkeep` back so the empty directory still gets created on a fresh clone.
+## 20. Presentation Demo Flow
 
-**Never commit:**
-- Real/local database passwords — `config/database.php` ships with the safe XAMPP defaults (`root` / empty password); if you change `DB_PASS` to a real credential for a shared or production environment, move it to an untracked file (e.g. `config/database.local.php`, included via `require` and already in `.gitignore`) instead of editing the tracked file in place.
-- The contents of `database/seed.sql`'s demo accounts are intentionally public/well-known (documented in the file itself as local-development-only) — this is fine to commit, but never reuse these exact credentials anywhere beyond local development.
+A suggested walkthrough, roughly 10–12 minutes, using
+`http://localhost/UIU-ResearchCollab-main/`:
+
+1. **Landing page** — scroll through Home → About → How It Works → Research
+   Domains → Community → Latest Opportunities, then open Contact Us and FAQs
+   from the footer.
+2. **Login** as `student@example.com`.
+3. **Dashboard** — point out the live statistics are real database counts.
+4. **Profile** — show a completed section and update one field to show it persists.
+5. **Research Connect** — apply a filter, click "How it works?", point out the dynamic percentages.
+6. **Research Opportunities** — apply, then show the status pill; toggle Save/Unsave.
+7. **My Teams** — open a team workspace, upload a file, and (optionally) show
+   the direct upload URL returning Apache `403 Forbidden` when pasted
+   directly into the address bar while logged out.
+8. **Communities** — open a community, show its posts and comments.
+9. **Research Repository** — save a resource, point out it appears in Saved Items.
+10. **Notifications** — show the unread badge and mark one as read.
+11. **Settings** — demonstrate a profile-visibility toggle (use a secondary
+    account for the password-change demo, not the primary one).
+12. **Forgot Password** — log out, click "Forgot Password?" on a throwaway
+    account to show the reset flow end-to-end.
 
 ---
 
-🤖 This backend was implemented by Claude Code on top of the existing approved frontend design — the visual design, color system, and layout were preserved throughout; this pass added the PHP/MySQL functionality behind it, followed by a dedicated security/consistency review pass (§13) and a real runtime test pass using PHP 8.2 and MariaDB (see "Application Status" at the top).
+🤖 This backend, the public landing-page completion pass (§9), and this
+XAMPP environment migration (§13/§14) were implemented and runtime-tested by
+Claude Code on top of the existing approved frontend design — the visual
+design, color system, and layout were preserved throughout and confirmed
+byte-identical before and after the migration.

@@ -224,7 +224,7 @@ $circleDeg  = (int)round(min(100, max(0, $completion)) * 3.6);
                             <a href="<?= e(rc_tab_url($key)) ?>" class="match-tab<?= $tab === $key ? ' active' : '' ?>"><?= e($label) ?></a>
                         <?php endforeach; ?>
                     </div>
-                    <a href="#" class="how-it-works">How it works?</a>
+                    <a href="#" class="how-it-works" data-bs-toggle="modal" data-bs-target="#matchFormulaModal">How it works?</a>
                 </div>
 
                 <div class="recommended-section">
@@ -431,6 +431,29 @@ $circleDeg  = (int)round(min(100, max(0, $completion)) * 3.6);
 
         </div>
     </main>
+
+    <!-- MATCH FORMULA EXPLANATION -->
+    <div class="modal fade" id="matchFormulaModal" tabindex="-1" aria-labelledby="matchFormulaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="matchFormulaModalLabel">How Your Match Score Is Calculated</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p style="font-size:13px;color:#555;">Each candidate's match score (0-100%) is calculated from your profiles:</p>
+                    <ul style="font-size:13px;color:#444;line-height:1.9;">
+                        <li><strong>Shared research domains — 40%</strong>: how many of your research domains overlap.</li>
+                        <li><strong>Shared skills — 30%</strong>: how many of your listed skills overlap.</li>
+                        <li><strong>Department / program — 15%</strong>: +10 for the same department, +5 more for the same program.</li>
+                        <li><strong>Academic-level closeness — 10%</strong>: +10 within 1 trimester, +5 within 3 trimesters.</li>
+                        <li><strong>Mutual availability — 5%</strong>: both of you marked as looking for a team.</li>
+                    </ul>
+                    <p style="font-size:13px;color:#555;margin-bottom:0;">Complete more of your profile — domains, skills, and preferences — to get more accurate matches.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 <?php require __DIR__ . '/../includes/footer.php'; ?>
 <script>
 document.addEventListener('DOMContentLoaded', function () {

@@ -206,7 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <label class="auth-terms">
                     <input type="checkbox" id="terms" name="terms" required>
-                    <span>I agree to the <a href="#">Terms &amp; Conditions</a> and <a href="#">Privacy Policy</a>.</span>
+                    <span>I agree to the <a href="terms.php" target="_blank" rel="noopener">Terms &amp; Conditions</a> and <a href="privacy.php" target="_blank" rel="noopener">Privacy Policy</a>.</span>
                 </label>
 
                 <button type="submit" class="auth-submit-btn" id="signupButton">

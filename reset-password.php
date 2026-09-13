@@ -1,38 +1,36 @@
 <?php
 require_once __DIR__ . '/includes/bootstrap.php';
 
-// Only students belong on the dashboard — avoid a redirect loop for any
-// other logged-in role (see includes/student_guard.php).
 if (is_logged_in() && ($_SESSION['role'] ?? '') === 'student') {
     redirect('/student/dashboard.php');
-} elseif (is_logged_in()) {
-    redirect('/index.php');
+}
+
+$token = trim((string)($_GET['token'] ?? $_POST['token'] ?? ''));
+$resetUser = $token !== '' ? find_valid_reset_token($token) : null;
+
+if ($token === '' || !$resetUser) {
+    flash('error', 'This password reset link is invalid or has expired. Please request a new one.');
+    redirect('/forgot-password.php');
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    require_csrf('/login.php');
+    require_csrf('/reset-password.php?token=' . urlencode($token));
 
-    $email    = trim((string)($_POST['email'] ?? ''));
     $password = (string)($_POST['password'] ?? '');
+    $confirm  = (string)($_POST['password_confirm'] ?? '');
 
-    if ($email === '' || $password === '') {
-        flash('error', 'Please enter your email and password.');
-        set_old(['email' => $email]);
-        redirect('/login.php');
+    if (strlen($password) < 8) {
+        flash('error', 'Password must be at least 8 characters long.');
+        redirect('/reset-password.php?token=' . urlencode($token));
+    }
+    if ($password !== $confirm) {
+        flash('error', 'Passwords do not match.');
+        redirect('/reset-password.php?token=' . urlencode($token));
     }
 
-    $user = attempt_login($email, $password);
-    if ($user) {
-        flash('success', 'Welcome back, ' . explode(' ', $user['name'])[0] . '!');
-        if ($user['role'] === 'student') {
-            redirect('/student/dashboard.php');
-        }
-        // Faculty/Admin portals are out of scope for this milestone.
-        flash('info', 'The Faculty/Admin portal is coming soon. You have been logged in.');
-        redirect('/index.php');
-    }
+    consume_password_reset_token((int)$resetUser['token_id'], (int)$resetUser['id'], $password);
 
-    set_old(['email' => $email]);
+    flash('success', 'Your password has been reset. Please log in with your new password.');
     redirect('/login.php');
 }
 ?>
@@ -41,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOGIN || UIU ResearchCollab</title>
+    <title>RESET PASSWORD || UIU ResearchCollab</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -70,39 +68,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="auth-heading">
-                <h1>Welcome Back</h1>
-                <p>Sign in to continue to <strong>UIU ResearchCollab</strong></p>
+                <h1>Reset Password</h1>
+                <p>Choose a new password for <strong><?= e($resetUser['email']) ?></strong></p>
             </div>
 
             <?php render_flashes(); ?>
 
-            <form class="auth-form" id="loginForm" action="login.php" method="POST" novalidate>
+            <form class="auth-form" id="resetPasswordForm" action="reset-password.php?token=<?= e(urlencode($token)) ?>" method="POST" novalidate>
                 <?= csrf_field() ?>
+                <input type="hidden" name="token" value="<?= e($token) ?>">
 
                 <div class="auth-input-group">
-                    <label for="login-email">Email Address</label>
-                    <div class="auth-input-wrapper">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <rect x="3" y="5" width="18" height="14" rx="2"/>
-                            <polyline points="3 7 12 13 21 7"/>
-                        </svg>
-                        <input
-                            type="email"
-                            id="login-email"
-                            name="email"
-                            value="<?= e(old('email')) ?>"
-                            placeholder="Enter your UIU email"
-                            autocomplete="email"
-                            required
-                        >
-                    </div>
-                </div>
-
-                <div class="auth-input-group">
-                    <div class="auth-label-row">
-                        <label for="login-password">Password</label>
-                        <a href="forgot-password.php" class="forgot-password">Forgot Password?</a>
-                    </div>
+                    <label for="reset-password">New Password</label>
                     <div class="auth-input-wrapper">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <rect x="3" y="11" width="18" height="10" rx="2"/>
@@ -110,30 +87,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </svg>
                         <input
                             type="password"
-                            id="login-password"
+                            id="reset-password"
                             name="password"
-                            placeholder="Enter your password"
-                            autocomplete="current-password"
+                            placeholder="At least 8 characters"
+                            minlength="8"
+                            autocomplete="new-password"
                             required
                         >
-                        <button type="button" class="password-toggle" data-target="#login-password" id="passwordToggle" aria-label="Show password">
-                            <svg class="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7 S2 12 2 12z"/>
-                                <circle cx="12" cy="12" r="3"/>
-                            </svg>
-                        </button>
                     </div>
                 </div>
 
-                <div class="auth-options">
-                    <label class="remember-me">
-                        <input type="checkbox" name="remember" id="rememberMe">
-                        <span>Remember me</span>
-                    </label>
+                <div class="auth-input-group">
+                    <label for="reset-password-confirm">Confirm New Password</label>
+                    <div class="auth-input-wrapper">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <rect x="3" y="11" width="18" height="10" rx="2"/>
+                            <path d="M7 11V7a5 5 0 0110 0v4"/>
+                        </svg>
+                        <input
+                            type="password"
+                            id="reset-password-confirm"
+                            name="password_confirm"
+                            placeholder="Re-enter new password"
+                            minlength="8"
+                            autocomplete="new-password"
+                            required
+                        >
+                    </div>
                 </div>
 
-                <button type="submit" class="auth-submit-btn" id="loginSubmit">
-                    <span>Login</span>
+                <button type="submit" class="auth-submit-btn">
+                    <span>Reset Password</span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                         <path d="M5 12h14"/>
                         <path d="M13 6l6 6-6 6"/>
@@ -142,10 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </button>
             </form>
 
-            <div class="auth-divider"><span>OR</span></div>
-
             <div class="auth-bottom">
-                <p>Don't have an account? <a href="signup.php">Create Account</a></p>
+                <p><a href="login.php">Back to Login</a></p>
             </div>
 
             <div class="auth-footer">
