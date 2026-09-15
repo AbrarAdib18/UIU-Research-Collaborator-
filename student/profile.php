@@ -74,6 +74,29 @@ $prefs      = get_research_preferences($pdo, $profileId);
 $visibility = get_profile_visibility($pdo, $profileId);
 $collabPreferences = ['Online', 'In Person', 'Online + In Person'];
 
+// --- Extracurricular activities ---------------------------------------------
+$stmt = $pdo->prepare('SELECT * FROM extracurricular_activities WHERE profile_id = ? ORDER BY is_current DESC, start_date DESC, id DESC');
+$stmt->execute([$profileId]);
+$extracurricularRows = $stmt->fetchAll();
+
+// --- Availability schedule (indexed by day for easy template lookup) --------
+$stmt = $pdo->prepare('SELECT * FROM profile_availability WHERE profile_id = ?');
+$stmt->execute([$profileId]);
+$availabilityByDay = [];
+foreach ($stmt->fetchAll() as $row) {
+    $availabilityByDay[$row['day_of_week']] = $row;
+}
+$daysOfWeek = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+// --- Option lists for formerly "Coming Soon" fields --------------------------
+$genderOptions          = ['Male', 'Female', 'Other', 'Prefer not to say'];
+$preferredContactOptions = ['University Email', 'Phone', 'Platform Messages'];
+$academicStatusOptions   = ['Currently Studying', 'Graduated', 'On Leave'];
+$methodologyOptions      = ['Experimental Research', 'Data Analysis', 'Machine Learning', 'System Development', 'Survey Research', 'Literature Review'];
+$myMethodologies         = !empty($studentProfile['research_methodologies'])
+    ? array_map('trim', explode(',', $studentProfile['research_methodologies']))
+    : [];
+
 // --- Activity ------------------------------------------------------------
 $stmt = $pdo->prepare('SELECT * FROM activity_logs WHERE user_id = ? ORDER BY created_at DESC LIMIT 15');
 $stmt->execute([$userId]);
@@ -263,17 +286,16 @@ $pageTitle = 'My Profile';
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Date of Birth <span class="coming-soon-badge">Coming Soon</span></label>
-                        <input type="date" class="form-control profile-input always-disabled" disabled>
+                        <label>Date of Birth</label>
+                        <input type="date" name="date_of_birth" class="form-control profile-input" value="<?= e($studentProfile['date_of_birth'] ?? '') ?>" max="<?= e(date('Y-m-d')) ?>" disabled>
                     </div>
                     <div class="form-group">
-                        <label>Gender <span class="coming-soon-badge">Coming Soon</span></label>
-                        <select class="form-select profile-input always-disabled" disabled>
-                            <option selected>Select Gender</option>
-                            <option>Male</option>
-                            <option>Female</option>
-                            <option>Other</option>
-                            <option>Prefer not to say</option>
+                        <label>Gender</label>
+                        <select name="gender" class="form-select profile-input" disabled>
+                            <option value="">Select Gender</option>
+                            <?php foreach ($genderOptions as $g): ?>
+                                <option value="<?= e($g) ?>" <?= ($studentProfile['gender'] ?? '') === $g ? 'selected' : '' ?>><?= e($g) ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                 </div>
@@ -301,7 +323,7 @@ $pageTitle = 'My Profile';
                 <input type="hidden" name="action" value="update_contact">
                 <div class="form-row">
                     <div class="form-group">
-                        <label>University Email</label>
+                        <label>University Email <small class="text-muted">(Fixed — your verified sign-in identity)</small></label>
                         <input type="email" class="form-control profile-input always-disabled" value="<?= e($currentUser['email']) ?>" disabled>
                     </div>
                     <div class="form-group">
@@ -315,11 +337,12 @@ $pageTitle = 'My Profile';
                         <input type="text" name="location" class="form-control profile-input" value="<?= e($studentProfile['location'] ?? '') ?>" placeholder="Dhaka, Bangladesh" disabled>
                     </div>
                     <div class="form-group">
-                        <label>Preferred Contact <span class="coming-soon-badge">Coming Soon</span></label>
-                        <select class="form-select profile-input always-disabled" disabled>
-                            <option>University Email</option>
-                            <option>Phone</option>
-                            <option>Platform Messages</option>
+                        <label>Preferred Contact</label>
+                        <select name="preferred_contact" class="form-select profile-input" disabled>
+                            <option value="">Select...</option>
+                            <?php foreach ($preferredContactOptions as $pc): ?>
+                                <option value="<?= e($pc) ?>" <?= ($studentProfile['preferred_contact'] ?? '') === $pc ? 'selected' : '' ?>><?= e($pc) ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                 </div>
@@ -351,7 +374,7 @@ $pageTitle = 'My Profile';
                 <input type="hidden" name="action" value="update_academic">
                 <div class="form-row">
                     <div class="form-group">
-                        <label>University <span class="coming-soon-badge">Coming Soon</span></label>
+                        <label>University <small class="text-muted">(Fixed — UIU ResearchCollab is exclusively for United International University)</small></label>
                         <input type="text" class="form-control profile-input always-disabled" value="United International University" disabled>
                     </div>
                     <div class="form-group">
@@ -376,7 +399,7 @@ $pageTitle = 'My Profile';
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Student ID</label>
+                        <label>Student ID <small class="text-muted">(Fixed — assigned at registration)</small></label>
                         <input type="text" class="form-control profile-input always-disabled" value="<?= e($studentProfile['student_id'] ?? '') ?>" disabled>
                     </div>
                     <div class="form-group">
@@ -386,15 +409,16 @@ $pageTitle = 'My Profile';
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Expected Graduation <span class="coming-soon-badge">Coming Soon</span></label>
-                        <input type="month" class="form-control profile-input always-disabled" disabled>
+                        <label>Expected Graduation</label>
+                        <input type="month" name="expected_graduation_date" class="form-control profile-input" value="<?= e($studentProfile['expected_graduation_date'] ? substr($studentProfile['expected_graduation_date'], 0, 7) : '') ?>" disabled>
                     </div>
                     <div class="form-group">
-                        <label>Academic Status <span class="coming-soon-badge">Coming Soon</span></label>
-                        <select class="form-select profile-input always-disabled" disabled>
-                            <option>Currently Studying</option>
-                            <option>Graduated</option>
-                            <option>On Leave</option>
+                        <label>Academic Status</label>
+                        <select name="academic_status" class="form-select profile-input" disabled>
+                            <option value="">Select...</option>
+                            <?php foreach ($academicStatusOptions as $st): ?>
+                                <option value="<?= e($st) ?>" <?= ($studentProfile['academic_status'] ?? '') === $st ? 'selected' : '' ?>><?= e($st) ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                 </div>
@@ -537,14 +561,11 @@ $pageTitle = 'My Profile';
                     <textarea name="research_statement" class="form-control profile-input" rows="4" placeholder="Describe your research interests, goals and areas you want to explore..." disabled><?= e($studentProfile['research_statement'] ?? '') ?></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Research Methodologies <span class="coming-soon-badge">Coming Soon</span></label>
+                    <label>Research Methodologies</label>
                     <div class="checkbox-grid">
-                        <label><input type="checkbox" class="always-disabled" disabled> Experimental Research</label>
-                        <label><input type="checkbox" class="always-disabled" disabled> Data Analysis</label>
-                        <label><input type="checkbox" class="always-disabled" disabled> Machine Learning</label>
-                        <label><input type="checkbox" class="always-disabled" disabled> System Development</label>
-                        <label><input type="checkbox" class="always-disabled" disabled> Survey Research</label>
-                        <label><input type="checkbox" class="always-disabled" disabled> Literature Review</label>
+                        <?php foreach ($methodologyOptions as $m): ?>
+                            <label><input type="checkbox" name="research_methodologies[]" value="<?= e($m) ?>" <?= in_array($m, $myMethodologies, true) ? 'checked' : '' ?> disabled> <?= e($m) ?></label>
+                        <?php endforeach; ?>
                     </div>
                 </div>
                 <button class="save-section-button" type="submit">Save Changes</button>
@@ -1095,15 +1116,82 @@ $pageTitle = 'My Profile';
         <section class="profile-section">
             <div class="section-header">
                 <div>
-                    <h2>Extracurricular Activities <span class="coming-soon-badge">Coming Soon</span></h2>
+                    <h2>Extracurricular Activities</h2>
                     <p>Clubs, volunteering and student activities.</p>
                 </div>
-                <button class="add-item-button" type="button" disabled title="Coming soon">
+                <button class="add-item-button" type="button" onclick="toggleForm('addActivityForm')">
                     <i class="bi bi-plus-lg"></i>
                     Add
                 </button>
             </div>
-            <textarea class="form-control" rows="4" placeholder="Describe your extracurricular activities..." disabled></textarea>
+            <div id="addActivityForm" hidden style="margin-bottom:12px;">
+                <form method="post" action="<?= e($editUrl) ?>">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="add_extracurricular">
+                    <div class="form-row">
+                        <div class="form-group"><label>Title</label><input type="text" name="title" class="form-control" required></div>
+                        <div class="form-group"><label>Organization</label><input type="text" name="organization" class="form-control" placeholder="e.g. UIU Robotics Club"></div>
+                    </div>
+                    <div class="form-group"><label>Role</label><input type="text" name="role" class="form-control" placeholder="e.g. Secretary, Member, Volunteer"></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Start Date</label><input type="date" name="start_date" class="form-control"></div>
+                        <div class="form-group"><label>End Date</label><input type="date" name="end_date" class="form-control"></div>
+                    </div>
+                    <div class="form-group"><label><input type="checkbox" name="is_current" value="1"> Currently active</label></div>
+                    <div class="form-group"><label>Description</label><textarea name="description" class="form-control" rows="3"></textarea></div>
+                    <button class="save-section-button" type="submit">Add Activity</button>
+                </form>
+            </div>
+            <div id="activityContainer">
+                <?php if (!$extracurricularRows): ?>
+                    <div class="empty-state">
+                        <i class="bi bi-people"></i>
+                        <p>No extracurricular activities added yet.</p>
+                    </div>
+                <?php else: foreach ($extracurricularRows as $act): ?>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;">
+                                <div>
+                                    <h3><?= e($act['title']) ?><?= $act['role'] ? ' — ' . e($act['role']) : '' ?></h3>
+                                    <span><?= e($act['organization'] ?: 'Organization not set') ?></span>
+                                    <small><?= format_date($act['start_date']) ?> - <?= !empty($act['is_current']) ? 'Present' : ($act['end_date'] ? format_date($act['end_date']) : 'N/A') ?></small>
+                                </div>
+                                <div style="display:flex;gap:4px;flex-shrink:0;">
+                                    <button class="section-edit-button" type="button" onclick="toggleForm('editAct<?= (int)$act['id'] ?>')"><i class="bi bi-pencil"></i></button>
+                                    <form method="post" action="<?= e($editUrl) ?>" style="display:contents">
+                                        <?= csrf_field() ?>
+                                        <input type="hidden" name="action" value="remove_extracurricular">
+                                        <input type="hidden" name="id" value="<?= (int)$act['id'] ?>">
+                                        <button type="submit" class="skill-delete" onclick="return confirm('Remove this activity?');"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                            <?php if ($act['description']): ?><p><?= nl2br(e($act['description'])) ?></p><?php endif; ?>
+                            <div id="editAct<?= (int)$act['id'] ?>" hidden style="margin-top:8px;">
+                                <form method="post" action="<?= e($editUrl) ?>">
+                                    <?= csrf_field() ?>
+                                    <input type="hidden" name="action" value="update_extracurricular">
+                                    <input type="hidden" name="id" value="<?= (int)$act['id'] ?>">
+                                    <div class="form-row">
+                                        <div class="form-group"><label>Title</label><input type="text" name="title" class="form-control" value="<?= e($act['title']) ?>" required></div>
+                                        <div class="form-group"><label>Organization</label><input type="text" name="organization" class="form-control" value="<?= e($act['organization'] ?? '') ?>"></div>
+                                    </div>
+                                    <div class="form-group"><label>Role</label><input type="text" name="role" class="form-control" value="<?= e($act['role'] ?? '') ?>"></div>
+                                    <div class="form-row">
+                                        <div class="form-group"><label>Start Date</label><input type="date" name="start_date" class="form-control" value="<?= e($act['start_date'] ?? '') ?>"></div>
+                                        <div class="form-group"><label>End Date</label><input type="date" name="end_date" class="form-control" value="<?= e($act['end_date'] ?? '') ?>"></div>
+                                    </div>
+                                    <div class="form-group"><label><input type="checkbox" name="is_current" value="1" <?= !empty($act['is_current']) ? 'checked' : '' ?>> Currently active</label></div>
+                                    <div class="form-group"><label>Description</label><textarea name="description" class="form-control" rows="3"><?= e($act['description'] ?? '') ?></textarea></div>
+                                    <button class="save-section-button" type="submit">Save Changes</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; endif; ?>
+            </div>
         </section>
 
         <!-- CV / RESUME -->
@@ -1139,19 +1227,40 @@ $pageTitle = 'My Profile';
         <section class="profile-section">
             <div class="section-header">
                 <div>
-                    <h2>Availability <span class="coming-soon-badge">Coming Soon</span></h2>
+                    <h2>Availability</h2>
                     <p>When are you available for research collaboration?</p>
                 </div>
+                <button class="section-edit-button" type="button" onclick="toggleForm('availabilityEditForm')"><i class="bi bi-pencil"></i></button>
             </div>
-            <p class="text-muted small">Set your weekly availability in Research Preferences above — detailed day/time scheduling is coming soon.</p>
-            <div class="availability-grid">
-                <label><input type="checkbox" class="always-disabled" disabled> Saturday</label>
-                <label><input type="checkbox" class="always-disabled" disabled> Sunday</label>
-                <label><input type="checkbox" class="always-disabled" disabled> Monday</label>
-                <label><input type="checkbox" class="always-disabled" disabled> Tuesday</label>
-                <label><input type="checkbox" class="always-disabled" disabled> Wednesday</label>
-                <label><input type="checkbox" class="always-disabled" disabled> Thursday</label>
-                <label><input type="checkbox" class="always-disabled" disabled> Friday</label>
+            <?php if (!$availabilityByDay): ?>
+                <div class="empty-state"><i class="bi bi-calendar-week"></i><p>No availability set yet.</p></div>
+            <?php else: ?>
+                <div class="availability-grid">
+                    <?php foreach ($daysOfWeek as $day): ?>
+                        <?php if (isset($availabilityByDay[$day])): ?>
+                            <label><i class="bi bi-check-circle-fill" style="color:var(--uiu-green,#18a879);margin-right:4px;"></i> <?= e($day) ?>: <?= e(substr($availabilityByDay[$day]['start_time'], 0, 5)) ?>–<?= e(substr($availabilityByDay[$day]['end_time'], 0, 5)) ?></label>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+            <div id="availabilityEditForm" hidden style="margin-top:10px;">
+                <form method="post" action="<?= e($editUrl) ?>">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="update_availability">
+                    <?php foreach ($daysOfWeek as $day): ?>
+                        <?php $slot = $availabilityByDay[$day] ?? null; ?>
+                        <div class="d-flex align-items-center gap-2 flex-wrap" style="padding:6px 0;border-bottom:1px solid var(--border-light,#eee);">
+                            <label style="min-width:120px;display:flex;align-items:center;gap:6px;margin:0;">
+                                <input type="checkbox" name="day_enabled[<?= e($day) ?>]" value="1" <?= $slot ? 'checked' : '' ?> onchange="this.closest('div').querySelectorAll('input[type=time]').forEach(t => t.disabled = !this.checked)">
+                                <?= e($day) ?>
+                            </label>
+                            <input type="time" name="day_start[<?= e($day) ?>]" class="form-control form-control-sm" style="max-width:120px;" value="<?= e($slot ? substr($slot['start_time'], 0, 5) : '09:00') ?>" <?= $slot ? '' : 'disabled' ?>>
+                            <span class="text-muted small">to</span>
+                            <input type="time" name="day_end[<?= e($day) ?>]" class="form-control form-control-sm" style="max-width:120px;" value="<?= e($slot ? substr($slot['end_time'], 0, 5) : '17:00') ?>" <?= $slot ? '' : 'disabled' ?>>
+                        </div>
+                    <?php endforeach; ?>
+                    <button class="save-section-button" type="submit" style="margin-top:10px;">Save Availability</button>
+                </form>
             </div>
         </section>
 
@@ -1224,7 +1333,9 @@ $pageTitle = 'My Profile';
 
 <script>
 // Toggle disabled state for the always-visible section-forms (Personal / Contact / Academic / Research).
-// Inputs marked .always-disabled never get re-enabled (no DB column backs them).
+// Inputs marked .always-disabled never get re-enabled — these are deliberately
+// immutable fields (verified email, student ID, fixed university name), not
+// unfinished features.
 function toggleSection(formId) {
     const form = document.getElementById(formId);
     if (!form) return;

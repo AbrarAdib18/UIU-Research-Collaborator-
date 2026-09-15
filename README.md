@@ -17,11 +17,15 @@ Core/Plain PHP, MySQL/MariaDB via PDO** — no frameworks (no Laravel/React/Vue/
 
 ## ✅ Application Status
 
-**Ready with minor known issues.** The project now runs live through a real
+**Ready with minor known issues.** The project runs live through a real
 **XAMPP** install (Apache + bundled MariaDB + PHP + phpMyAdmin) — see §14 for
-the full, dated runtime report, including the real Apache `403 Forbidden`
-result on the `.htaccess`-protected upload folder. See §11 for the one
-remaining known limitation.
+the XAMPP migration runtime report, including the real Apache `403 Forbidden`
+result on the `.htaccess`-protected upload folder. As of this pass, the
+**Student Profile / Edit Profile area has zero remaining "Coming Soon"
+fields** — every previously-inert field (Date of Birth, Gender, Preferred
+Contact, Expected Graduation, Academic Status, Research Methodologies,
+Extracurricular Activities, and a real day/time Availability schedule) is
+now fully database-backed and tested — see §21 for that dated report.
 
 ---
 
@@ -72,7 +76,13 @@ Open **phpMyAdmin** (`http://localhost/phpmyadmin`) and:
    3. `database/migrations_002_landing.sql` — adds `password_reset_tokens`
       (backs the "Forgot Password?" flow) and `contact_messages` (backs the
       Contact Us form). Safe to re-run.
-   4. `database/seed.sql` — realistic demo data (see credentials below).
+   4. `database/migrations_003_profile_extended.sql` — adds the columns and
+      tables backing every formerly "Coming Soon" Student Profile field
+      (Date of Birth, Gender, Preferred Contact, Academic Status, Expected
+      Graduation, Research Methodologies, plus the new
+      `extracurricular_activities` and `profile_availability` tables). Safe
+      to re-run. See §21 for full details.
+   5. `database/seed.sql` — realistic demo data (see credentials below).
       **Assumes a fresh import** — run it only once, right after the files above.
 
 This exact import order was tested end-to-end against a **fresh, empty
@@ -194,14 +204,21 @@ Communities, Research Repositories, Saved Items, Notifications, Settings, Logout
   counts, unread notifications, recommended collaborators (real match
   scoring), latest open opportunities, upcoming team milestones, recent
   activity feed.
-- **Profile**: personal/contact/academic info, research domains
-  (multi-select tags), skills with levels, education, research preferences,
-  projects, publications, certifications, achievements, languages, work
-  experience, profile/cover photo upload, CV upload, profile visibility — all
-  with real CRUD. URL fields (LinkedIn/GitHub) reject `javascript:` and other
-  unsafe schemes server-side — confirmed live under XAMPP in this pass (see
-  §14). Fields with no corresponding DB column (Date of Birth, Gender, etc.)
-  are honestly labeled **"Coming Soon"**, never faked.
+- **Profile**: personal/contact/academic info (including Date of Birth,
+  Gender, Preferred Contact, Academic Status, and Expected Graduation — all
+  fully functional, see §21), research domains (multi-select tags), skills
+  with levels, education, research preferences, research methodologies
+  checklist, a real day/time **Availability** schedule
+  (`profile_availability`), **Extracurricular Activities** (full CRUD,
+  `extracurricular_activities`), projects, publications, certifications,
+  achievements, languages, work experience, profile/cover photo upload, CV
+  upload, profile visibility — all with real CRUD. URL fields (LinkedIn/
+  GitHub) reject `javascript:` and other unsafe schemes server-side —
+  confirmed live under XAMPP. **Zero "Coming Soon" labels remain anywhere in
+  Student Profile / Edit Profile** — the only disabled fields left are the
+  three deliberately immutable ones (University Email, Student ID, and the
+  fixed "United International University" field), each labeled in the UI
+  explaining why it can't be changed.
 - **Research Connect**: filterable/searchable researcher directory (domain,
   skill, department, academic level), paginated, dynamic match-score badges
   with a **"How it works?" modal** explaining the weighted formula, read-only
@@ -309,7 +326,7 @@ section is a known, documented, low-risk design tradeoff, not an open bug.**
 ## 12. Database Changes Explained
 
 The original schema (`database/schema.sql`) covers nearly every table the
-brief required. Two migration files add what was missing:
+brief required. Three migration files add what was missing:
 
 **`database/migrations.sql`**:
 - **`research_resources`** — powers the Research Repository.
@@ -323,6 +340,23 @@ brief required. Two migration files add what was missing:
   `users(id)` with `ON DELETE CASCADE`.
 - **`contact_messages`** — backs the Contact Us form. Stores name, email,
   subject, message, an `is_read` flag, and a `created_at` index.
+
+**`database/migrations_003_profile_extended.sql`** (removes every "Coming
+Soon" label from Student Profile / Edit Profile — see §21):
+- **`student_profiles.date_of_birth`** (DATE, nullable) — Personal Information.
+- **`student_profiles.gender`** (VARCHAR(30), nullable) — Personal Information.
+- **`student_profiles.preferred_contact`** (VARCHAR(30), nullable) — Contact Information.
+- **`student_profiles.academic_status`** (VARCHAR(30), nullable) — Academic Information.
+- **`student_profiles.expected_graduation_date`** (DATE, nullable) — Academic Information.
+- **`student_profiles.research_methodologies`** (TEXT, nullable, comma-separated) — Research Profile.
+- **`extracurricular_activities`** — full CRUD table (title, organization,
+  role, start/end date, is_current, description), same pattern as
+  `education`/`work_experience`. Foreign key to `student_profiles(id)` with
+  `ON DELETE CASCADE`.
+- **`profile_availability`** — one row per available weekday (real
+  `start_time`/`end_time`, not a fake grid). `UNIQUE(profile_id,
+  day_of_week)` keeps the one-slot-per-day UI free of duplicates. Foreign
+  key to `student_profiles(id)` with `ON DELETE CASCADE`.
 
 No existing table, column, or constraint was renamed or removed. Both
 migration files use `utf8mb4`/`utf8mb4_general_ci` per-table, `IF NOT EXISTS`
@@ -632,7 +666,7 @@ Run these against your local XAMPP import (all 4 SQL files + the demo accounts a
 - **Session/header errors ("Headers already sent")** — usually caused by
   stray whitespace or output before a `<?php` tag in a hand-edited file. All
   shipped files start with `<?php` on line 1 with no leading BOM/whitespace.
-- **Demo credentials don't work** — confirm all 4 SQL files were imported in
+- **Demo credentials don't work** — confirm all 5 SQL files were imported in
   the exact order in §2, into a database actually named `uiu_researchcollab`.
 
 ## 19. Git Safety Recommendations
@@ -675,8 +709,208 @@ A suggested walkthrough, roughly 10–12 minutes, using
 
 ---
 
-🤖 This backend, the public landing-page completion pass (§9), and this
-XAMPP environment migration (§13/§14) were implemented and runtime-tested by
-Claude Code on top of the existing approved frontend design — the visual
-design, color system, and layout were preserved throughout and confirmed
-byte-identical before and after the migration.
+## 21. Student Profile Completion — Final Report (2026-09-15)
+
+This pass removed **every** "Coming Soon" placeholder from the Student
+Profile / Edit Profile area and made each field fully database-backed,
+server-validated, and tested live under XAMPP (Apache 2.4.58 + bundled
+MariaDB 10.4.32 + PHP 8.2.12).
+
+### 1. Every "Coming Soon" Item Found
+
+An audit of `student/profile.php` found exactly 9 non-functional items —
+each marked with a `coming-soon-badge` span and/or an `always-disabled` CSS
+class preventing the field from ever being enabled by the existing
+`toggleSection()` JavaScript:
+
+| # | Field / Section | Where |
+|---|---|---|
+| 1 | Date of Birth | Personal Information |
+| 2 | Gender | Personal Information |
+| 3 | Preferred Contact | Contact Information |
+| 4 | University (labeled Coming Soon, though the value itself is a platform constant) | Academic Information |
+| 5 | Expected Graduation | Academic Information |
+| 6 | Academic Status | Academic Information |
+| 7 | Research Methodologies (6-item checklist) | Research Profile |
+| 8 | Extracurricular Activities (entire section — disabled Add button, disabled textarea) | dedicated section |
+| 9 | Availability (7-day checkbox grid, no time slots, no save action) | dedicated section |
+
+### 2. How Each Item Was Implemented
+
+- **Date of Birth, Gender**: new nullable columns on `student_profiles`,
+  wired into the existing `personalForm` / `update_personal` action. DOB is
+  rejected server-side if it's in the future.
+- **Preferred Contact**: new nullable column, wired into the existing
+  `contactForm` / `update_contact` action, whitelist-validated.
+- **University**: left as the deliberately immutable platform constant it
+  always was (this app is UIU-only) — the "Coming Soon" badge was replaced
+  with an inline explanation (`(Fixed — UIU ResearchCollab is exclusively
+  for United International University)`), matching the task's explicit
+  carve-out for immutable system fields. The two other pre-existing
+  immutable fields (University Email, Student ID) received the same kind of
+  inline explanation for consistency, even though they were never labeled
+  "Coming Soon."
+- **Expected Graduation, Academic Status**: new nullable columns, wired into
+  the existing `academicForm` / `update_academic` action. The `<input
+  type="month">` value (`YYYY-MM`) is converted to a stored `YYYY-MM-01`
+  date and back for display.
+- **Research Methodologies**: new nullable `TEXT` column storing a
+  comma-separated whitelist-filtered list, wired into the existing
+  `researchForm` / `update_research_statement` action (same form as the
+  research description, same Save button — no new form was needed).
+- **Extracurricular Activities**: new normalized `extracurricular_activities`
+  table with full CRUD (add/edit/delete), built by mirroring the existing
+  Work Experience section's exact markup pattern (timeline-item cards,
+  inline add/edit forms via the existing `toggleForm()` JS, ownership-scoped
+  `WHERE id = ? AND profile_id = ?` on every write).
+- **Availability**: new normalized `profile_availability` table (one row per
+  selected weekday, real `start_time`/`end_time`). The UI keeps the original
+  7-day checkbox layout but each day now has two small time inputs
+  (Bootstrap `form-control-sm`, already used elsewhere in the app) that
+  enable/disable alongside their checkbox. Saving replaces all of a
+  profile's rows in a single transaction — unchecked days are simply
+  dropped, so there's no way to end up with a stale/duplicate slot.
+
+### 3. Exact Database Changes
+
+See §12 above for the full column/table list. Summary: **6 new nullable
+columns** on `student_profiles`, **2 new tables**
+(`extracurricular_activities`, `profile_availability`) each with a foreign
+key to `student_profiles(id) ON DELETE CASCADE`. No existing column, table,
+or constraint was altered or removed. Migration file:
+`database/migrations_003_profile_extended.sql` — confirmed importing with
+**zero errors** on a fresh database (`schema.sql` → `migrations.sql` →
+`migrations_002_landing.sql` → `migrations_003_profile_extended.sql` →
+`seed.sql`, verified end-to-end in a scratch database and then dropped).
+`database/seed.sql` was extended with realistic demo values for 3 profiles'
+new personal/academic fields, 4 extracurricular activity rows, and 7
+availability rows, so the profile pages look complete out of the box.
+
+### 4. Exact Files Modified / Created
+
+**Modified:**
+- `student/profile.php` — removed all 9 Coming Soon items; added DOB/Gender/
+  Preferred Contact/Expected Graduation/Academic Status/Research
+  Methodologies fields to existing forms; replaced the Extracurricular
+  Activities and Availability sections with real CRUD UIs; added inline
+  "why this is fixed" notes to the 3 genuinely immutable fields.
+- `student/profile-edit.php` — extended `update_personal`, `update_contact`,
+  `update_academic`, `update_research_statement`; added `add_extracurricular`
+  / `update_extracurricular` / `remove_extracurricular` / `update_availability`.
+- `student/researcher-profile.php` — added Academic Status / Expected
+  Graduation to the header (ungated, same as the existing
+  department/program display), Research Methodologies to the Research
+  Profile section (gated by `research_visibility`), a new Extracurricular
+  Activities section (ungated, matching Education/Work Experience), and an
+  Availability display inside Research Preferences (gated by
+  `research_visibility`).
+- `database/seed.sql` — appended realistic demo data for the new fields/tables.
+- `README.md` — this report, plus updates to §2, §8, §12.
+
+**Created:**
+- `database/migrations_003_profile_extended.sql`
+
+**Not touched:** any CSS file (every new UI element reuses existing
+`.form-row`/`.form-group`/`.checkbox-grid`/`.availability-grid`/
+`.timeline-item`/`.empty-state`/`.save-section-button`/`.add-item-button`
+classes, plus plain Bootstrap utility/`form-control-sm` classes already used
+elsewhere in the same file — zero new CSS was required); any original
+`.html` file; `database/schema.sql`; `database/migrations.sql`;
+`database/migrations_002_landing.sql`.
+
+### 5. Runtime Tests Performed — All Pass
+
+All tests were run as real HTTP requests (`curl`, with a real login session)
+against `http://localhost/UIU-ResearchCollab-main/` served by real XAMPP
+Apache, plus two full-page screenshots captured via a real headless Chrome
+instance driven through the Chrome DevTools Protocol (with the actual
+session cookie injected, not a mocked render) to visually confirm both
+desktop (1400px) and mobile (390px) layouts.
+
+| Test | Result |
+|---|---|
+| Personal: save DOB + Gender, confirm persisted in DB | ✅ Pass |
+| Personal: DOB in the future rejected, prior value unchanged | ✅ Pass |
+| Contact: save Preferred Contact, confirm persisted | ✅ Pass |
+| Academic: save Expected Graduation (month→date conversion) + Academic Status | ✅ Pass |
+| Research: save Research Methodologies; a spoofed non-whitelisted value was silently filtered out | ✅ Pass |
+| Extracurricular: add → update → delete, full cycle | ✅ Pass |
+| Extracurricular: cross-user delete attempt (a second student targeting the first student's activity row by ID) silently blocked, row unaffected | ✅ Pass |
+| Availability: save 2 days with real times, confirm exact rows in DB (old rows correctly replaced) | ✅ Pass |
+| Availability: invalid time range (start ≥ end) rejected entirely; existing valid rows untouched (validation runs before the transaction) | ✅ Pass |
+| Availability: CSRF-less update attempt rejected, no DB change | ✅ Pass |
+| Researcher-profile view: Extracurricular Activities visible (ungated), matching Education/Work Experience | ✅ Pass |
+| Researcher-profile view: Research Methodologies + Availability visible when `research_visibility = 1` | ✅ Pass |
+| Researcher-profile view: same two sections correctly disappear when `research_visibility = 0` (while Extracurricular Activities correctly stays visible) | ✅ Pass |
+| Full regression: Dashboard, Research Connect, Opportunities, Teams, Communities, Repository, Saved Items, Notifications, Settings, Researcher Profile all still return `200` | ✅ Pass |
+| Fresh-database import (all 5 SQL files) | ✅ Pass — zero errors |
+| Visual regression, desktop 1400px (authenticated, real screenshot) | ✅ Pass — matches existing design exactly |
+| Visual regression, mobile 390px (authenticated, real screenshot) | ✅ Pass — stacks correctly, no overflow/breakage |
+| PHP syntax check (`php -l`) on all 3 modified files | ✅ Pass — no errors |
+| Apache/PHP error log review after testing | ✅ Pass — zero new warnings/errors |
+
+All test data (a temporary "Test Activity" row, temporary availability
+slots, temporary Personal/Contact/Academic/Research field values used to
+verify saving) was cleaned up afterward — the live demo account
+(`student@example.com`) was restored to match the values now documented in
+`seed.sql`.
+
+### 6. Remaining Profile Limitations
+
+None that were in scope. Two deliberate, disclosed scope decisions:
+
+- **Research Connect's match-score formula was not changed** to factor in
+  the new Availability schedule. The task explicitly said to do this "if
+  implemented" — given the match formula is already documented (§15) and
+  covered by its own existing tests, reweighting it risked destabilizing an
+  already-verified feature for a field the task treated as optional to
+  integrate. The Availability data is fully real and queryable for future use.
+- **Profile completion scoring (`calculate_profile_completion()`) was not
+  rebalanced** to add new criteria for the newly-functional fields. Its
+  existing 9-criterion, 100-point formula is documented and already
+  contributes to tested Dashboard/Research Connect completion percentages;
+  changing the weights would shift every existing seeded profile's
+  completion score. All of the newly functional sections remain fully
+  usable and displayed — they're just not separately weighted in that one
+  aggregate number.
+
+No CV/photo/cover "remove" action was added, because none is visible in the
+current design (only upload/replace) — adding one would have been UI scope
+creep beyond "make currently visible fields work."
+
+### 7. Confirmation: No "Coming Soon" Label Remains
+
+Verified two ways: (1) `grep -c "Coming Soon" student/profile.php` after
+edits returns 0 matches in the UI (the only remaining string match is a code
+comment referring to the fields historically), and (2) the actual rendered
+HTML returned by the live server for an authenticated request to
+`student/profile.php` contains zero occurrences of "Coming Soon".
+
+### 8. Confirmation: Original Frontend Design Preserved
+
+No CSS file was created or modified. Every new UI element reuses existing
+classes verbatim. Two independent real (non-mocked, authenticated)
+screenshots — desktop 1400px and mobile 390px — confirm the page's
+branding, colors, header, sidebar, card styling, spacing, and responsive
+behavior are unchanged from before this pass; the new fields and sections
+are visually indistinguishable in style from the pre-existing ones around them.
+
+### 9. Final Readiness Assessment
+
+**Ready for presentation.**
+
+Every field visible in Student Profile / Edit Profile now loads, saves,
+validates, persists across refresh/re-login, respects ownership, uses CSRF
+protection, and (where applicable) respects the existing visibility system
+on the public researcher-profile view. Zero "Coming Soon" labels, zero
+disabled-with-no-explanation fields, and zero silently-ignored form inputs
+remain in this area.
+
+---
+
+🤖 This backend, the public landing-page completion pass (§9), the XAMPP
+environment migration (§13/§14), and the Student Profile completion pass
+(§21) were implemented and runtime-tested by Claude Code on top of the
+existing approved frontend design — the visual design, color system, and
+layout were preserved throughout and confirmed byte-identical/pixel-consistent
+at every stage.

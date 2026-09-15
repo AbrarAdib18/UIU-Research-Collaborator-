@@ -54,9 +54,21 @@ switch ($action) {
             flash('error', 'Name cannot be empty.');
             break;
         }
+
+        $dob = local_date($_POST['date_of_birth'] ?? '');
+        if ($dob !== null && $dob > date('Y-m-d')) {
+            flash('error', 'Date of birth cannot be in the future.');
+            break;
+        }
+
+        $validGenders = ['Male', 'Female', 'Other', 'Prefer not to say'];
+        $gender       = $_POST['gender'] ?? '';
+        $gender       = in_array($gender, $validGenders, true) ? $gender : null;
+
         try {
             $pdo->prepare('UPDATE users SET name = ? WHERE id = ?')->execute([$fullName, $userId]);
-            $pdo->prepare('UPDATE student_profiles SET bio = ? WHERE id = ?')->execute([$bio, $profileId]);
+            $pdo->prepare('UPDATE student_profiles SET bio = ?, date_of_birth = ?, gender = ? WHERE id = ?')
+                ->execute([$bio, $dob, $gender, $profileId]);
             calculate_profile_completion($pdo, $userId);
             log_activity($pdo, $userId, 'profile_update', 'Updated personal information');
             flash('success', 'Personal information updated.');
@@ -72,9 +84,14 @@ switch ($action) {
         $location = nullable_trim($_POST['location'] ?? '');
         $linkedin = local_url($_POST['linkedin_url'] ?? '');
         $github   = local_url($_POST['github_url'] ?? '');
+
+        $validPreferredContact = ['University Email', 'Phone', 'Platform Messages'];
+        $preferredContact      = $_POST['preferred_contact'] ?? '';
+        $preferredContact      = in_array($preferredContact, $validPreferredContact, true) ? $preferredContact : null;
+
         try {
-            $pdo->prepare('UPDATE student_profiles SET phone = ?, location = ?, linkedin_url = ?, github_url = ? WHERE id = ?')
-                ->execute([$phone, $location, $linkedin, $github, $profileId]);
+            $pdo->prepare('UPDATE student_profiles SET phone = ?, location = ?, linkedin_url = ?, github_url = ?, preferred_contact = ? WHERE id = ?')
+                ->execute([$phone, $location, $linkedin, $github, $preferredContact, $profileId]);
             calculate_profile_completion($pdo, $userId);
             log_activity($pdo, $userId, 'profile_update', 'Updated contact information');
             flash('success', 'Contact information updated.');
@@ -98,9 +115,25 @@ switch ($action) {
             }
             $cgpa = number_format((float)$cgpaRaw, 2, '.', '');
         }
+
+        // <input type="month"> posts "YYYY-MM" — store as the first of that month.
+        $gradRaw       = trim($_POST['expected_graduation_date'] ?? '');
+        $expectedGrad  = null;
+        if ($gradRaw !== '') {
+            if (!preg_match('/^\d{4}-\d{2}$/', $gradRaw)) {
+                flash('error', 'Invalid expected graduation date.');
+                break;
+            }
+            $expectedGrad = $gradRaw . '-01';
+        }
+
+        $validStatuses  = ['Currently Studying', 'Graduated', 'On Leave'];
+        $academicStatus = $_POST['academic_status'] ?? '';
+        $academicStatus = in_array($academicStatus, $validStatuses, true) ? $academicStatus : null;
+
         try {
-            $pdo->prepare('UPDATE student_profiles SET department = ?, program = ?, semester = ?, cgpa = ? WHERE id = ?')
-                ->execute([$department, $program, $semester, $cgpa, $profileId]);
+            $pdo->prepare('UPDATE student_profiles SET department = ?, program = ?, semester = ?, cgpa = ?, expected_graduation_date = ?, academic_status = ? WHERE id = ?')
+                ->execute([$department, $program, $semester, $cgpa, $expectedGrad, $academicStatus, $profileId]);
             calculate_profile_completion($pdo, $userId);
             log_activity($pdo, $userId, 'profile_update', 'Updated academic information');
             flash('success', 'Academic information updated.');
@@ -155,9 +188,15 @@ switch ($action) {
 
     case 'update_research_statement': {
         $statement = nullable_trim($_POST['research_statement'] ?? '');
+
+        $validMethodologies = ['Experimental Research', 'Data Analysis', 'Machine Learning', 'System Development', 'Survey Research', 'Literature Review'];
+        $submittedMethods    = (array)($_POST['research_methodologies'] ?? []);
+        $methods             = array_values(array_intersect($validMethodologies, $submittedMethods));
+        $methodologies       = $methods ? implode(',', $methods) : null;
+
         try {
-            $pdo->prepare('UPDATE student_profiles SET research_statement = ? WHERE id = ?')
-                ->execute([$statement, $profileId]);
+            $pdo->prepare('UPDATE student_profiles SET research_statement = ?, research_methodologies = ? WHERE id = ?')
+                ->execute([$statement, $methodologies, $profileId]);
             log_activity($pdo, $userId, 'profile_update', 'Updated research description');
             flash('success', 'Research description updated.');
         } catch (Throwable $ex) {
@@ -347,6 +386,114 @@ switch ($action) {
         } catch (Throwable $ex) {
             error_log('profile-edit remove_work: ' . $ex->getMessage());
             flash('error', 'Could not remove work experience.');
+        }
+        break;
+    }
+
+    // -----------------------------------------------------------------
+    // EXTRACURRICULAR ACTIVITIES
+    // -----------------------------------------------------------------
+    case 'add_extracurricular':
+    case 'update_extracurricular': {
+        $title = nullable_trim($_POST['title'] ?? '');
+        if (!$title) {
+            flash('error', 'Activity title is required.');
+            break;
+        }
+        $org       = nullable_trim($_POST['organization'] ?? '');
+        $role      = nullable_trim($_POST['role'] ?? '');
+        $start     = local_date($_POST['start_date'] ?? '');
+        $end       = local_date($_POST['end_date'] ?? '');
+        $isCurrent = isset($_POST['is_current']) ? 1 : 0;
+        if ($isCurrent) {
+            $end = null;
+        }
+        if ($start !== null && $end !== null && $start > $end) {
+            flash('error', 'Start date cannot be after end date.');
+            break;
+        }
+        $desc = nullable_trim($_POST['description'] ?? '');
+
+        try {
+            if ($action === 'add_extracurricular') {
+                $pdo->prepare('INSERT INTO extracurricular_activities (profile_id, title, organization, role, start_date, end_date, is_current, description) VALUES (?,?,?,?,?,?,?,?)')
+                    ->execute([$profileId, $title, $org, $role, $start, $end, $isCurrent, $desc]);
+                log_activity($pdo, $userId, 'profile_update', 'Added an extracurricular activity: ' . $title);
+                flash('success', 'Activity added.');
+            } else {
+                $id = (int)($_POST['id'] ?? 0);
+                $stmt = $pdo->prepare('UPDATE extracurricular_activities SET title=?, organization=?, role=?, start_date=?, end_date=?, is_current=?, description=? WHERE id=? AND profile_id=?');
+                $stmt->execute([$title, $org, $role, $start, $end, $isCurrent, $desc, $id, $profileId]);
+                flash('success', 'Activity updated.');
+            }
+        } catch (Throwable $ex) {
+            error_log('profile-edit ' . $action . ': ' . $ex->getMessage());
+            flash('error', 'Could not save activity.');
+        }
+        break;
+    }
+
+    case 'remove_extracurricular': {
+        $id = (int)($_POST['id'] ?? 0);
+        try {
+            $pdo->prepare('DELETE FROM extracurricular_activities WHERE id = ? AND profile_id = ?')->execute([$id, $profileId]);
+            flash('success', 'Activity removed.');
+        } catch (Throwable $ex) {
+            error_log('profile-edit remove_extracurricular: ' . $ex->getMessage());
+            flash('error', 'Could not remove activity.');
+        }
+        break;
+    }
+
+    // -----------------------------------------------------------------
+    // AVAILABILITY SCHEDULE (one row per selected weekday)
+    // -----------------------------------------------------------------
+    case 'update_availability': {
+        $days = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        $enabledDays = (array)($_POST['day_enabled'] ?? []);
+        $startTimes  = (array)($_POST['day_start'] ?? []);
+        $endTimes    = (array)($_POST['day_end'] ?? []);
+
+        $rowsToSave = [];
+        foreach ($days as $day) {
+            if (empty($enabledDays[$day])) {
+                continue;
+            }
+            $start = trim((string)($startTimes[$day] ?? ''));
+            $end   = trim((string)($endTimes[$day] ?? ''));
+            if (!preg_match('/^\d{2}:\d{2}$/', $start) || !preg_match('/^\d{2}:\d{2}$/', $end)) {
+                flash('error', "Please provide a valid start and end time for $day.");
+                $rowsToSave = null;
+                break;
+            }
+            if ($start >= $end) {
+                flash('error', "$day's start time must be before its end time.");
+                $rowsToSave = null;
+                break;
+            }
+            $rowsToSave[$day] = [$start, $end];
+        }
+
+        if ($rowsToSave === null) {
+            break;
+        }
+
+        try {
+            $pdo->beginTransaction();
+            $pdo->prepare('DELETE FROM profile_availability WHERE profile_id = ?')->execute([$profileId]);
+            if ($rowsToSave) {
+                $ins = $pdo->prepare('INSERT INTO profile_availability (profile_id, day_of_week, start_time, end_time) VALUES (?, ?, ?, ?)');
+                foreach ($rowsToSave as $day => [$start, $end]) {
+                    $ins->execute([$profileId, $day, $start, $end]);
+                }
+            }
+            $pdo->commit();
+            log_activity($pdo, $userId, 'profile_update', 'Updated availability schedule');
+            flash('success', 'Availability schedule updated.');
+        } catch (Throwable $ex) {
+            $pdo->rollBack();
+            error_log('profile-edit update_availability: ' . $ex->getMessage());
+            flash('error', 'Could not update availability schedule.');
         }
         break;
     }

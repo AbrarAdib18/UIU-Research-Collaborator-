@@ -103,6 +103,29 @@ $langStmt = $pdo->prepare('SELECT l.name, pl.proficiency FROM profile_languages 
 $langStmt->execute([$profileId]);
 $languageRows = $langStmt->fetchAll();
 
+// ---- Extracurricular activities (not gated, matches Education/Work) --------
+$actStmt = $pdo->prepare('SELECT * FROM extracurricular_activities WHERE profile_id = ? ORDER BY is_current DESC, start_date DESC, id DESC');
+$actStmt->execute([$profileId]);
+$extracurricularRows = $actStmt->fetchAll();
+
+// ---- Availability schedule (gated by research_visibility, same as the
+// hours/week figure already shown in Research Preferences) -----------------
+$availabilityRows = [];
+if ($visibility['research_visibility']) {
+    $availStmt = $pdo->prepare(
+        "SELECT * FROM profile_availability WHERE profile_id = ?
+         ORDER BY FIELD(day_of_week,'Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday','Friday')"
+    );
+    $availStmt->execute([$profileId]);
+    $availabilityRows = $availStmt->fetchAll();
+}
+
+// ---- Research methodologies (gated by research_visibility) -----------------
+$methodologies = [];
+if ($visibility['research_visibility'] && !empty($profile['research_methodologies'])) {
+    $methodologies = array_map('trim', explode(',', $profile['research_methodologies']));
+}
+
 // ---------------------------------------------------------------------
 // Teams the viewer can invite this person into (Leader of a non-full,
 // Active team of their own).
@@ -201,6 +224,12 @@ function rp_safe_url(?string $url): ?string
                     <?php if (!empty($profile['program'])): ?>
                         <p><i class="bi bi-mortarboard-fill"></i> <?= e($profile['program']) ?></p>
                     <?php endif; ?>
+                    <?php if (!empty($profile['academic_status'])): ?>
+                        <p><i class="bi bi-person-check-fill"></i> <?= e($profile['academic_status']) ?></p>
+                    <?php endif; ?>
+                    <?php if (!empty($profile['expected_graduation_date'])): ?>
+                        <p><i class="bi bi-calendar-event"></i> Expected Graduation: <?= e(format_date($profile['expected_graduation_date'], 'F Y')) ?></p>
+                    <?php endif; ?>
                 </div>
 
                 <div class="profile-header-actions">
@@ -283,6 +312,13 @@ function rp_safe_url(?string $url): ?string
                         <?php if (!empty($profile['research_statement'])): ?>
                             <p style="font-size:13px;color:#4b6073;margin-top:10px;"><?= nl2br(e($profile['research_statement'])) ?></p>
                         <?php endif; ?>
+                        <?php if ($methodologies): ?>
+                            <div class="research-tags" style="margin-top:10px;">
+                                <?php foreach ($methodologies as $m): ?>
+                                    <span class="research-tag"><?= e($m) ?></span>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                     </section>
                 <?php endif; ?>
 
@@ -355,6 +391,31 @@ function rp_safe_url(?string $url): ?string
                                     <span><?= e($w['organization']) ?></span>
                                     <small><?= e(rp_date_range($w['start_date'], $w['end_date'], (bool)$w['is_current'])) ?></small>
                                     <?php if ($w['description']): ?><p><?= nl2br(e($w['description'])) ?></p><?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </section>
+
+                <!-- EXTRACURRICULAR ACTIVITIES -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <div>
+                            <h2>Extracurricular Activities</h2>
+                            <p>Clubs, volunteering and student activities.</p>
+                        </div>
+                    </div>
+                    <?php if (!$extracurricularRows): ?>
+                        <div class="empty-state"><i class="bi bi-people"></i><p>No extracurricular activities added yet.</p></div>
+                    <?php else: ?>
+                        <?php foreach ($extracurricularRows as $act): ?>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <h3><?= e($act['title']) ?><?= $act['role'] ? ' — ' . e($act['role']) : '' ?></h3>
+                                    <span><?= e($act['organization'] ?: 'Organization not specified') ?></span>
+                                    <small><?= e(rp_date_range($act['start_date'], $act['end_date'], (bool)$act['is_current'])) ?></small>
+                                    <?php if ($act['description']): ?><p><?= nl2br(e($act['description'])) ?></p><?php endif; ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -491,6 +552,13 @@ function rp_safe_url(?string $url): ?string
                                     <span>Preferred Project Type</span>
                                     <strong><?= e($preferences['project_type_preference'] ?: 'Not set') ?></strong>
                                 </div>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($availabilityRows): ?>
+                            <div class="availability-grid" style="margin-top:10px;">
+                                <?php foreach ($availabilityRows as $slot): ?>
+                                    <label><?= e($slot['day_of_week']) ?>: <?= e(substr($slot['start_time'], 0, 5)) ?>–<?= e(substr($slot['end_time'], 0, 5)) ?></label>
+                                <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
                     </section>

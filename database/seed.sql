@@ -606,5 +606,30 @@ INSERT INTO `activity_logs` (`id`, `user_id`, `activity_type`, `description`, `r
 (14, 2, 'login', 'Faculty logged in', NULL, NULL, '2026-08-30 09:00:00'),
 (15, 2, 'opportunity_post', 'Posted new research opportunity: AI-Based Plant Disease Detection using Deep Learning', 'research_opportunity', 1, '2026-07-01 10:00:00');
 
+-- ---------------------------------------------------------------------
+-- Formerly "Coming Soon" Student Profile fields (requires
+-- database/migrations_003_profile_extended.sql to have been imported
+-- first). Populates a few demo profiles so the profile pages look
+-- complete during a demonstration.
+-- ---------------------------------------------------------------------
+UPDATE `student_profiles` SET `date_of_birth`='2003-05-14', `gender`='Male', `preferred_contact`='University Email', `academic_status`='Currently Studying', `expected_graduation_date`='2027-06-01', `research_methodologies`='Machine Learning,Data Analysis,Experimental Research' WHERE `id`=1;
+UPDATE `student_profiles` SET `date_of_birth`='2002-11-02', `gender`='Female', `preferred_contact`='Platform Messages', `academic_status`='Currently Studying', `expected_graduation_date`='2026-12-01', `research_methodologies`='System Development,Literature Review' WHERE `id`=2;
+UPDATE `student_profiles` SET `date_of_birth`='2003-02-20', `gender`='Female', `preferred_contact`='Phone', `academic_status`='Currently Studying', `expected_graduation_date`='2027-12-01', `research_methodologies`='Survey Research,Data Analysis' WHERE `id`=3;
+
+INSERT INTO `extracurricular_activities` (`profile_id`, `title`, `organization`, `role`, `start_date`, `end_date`, `is_current`, `description`) VALUES
+(1, 'Robotics Club', 'UIU Robotics Club', 'Technical Lead', '2025-01-15', NULL, 1, 'Leading a team of 6 students building autonomous line-following robots for inter-university competitions.'),
+(1, 'Hackathon Volunteer', 'UIU CSE Society', 'Volunteer', '2025-06-01', '2025-06-03', 0, 'Helped organize and run a 48-hour campus hackathon for 120+ participants.'),
+(4, 'Debate Club', 'UIU Debating Society', 'Member', '2024-09-01', NULL, 1, 'Regular participant in inter-departmental debate competitions.'),
+(5, 'Cultural Fest Committee', 'UIU Cultural Club', 'Coordinator', '2025-02-01', '2025-04-30', 0, 'Coordinated logistics for the annual spring cultural festival.');
+
+INSERT INTO `profile_availability` (`profile_id`, `day_of_week`, `start_time`, `end_time`) VALUES
+(1, 'Saturday', '09:00:00', '13:00:00'),
+(1, 'Monday', '15:00:00', '18:00:00'),
+(1, 'Wednesday', '15:00:00', '18:00:00'),
+(4, 'Sunday', '10:00:00', '14:00:00'),
+(4, 'Tuesday', '16:00:00', '19:00:00'),
+(5, 'Saturday', '14:00:00', '17:00:00'),
+(5, 'Thursday', '10:00:00', '13:00:00');
+
 COMMIT;
 SET FOREIGN_KEY_CHECKS=1;
