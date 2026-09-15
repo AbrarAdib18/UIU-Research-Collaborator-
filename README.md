@@ -82,7 +82,10 @@ Open **phpMyAdmin** (`http://localhost/phpmyadmin`) and:
       Graduation, Research Methodologies, plus the new
       `extracurricular_activities` and `profile_availability` tables). Safe
       to re-run. See §21 for full details.
-   5. `database/seed.sql` — realistic demo data (see credentials below).
+   5. `database/migrations_004_communities.sql` — adds a case-insensitive
+      unique constraint on `communities.name` and two read-path indexes.
+      Safe to re-run. See §22 for full details.
+   6. `database/seed.sql` — realistic demo data (see credentials below).
       **Assumes a fresh import** — run it only once, right after the files above.
 
 This exact import order was tested end-to-end against a **fresh, empty
@@ -138,6 +141,8 @@ The app writes to these folders — they already exist in the repo with
   `student/team-files.php`'s membership-gated download route — direct web
   access is blocked via `.htaccess`, confirmed with a real `403 Forbidden`
   under XAMPP's Apache in this pass — see §14)
+- `uploads/communities/` — community cover images (public-facing, same
+  pattern as avatars — see §22)
 
 On Windows/XAMPP these are writable by default under the user account
 running Apache — no manual `chmod`/ACL changes were needed in this pass. Use
@@ -234,8 +239,9 @@ Communities, Research Repositories, Saved Items, Notifications, Settings, Logout
   private workspace tabs (confirmed live in this pass: `team-files.php`,
   `team-tasks.php`, `team-messages.php`, `team-milestones.php` all redirect
   a non-member away).
-- **Communities**: browse/search/filter, join/leave, posts and comments
-  (member-only posting, owner-only deletion), private-community access
+- **Communities**: **create a community** (student becomes its `Admin`
+  member automatically, see §22), browse/search/filter, join/leave, posts
+  and comments (member-only posting, owner-only deletion), private-community access
   control (confirmed live: a non-member hitting a private community's URL
   directly sees a private notice, zero post content in the response).
 - **Research Repository**: browse/search/filter by type/year/domain, add a
@@ -326,7 +332,7 @@ section is a known, documented, low-risk design tradeoff, not an open bug.**
 ## 12. Database Changes Explained
 
 The original schema (`database/schema.sql`) covers nearly every table the
-brief required. Three migration files add what was missing:
+brief required. Four migration files add what was missing:
 
 **`database/migrations.sql`**:
 - **`research_resources`** — powers the Research Repository.
@@ -357,6 +363,20 @@ Soon" label from Student Profile / Edit Profile — see §21):
   `start_time`/`end_time`, not a fake grid). `UNIQUE(profile_id,
   day_of_week)` keeps the one-slot-per-day UI free of duplicates. Foreign
   key to `student_profiles(id)` with `ON DELETE CASCADE`.
+
+**`database/migrations_004_communities.sql`** (fixes Create Community — see §22):
+- **`uq_community_name`** — a `UNIQUE` key on `communities.name`. The
+  table's existing `utf8mb4_general_ci` collation makes this naturally
+  case-insensitive, so it also enforces the "no duplicate name" rule at the
+  database layer as a second line of defense behind the application-level
+  check.
+- **`idx_community_status`**, **`idx_community_privacy`** — indexes
+  supporting the `WHERE status = 'Active' AND privacy = 'Public'` filter
+  used by every community listing/lookup query.
+- No new tables were needed — `communities` and `community_members`
+  already had every column (including `community_members.role` already
+  supporting `'Admin'` as the owner role) and the unique
+  `(community_id, user_id)` membership constraint the feature required.
 
 No existing table, column, or constraint was renamed or removed. Both
 migration files use `utf8mb4`/`utf8mb4_general_ci` per-table, `IF NOT EXISTS`
@@ -666,7 +686,7 @@ Run these against your local XAMPP import (all 4 SQL files + the demo accounts a
 - **Session/header errors ("Headers already sent")** — usually caused by
   stray whitespace or output before a `<?php` tag in a hand-edited file. All
   shipped files start with `<?php` on line 1 with no leading BOM/whitespace.
-- **Demo credentials don't work** — confirm all 5 SQL files were imported in
+- **Demo credentials don't work** — confirm all 6 SQL files were imported in
   the exact order in §2, into a database actually named `uiu_researchcollab`.
 
 ## 19. Git Safety Recommendations
@@ -843,7 +863,7 @@ desktop (1400px) and mobile (390px) layouts.
 | Researcher-profile view: Research Methodologies + Availability visible when `research_visibility = 1` | ✅ Pass |
 | Researcher-profile view: same two sections correctly disappear when `research_visibility = 0` (while Extracurricular Activities correctly stays visible) | ✅ Pass |
 | Full regression: Dashboard, Research Connect, Opportunities, Teams, Communities, Repository, Saved Items, Notifications, Settings, Researcher Profile all still return `200` | ✅ Pass |
-| Fresh-database import (all 5 SQL files) | ✅ Pass — zero errors |
+| Fresh-database import (all 6 SQL files) | ✅ Pass — zero errors |
 | Visual regression, desktop 1400px (authenticated, real screenshot) | ✅ Pass — matches existing design exactly |
 | Visual regression, mobile 390px (authenticated, real screenshot) | ✅ Pass — stacks correctly, no overflow/breakage |
 | PHP syntax check (`php -l`) on all 3 modified files | ✅ Pass — no errors |
@@ -908,9 +928,157 @@ remain in this area.
 
 ---
 
+## 22. Communities Module Audit & Fix — Final Report (2026-09-15)
+
+### Root Cause of the Create Community Problem
+
+**The Create Community feature did not exist anywhere in the codebase.**
+This was not a broken button, a wrong Bootstrap target, a hidden modal, or
+a CSRF/authorization bug — a full-text search for `community-create`,
+`Create Community`, and `create_community` across the entire project
+returned **zero matches** before this pass. `student/communities.php` had
+search, filter, pagination, and Join actions, but no Create button, no
+form, no modal, and no link to any creation page. There was also no
+`community-create.php` (or equivalent) handler file at all. The database
+schema (`communities`, `community_members`) already fully supported
+creation — including `community_members.role` already having an `'Admin'`
+value for the owner — so no part of the backend had ever been wired up for
+this specific action. The join/leave, posts, comments, and private-community
+gating logic in `community-details.php` and `community-post.php` were, by
+contrast, already fully implemented and correctly enforced server-side.
+
+### Exact Files Modified / Created
+
+**Created:**
+- `student/community-create.php` — the entire creation workflow (form +
+  handler), built by mirroring the existing `student/team-create.php`
+  page's exact structure and CSS classes (`.app-page-header`, `.app-panel`,
+  `.btn-uiu`) since Teams is the closest existing analog and Communities had
+  no prior creation-page design to preserve.
+- `database/migrations_004_communities.sql`
+
+**Modified:**
+- `student/communities.php` — added the "Create Community" button (reusing
+  the page's own existing `.profile-button` class, styled identically to
+  the adjacent Filter/Join buttons) and a "Create the First Community" call
+  to action in the empty state.
+- `README.md` — this report, plus updates to §2, §5, §8, §12.
+
+**Not touched:** `student/community-details.php`, `student/community-post.php`
+(both already correct — see below), any CSS file, any original `.html` file,
+`database/schema.sql`, `database/migrations.sql`,
+`database/migrations_002_landing.sql`, `database/migrations_003_profile_extended.sql`.
+
+### Exact Database Changes
+
+See §12 above. Summary: one `UNIQUE` key (`communities.name`, naturally
+case-insensitive via the table's existing collation) and two indexes
+(`status`, `privacy`) — no new tables or columns were needed; the schema
+already had everything the feature required.
+
+### Was the Create Community Button/Form Fixed?
+
+**Yes — built from scratch and confirmed working end-to-end.** The button
+now links to a real page (not `#`), the form renders with a valid CSRF
+token, and a successful submission creates the community, adds its creator
+as an `Admin` member, and redirects to the new community's detail page with
+a success message — all verified with real HTTP requests against live
+XAMPP Apache + MySQL (not just visual inspection).
+
+### Runtime Test Results
+
+| # | Test | Result |
+|---|---|---|
+| 1 | "Create Community" button is a real link, not a dead `#` | ✅ Pass |
+| 1 | `community-create.php` form loads with CSRF token and required fields | ✅ Pass |
+| 1 | Valid submission → community row created, `created_by` = logged-in user | ✅ Pass |
+| 1 | Creator automatically added to `community_members` with `role = 'Admin'` | ✅ Pass |
+| 1 | Redirect to `community-details.php?id=<new-id>` with success flash | ✅ Pass |
+| 1 | New community appears immediately in the Communities listing | ✅ Pass |
+| 2 | Missing name rejected, no row created | ✅ Pass |
+| 2 | Duplicate name rejected case-insensitively ("quantum..." vs "Quantum...") with a clear message | ✅ Pass |
+| 2 | Invalid/missing CSRF token rejected, no row created | ✅ Pass |
+| 2 | No partial/orphaned rows after any rejected attempt (community count unchanged) | ✅ Pass |
+| 3 | Public community created and joinable by a second student | ✅ Pass |
+| 3 | Private community created; non-member blocked from viewing content via direct URL (private notice shown, zero post content in response) | ✅ Pass |
+| 3 | Creator/member can view their own private community fully | ✅ Pass |
+| 3 | Direct POST `action=join` on a private community as a non-member silently blocked (membership row not created) | ✅ Pass |
+| 3 | Direct POST `action=create_post` on a private community as a non-member blocked ("Join the community to post.") | ✅ Pass |
+| 4 | Join a public community → membership row with `role = 'Member'` | ✅ Pass |
+| 4 | Duplicate join attempt → no second row, friendly "already a member" message | ✅ Pass |
+| 4 | Leave → membership row removed, member count decrements | ✅ Pass |
+| 4 | Sole member (owner) attempting to leave is blocked ("the only member — leaving isn't allowed yet"), community not left ownerless | ✅ Pass |
+| 5 | Member creates a post and a comment | ✅ Pass |
+| 5 | A different (non-owning) user's attempt to delete another student's post is blocked, post unaffected | ✅ Pass |
+| 5 | Same for comment deletion — blocked, comment unaffected | ✅ Pass |
+| 5 | Owner deletes own post/comment successfully | ✅ Pass |
+| 6 | Cover image upload (valid PNG): stored with a random-generated filename, correct relative path in DB, loads via direct URL | ✅ Pass |
+| 6 | Disallowed file (`.php`) as a cover image rejected: "File type not allowed.", no community row created, no file written to `uploads/communities/` | ✅ Pass |
+| 6 | Stored-XSS attempt in community name/description (`<script>`, `<img onerror>`) rendered as inert escaped text, not executable markup | ✅ Pass |
+| 7 | Fresh-database import, all 6 SQL files in order | ✅ Pass — zero errors |
+| 7 | Full portal regression (Dashboard, Profile, Research Connect, Opportunities, Teams, Communities, Community Details ×2, Repository, Saved Items, Notifications, Settings) | ✅ Pass — all `200` |
+| 7 | Apache/PHP error log reviewed after testing | ✅ Pass — zero new warnings/errors |
+| 7 | Visual check, desktop 1400px (real authenticated screenshot via Chrome DevTools Protocol) | ✅ Pass — button and new page match existing design exactly |
+| 7 | Visual check, mobile 390px (same method) | ✅ Pass — stacks correctly, button remains visible and usable |
+
+All test communities, their memberships, posts, comments, and the one
+uploaded test cover-image file were deleted afterward (cascade delete via
+the existing foreign keys handled memberships automatically). The live
+database was returned to its original 5 seeded communities.
+
+### Confirmations
+
+- ✅ A student can create a **public** community.
+- ✅ A student can create a **private** community.
+- ✅ The creator becomes its `Admin` member automatically (verified in the database, not just assumed from code).
+- ✅ The new community appears in the listing immediately (subject to the existing privacy/status rules — Private communities still don't appear in the public browse list, matching the pre-existing, documented scope decision in `communities.php`).
+- ✅ Private-community access is protected **server-side** — confirmed by attacking it directly (non-member direct URL, non-member direct POST for join and for posting), not by only checking that a button is hidden.
+- ✅ Join, leave, duplicate-join prevention, post, and comment workflows all work, including cross-user deletion attempts being blocked.
+
+### Remaining Limitations
+
+- No owner-management UI (edit community details, remove a member,
+  promote/demote, delete the community) was added, because **none exists in
+  the current design** — the task explicitly says not to add a major new
+  management interface where the UI doesn't already show one. The creator
+  is correctly recorded as `Admin` in the database and this role is
+  displayed on the community page, so the data model is ready whenever such
+  a UI is added later.
+- Private communities still require an existing member to add someone
+  (there is no request-to-join workflow for private communities, mirroring
+  the same pre-existing, documented scope decision already in place for
+  Teams' equivalent private flows — the task said to implement a request
+  workflow only if the UI implies one, and none does here).
+- The two new indexes and the uniqueness constraint are the only schema
+  changes; no other Communities query needed a schema change — everything
+  else the task asked to verify (foreign keys, role values, privacy/status
+  values, cascading deletes) was already correct.
+
+### Confirmation: No Frontend Redesign
+
+No CSS file was created or modified. `community-create.php` reuses the
+exact `.app-page-header`/`.app-panel`/`.btn-uiu` pattern already established
+by `team-create.php` (byte-identical `<style>` block). The new button on
+`communities.php` reuses that page's own pre-existing `.profile-button`
+class. Two real, authenticated screenshots (desktop 1400px, mobile 390px,
+captured via Chrome DevTools Protocol with the live session cookie
+injected) confirm the existing UIU branding, colors, header, sidebar, card
+styling, and responsive behavior are unchanged.
+
+### Final Status
+
+**Ready for presentation.**
+
+The Communities module — create, browse, search, filter, view details,
+join, leave, post, comment, delete own content, and private-community
+protection — is now fully functional end-to-end and verified against a
+real PHP + MySQL/MariaDB runtime under XAMPP.
+
+---
+
 🤖 This backend, the public landing-page completion pass (§9), the XAMPP
-environment migration (§13/§14), and the Student Profile completion pass
-(§21) were implemented and runtime-tested by Claude Code on top of the
-existing approved frontend design — the visual design, color system, and
-layout were preserved throughout and confirmed byte-identical/pixel-consistent
-at every stage.
+environment migration (§13/§14), the Student Profile completion pass
+(§21), and the Communities module audit and fix (§22) were implemented and
+runtime-tested by Claude Code on top of the existing approved frontend
+design — the visual design, color system, and layout were preserved
+throughout and confirmed byte-identical/pixel-consistent at every stage.

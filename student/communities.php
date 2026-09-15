@@ -91,9 +91,14 @@ $currentQueryString = '?' . http_build_query($_GET);
     <main class="dashboard-main">
         <?php render_flashes(); ?>
 
-        <div class="welcome-section">
-            <h2>Communities</h2>
-            <p>Discover and join research communities that match your interests.</p>
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div class="welcome-section">
+                <h2>Communities</h2>
+                <p>Discover and join research communities that match your interests.</p>
+            </div>
+            <a href="<?= e(url('/student/community-create.php')) ?>" class="profile-button" style="width:auto;padding:0 16px;">
+                <i class="bi bi-plus-lg"></i>&nbsp;Create Community
+            </a>
         </div>
 
         <section class="dashboard-section">
@@ -175,7 +180,14 @@ $currentQueryString = '?' . http_build_query($_GET);
             <?php else: ?>
                 <div class="app-empty-state">
                     <i class="bi bi-diagram-3"></i>
-                    <p>No communities found. Try a different search or filter.</p>
+                    <?php if ($q !== '' || $domainId > 0): ?>
+                        <p>No communities found. Try a different search or filter.</p>
+                    <?php else: ?>
+                        <p>No communities yet. Be the first to create one!</p>
+                        <a href="<?= e(url('/student/community-create.php')) ?>" class="profile-button d-inline-flex" style="width:auto;padding:0 16px;">
+                            <i class="bi bi-plus-lg"></i>&nbsp;Create the First Community
+                        </a>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </section>
