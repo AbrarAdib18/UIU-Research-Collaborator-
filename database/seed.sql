@@ -631,5 +631,258 @@ INSERT INTO `profile_availability` (`profile_id`, `day_of_week`, `start_time`, `
 (5, 'Saturday', '14:00:00', '17:00:00'),
 (5, 'Thursday', '10:00:00', '13:00:00');
 
+-- =====================================================================
+-- Faculty Portal + Advisor System — demo data.
+-- Requires database/migrations_005_faculty_portal.sql to have been
+-- imported first (faculty_* tables, advisor_requests/assignments/
+-- feedback, research_connections, direct_conversations/messages).
+--
+-- Adds 2 more faculty (4 total: 2 accepting mentees, 1 with limited
+-- capacity, 1 not currently accepting — on sabbatical), their full
+-- profiles, a faculty-created opportunity, a realistic mix of advisor
+-- requests (pending / accepted / declined / clarification_requested,
+-- both individual and team), 2 active advisor assignments (one
+-- individual, one team), matching research_connections + a direct
+-- message thread for each, one advisor_feedback entry, and the
+-- notifications each of these actions would have produced.
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- 2 additional faculty users + profiles
+-- ---------------------------------------------------------------------
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `status`, `email_verified_at`, `last_login_at`, `created_at`, `updated_at`) VALUES
+(15, 'Dr. Farzana Yasmin', 'farzana.yasmin@cse.uiu.ac.bd', '$2b$10$skYHSQsOSXnLQ7XCsRjnOeqI2PCnINhBAlpdnL10B5FKPOPa10Usi', 'faculty', 'active', '2026-08-05 09:00:00', '2026-09-10 10:00:00', '2026-08-05 09:00:00', '2026-08-05 09:00:00'),
+(16, 'Dr. Imran Chowdhury', 'imran.chowdhury@cse.uiu.ac.bd', '$2b$10$skYHSQsOSXnLQ7XCsRjnOeqI2PCnINhBAlpdnL10B5FKPOPa10Usi', 'faculty', 'active', '2026-08-06 09:00:00', '2026-09-01 08:00:00', '2026-08-06 09:00:00', '2026-08-06 09:00:00');
+
+INSERT INTO `faculty_profiles` (`id`, `user_id`, `faculty_id`, `department`, `designation`, `specialization`, `office_location`, `phone`, `bio`, `research_statement`, `linkedin_url`, `google_scholar_url`, `researchgate_url`, `portfolio_url`) VALUES
+(3, 15, 'FAC-1003', 'Computer Science and Engineering', 'Professor', 'Human-Computer Interaction, Artificial Intelligence', 'Room 502, UIU CSE Building', '+8801711000003', 'Dr. Farzana Yasmin is a Professor researching accessible and inclusive AI interfaces, with a focus on assistive technology for visually impaired users.', 'My research explores how AI systems can be designed to be more inclusive and accessible, particularly for users with visual impairments. I welcome students interested in HCI, accessibility, or applied AI.', 'https://linkedin.com/in/farzana-yasmin-uiu', 'https://scholar.google.com/citations?user=farzanayasmin', 'https://researchgate.net/profile/Farzana-Yasmin', NULL),
+(4, 16, 'FAC-1004', 'Computer Science and Engineering', 'Assistant Professor', 'Robotics, Internet of Things', 'Room 210, UIU CSE Building', '+8801711000004', 'Dr. Imran Chowdhury researches low-cost robotics and IoT systems for resource-constrained environments, and supervises embedded-systems FYDP teams.', 'I focus on affordable robotics and IoT solutions that work reliably in low-resource settings — smart attendance, campus automation, and autonomous delivery systems.', 'https://linkedin.com/in/imran-chowdhury-uiu', 'https://scholar.google.com/citations?user=imranchowdhury', NULL, NULL);
+
+UPDATE `faculty_profiles` SET `research_statement` = 'I work on transformer-based NLP for low-resource languages, with a focus on Bengali. I welcome students interested in NLP, sentiment analysis, or applied deep learning.' WHERE `id` = 1;
+UPDATE `faculty_profiles` SET `research_statement` = 'My research covers blockchain security, distributed consensus, and applied cryptography. I supervise students building secure, verifiable systems.' WHERE `id` = 2;
+
+-- ---------------------------------------------------------------------
+-- Faculty research domains / expertise
+-- ---------------------------------------------------------------------
+INSERT INTO `faculty_research_domains` (`faculty_profile_id`, `domain_id`) VALUES
+(1, 1), (1, 13),
+(2, 4), (2, 7),
+(3, 1), (3, 10),
+(4, 15), (4, 11);
+
+INSERT INTO `faculty_skills` (`faculty_profile_id`, `skill_id`) VALUES
+(1, 1), (1, 11), (1, 12),
+(2, 1), (2, 19), (2, 21),
+(3, 1), (3, 6), (3, 22),
+(4, 25), (4, 1), (4, 16);
+
+-- ---------------------------------------------------------------------
+-- Faculty education
+-- ---------------------------------------------------------------------
+INSERT INTO `faculty_education` (`faculty_profile_id`, `institution`, `degree`, `field_of_study`, `start_date`, `end_date`, `description`) VALUES
+(1, 'Bangladesh University of Engineering and Technology (BUET)', 'PhD', 'Computer Science (Natural Language Processing)', '2016-01-01', '2020-12-01', 'Dissertation on low-resource neural machine translation for South Asian languages.'),
+(2, 'North South University', 'PhD', 'Computer Science and Engineering (Blockchain Security)', '2017-01-01', '2021-06-01', 'Dissertation on Byzantine fault-tolerant consensus for permissioned blockchains.'),
+(3, 'University of Malaya', 'PhD', 'Human-Computer Interaction', '2015-09-01', '2019-08-01', 'Dissertation on accessible interface design for visually impaired users.'),
+(4, 'Asian Institute of Technology (AIT)', 'PhD', 'Robotics Engineering', '2016-06-01', '2021-05-01', 'Dissertation on low-cost autonomous navigation for resource-constrained robotic platforms.');
+
+-- ---------------------------------------------------------------------
+-- Faculty publications
+-- ---------------------------------------------------------------------
+INSERT INTO `faculty_publications` (`faculty_profile_id`, `title`, `authors`, `venue`, `publication_type`, `publication_date`, `doi`, `url`, `abstract`, `status`) VALUES
+(1, 'Transformer-Based Named Entity Recognition for Low-Resource Bengali Text', 'Faculty Demo, Student Demo', 'IEEE Access', 'Journal Article', '2025-11-10', '10.1109/ACCESS.2025.9988776', NULL, 'Proposes a fine-tuning approach improving Bengali NER F1 score by 6 points over prior baselines.', 'Published'),
+(1, 'A Survey of Deep Learning Techniques for Bengali NLP', 'Faculty Demo', 'Journal of Language Technology', 'Journal Article', '2024-06-01', NULL, NULL, 'Surveys transformer and RNN-based approaches applied to Bengali language processing tasks.', 'Published'),
+(2, 'Blockchain Consensus Mechanisms: A Comparative Study', 'K. S. Zaman, F. Islam', 'arXiv', 'Conference Paper', '2024-03-18', NULL, 'https://arxiv.org/abs/2403.11842', 'Compares Proof-of-Work, Proof-of-Stake, and PBFT for permissioned voting applications.', 'Published'),
+(2, 'Smart Contract Vulnerability Detection using Static Analysis', 'K. S. Zaman', 'Journal of Systems Security', 'Journal Article', NULL, NULL, NULL, 'Proposes a static-analysis pipeline for detecting re-entrancy and access-control flaws in Solidity contracts.', 'Under Review'),
+(3, 'Designing Inclusive AI Interfaces for Visually Impaired Users', 'F. Yasmin', 'ACM CHI', 'Conference Paper', '2025-04-22', '10.1145/3544548.3581234', NULL, 'Presents design guidelines for screen-reader-compatible AI assistant interfaces.', 'Published'),
+(4, 'Low-Cost RFID Attendance Systems for Resource-Constrained Classrooms', 'I. Chowdhury', 'IEEE Region 10 Conference (TENCON)', 'Conference Paper', '2024-11-05', NULL, NULL, 'Evaluates a low-cost RFID attendance pipeline suitable for large lecture halls in resource-constrained institutions.', 'Published');
+
+-- ---------------------------------------------------------------------
+-- Faculty research projects
+-- ---------------------------------------------------------------------
+INSERT INTO `faculty_projects` (`faculty_profile_id`, `title`, `description`, `project_type`, `funding_source`, `start_date`, `end_date`, `status`, `repository_url`) VALUES
+(1, 'Bengali NLP Toolkit', 'An open-source toolkit bundling tokenization, NER, and sentiment models for Bengali text.', 'Research', 'UIU Internal Research Grant', '2025-01-01', NULL, 'Ongoing', 'https://github.com/uiu-nlp/bengali-nlp-toolkit'),
+(2, 'BlockSecure Voting Platform Research', 'Research underpinning a transparent, tamper-resistant blockchain voting system for university elections.', 'Research', NULL, '2025-06-01', NULL, 'Ongoing', NULL),
+(3, 'Accessible Campus AI Assistant', 'A screen-reader-compatible AI assistant helping visually impaired students navigate campus resources.', 'Research', 'UIU Internal Research Grant', '2025-09-01', NULL, 'Ongoing', NULL),
+(4, 'Autonomous Campus Delivery Robot', 'A low-cost autonomous ground robot for intra-campus document and parcel delivery.', 'Research', NULL, '2026-01-01', NULL, 'Planned', NULL);
+
+-- ---------------------------------------------------------------------
+-- Faculty availability
+-- ---------------------------------------------------------------------
+INSERT INTO `faculty_availability` (`faculty_profile_id`, `day_of_week`, `start_time`, `end_time`) VALUES
+(1, 'Sunday', '10:00:00', '12:00:00'),
+(1, 'Wednesday', '14:00:00', '16:00:00'),
+(2, 'Monday', '11:00:00', '13:00:00'),
+(3, 'Tuesday', '10:00:00', '12:00:00'),
+(3, 'Thursday', '14:00:00', '16:00:00'),
+(4, 'Saturday', '10:00:00', '12:00:00');
+
+-- ---------------------------------------------------------------------
+-- Faculty mentorship preferences (fp4 is NOT accepting mentees — on
+-- sabbatical — to exercise the "not accepting" UI/logic path).
+-- ---------------------------------------------------------------------
+INSERT INTO `faculty_preferences` (`faculty_profile_id`, `accepting_mentees`, `accepting_team_advisory`, `accepting_paper_advisory`, `max_active_mentees`, `preferred_project_types`, `preferred_domains`, `meeting_preference`, `availability_note`) VALUES
+(1, 1, 1, 1, 6, 'Research, FYDP', 'Artificial Intelligence, Natural Language Processing', 'Online + In Person', 'Prefers async updates by email between scheduled meetings.'),
+(2, 1, 1, 1, 5, 'Research, FYDP', 'Blockchain, Cyber Security', 'Online', NULL),
+(3, 1, 0, 1, 4, 'Research', 'Artificial Intelligence, Human Computer Interaction', 'In Person', 'Currently at full individual-mentee capacity for team advisory.'),
+(4, 0, 0, 0, 2, 'FYDP', 'Robotics, Internet of Things', 'Online', 'On research sabbatical this trimester — not accepting new mentees or advisory requests until next term.');
+
+-- ---------------------------------------------------------------------
+-- Faculty profile visibility
+-- ---------------------------------------------------------------------
+INSERT INTO `faculty_visibility` (`faculty_profile_id`, `profile_visibility`, `contact_visibility`, `research_visibility`, `project_visibility`, `publication_visibility`) VALUES
+(1, 'Public', 1, 1, 1, 1),
+(2, 'Public', 1, 1, 1, 1),
+(3, 'Public', 1, 1, 1, 1),
+(4, 'Students Only', 0, 1, 1, 1);
+
+-- ---------------------------------------------------------------------
+-- A faculty-created opportunity from the newest faculty member
+-- ---------------------------------------------------------------------
+INSERT INTO `research_opportunities` (`id`, `created_by`, `title`, `description`, `problem_statement`, `requirements`, `project_type`, `team_size_min`, `team_size_max`, `deadline`, `status`, `visibility`) VALUES
+(7, 15, 'Accessible AI Assistant for Visually Impaired Students', 'Build a screen-reader-friendly conversational assistant that helps visually impaired students navigate course materials and campus services.', 'Visually impaired students face significant friction using mainstream campus portals and LMS tools not designed with screen readers in mind.', 'Familiarity with accessibility standards (WCAG), basic NLP/conversational AI, and empathy-driven design. Frontend experience is a plus.', 'Research', 2, 4, '2026-12-15', 'Open', 'Public');
+
+INSERT INTO `opportunity_domains` (`opportunity_id`, `domain_id`) VALUES
+(7, 1), (7, 10);
+
+-- ---------------------------------------------------------------------
+-- Advisor / mentorship requests — a realistic mix of statuses.
+-- ---------------------------------------------------------------------
+INSERT INTO `advisor_requests` (`id`, `requester_type`, `requested_by_user_id`, `faculty_user_id`, `team_id`, `project_id`, `opportunity_id`, `request_type`, `title`, `message`, `research_summary`, `expected_commitment`, `preferred_meeting_frequency`, `status`, `faculty_response`, `responded_at`, `created_at`) VALUES
+(1, 'student', 4, 2, NULL, 3, NULL, 'research_advisor', 'Requesting Research Advisor for Network Security Track', 'I have been working on network intrusion detection and would value your guidance as I move toward a publishable research paper.', 'Building an anomaly-based NIDS prototype evaluated against the CIC-IDS2017 dataset.', '5 hrs/week', 'Weekly', 'accepted', 'Happy to advise you on this — let''s set up a recurring weekly check-in.', '2026-08-10 10:00:00', '2026-08-08 09:00:00'),
+(2, 'student', 8, 11, NULL, 11, NULL, 'technical_mentor', 'Technical Mentorship for Bengali Chatbot FYDP', 'I''m building a retrieval-augmented Bengali chatbot for my FYDP and would appreciate technical mentorship on the architecture.', 'Retrieval-augmented generation pipeline for open-domain Bengali academic Q&A.', '4 hrs/week', 'Biweekly', 'pending', NULL, NULL, '2026-09-15 11:20:00'),
+(3, 'team', 1, 2, 3, NULL, 3, 'research_advisor', 'Faculty Advisor Request — Bengali NLP Lab', 'Our team would love to have you as our official faculty advisor for the Bengali sentiment analysis initiative.', 'Team is annotating a 5,000-comment Bengali sentiment dataset and training baseline classifiers.', '3 hrs/week', 'Weekly', 'accepted', 'Excited to guide this team — great initiative on the dataset work.', '2026-08-14 15:00:00', '2026-08-12 10:00:00'),
+(4, 'student', 6, 15, NULL, 7, NULL, 'project_mentor', 'Project Mentorship for Autonomous Robot FYDP', 'Would you be willing to mentor my line-following robot project as it expands into a full FYDP?', 'Extending a PID-controlled line-following robot into a general-purpose autonomous navigation platform.', '4 hrs/week', 'Weekly', 'declined', 'My individual-mentee capacity is full this trimester — please reach out again next term.', '2026-09-05 09:30:00', '2026-09-02 14:00:00'),
+(5, 'student', 9, 11, NULL, NULL, NULL, 'research_mentor', 'Research Mentorship — Business Analytics Direction', 'I''m interested in applying data analytics research methods to retail forecasting and would like your mentorship.', 'Exploring time-series forecasting methods for small-retail sales prediction.', NULL, NULL, 'clarification_requested', 'Could you share more detail on your research question and how many hours per week you can commit?', '2026-09-18 12:00:00', '2026-09-16 09:00:00'),
+(6, 'team', 6, 16, 4, NULL, 4, 'fydp_supervisor', 'FYDP Supervisor Request — Smart IoT Innovators', 'Our team is building a smart attendance system for our FYDP and would like you as our supervisor.', 'RFID/BLE-based smart attendance system with a live analytics dashboard.', '3 hrs/week', 'Weekly', 'pending', NULL, NULL, '2026-07-20 10:00:00');
+
+-- ---------------------------------------------------------------------
+-- Active advisor assignments (created by requests 1 and 3 being accepted)
+-- ---------------------------------------------------------------------
+INSERT INTO `advisor_assignments` (`id`, `advisor_request_id`, `faculty_user_id`, `student_user_id`, `team_id`, `project_id`, `opportunity_id`, `assignment_type`, `status`, `assigned_at`) VALUES
+(1, 1, 2, 4, NULL, 3, NULL, 'research_advisor', 'active', '2026-08-10 10:00:00'),
+(2, 3, 2, NULL, 3, NULL, 3, 'research_advisor', 'active', '2026-08-14 15:00:00');
+
+INSERT INTO `advisor_feedback` (`assignment_id`, `faculty_user_id`, `team_id`, `title`, `content`, `visibility`, `created_at`) VALUES
+(2, 2, 3, 'Kickoff Guidance', 'Great start on the literature review — let''s prioritize expanding the labeled dataset to at least 5,000 comments before we train a baseline classifier.', 'team', '2026-08-16 09:00:00');
+
+-- ---------------------------------------------------------------------
+-- Research connections (accepted connections back the two conversations
+-- below; one additional pending connection exercises that UI state).
+-- ---------------------------------------------------------------------
+INSERT INTO `research_connections` (`id`, `requester_id`, `recipient_id`, `request_message`, `status`, `responded_at`, `created_at`) VALUES
+(1, 2, 4, 'Looking forward to advising you — let''s connect here first.', 'accepted', '2026-08-10 10:05:00', '2026-08-10 09:50:00'),
+(2, 1, 11, 'Would love to connect and learn more about your blockchain security research.', 'pending', NULL, '2026-09-20 08:30:00'),
+(3, 2, 1, 'Connecting so I can share guidance with your team here.', 'accepted', '2026-08-14 15:05:00', '2026-08-14 14:55:00');
+
+-- ---------------------------------------------------------------------
+-- Direct conversations + a short message thread for each accepted
+-- connection above (canonical ordering: user_one_id < user_two_id).
+-- ---------------------------------------------------------------------
+INSERT INTO `direct_conversations` (`id`, `user_one_id`, `user_two_id`, `connection_id`, `advisor_assignment_id`, `last_message_at`, `created_at`) VALUES
+(1, 2, 4, 1, 1, '2026-08-11 09:05:00', '2026-08-10 10:05:00'),
+(2, 1, 2, 3, 2, '2026-08-15 11:20:00', '2026-08-14 15:05:00');
+
+INSERT INTO `direct_messages` (`id`, `conversation_id`, `sender_id`, `message`, `is_read`, `created_at`) VALUES
+(1, 1, 2, 'Welcome aboard! Let''s set up a weekly check-in — does Sunday 10am work for you?', 1, '2026-08-10 10:10:00'),
+(2, 1, 4, 'Sunday 10am works great. I''ll prepare a short progress summary beforehand.', 1, '2026-08-10 18:30:00'),
+(3, 1, 2, 'Perfect, see you then. In the meantime, could you share your current dataset size?', 0, '2026-08-11 09:05:00'),
+(4, 2, 2, 'Looking forward to advising Bengali NLP Lab. Can your team share the current dataset size?', 0, '2026-08-14 15:10:00'),
+(5, 2, 1, 'We currently have about 2,000 labeled comments and are cleaning the corpus this week.', 1, '2026-08-15 11:20:00');
+
+-- ---------------------------------------------------------------------
+-- Notifications for the advisor / connection / messaging workflows above.
+-- ---------------------------------------------------------------------
+INSERT INTO `notifications` (`id`, `user_id`, `type`, `title`, `message`, `related_type`, `related_id`, `is_read`, `created_at`, `read_at`) VALUES
+(13, 2, 'advisor_request', 'New Advisor Request', 'Tanvir Ahmed requested you as a Research Advisor.', 'advisor_request', 1, 1, '2026-08-08 09:00:00', '2026-08-08 12:00:00'),
+(14, 4, 'advisor_request', 'Advisor Request Accepted', 'Faculty Demo accepted your advisor request for you.', 'advisor_request', 1, 1, '2026-08-10 10:00:00', '2026-08-10 12:00:00'),
+(15, 2, 'advisor_request', 'New Team Advisor Request', 'Team "Bengali NLP Lab" requested you as a Research Advisor.', 'advisor_request', 3, 1, '2026-08-12 10:00:00', '2026-08-12 11:00:00'),
+(16, 1, 'advisor_request', 'Advisor Request Accepted', 'Faculty Demo accepted the advisor request for your team "Bengali NLP Lab".', 'advisor_request', 3, 0, '2026-08-14 15:00:00', NULL),
+(17, 8, 'advisor_assignment', 'Faculty Advisor Assigned', 'Faculty Demo is now advising your team "Bengali NLP Lab".', 'team', 3, 0, '2026-08-14 15:00:00', NULL),
+(18, 10, 'advisor_assignment', 'Faculty Advisor Assigned', 'Faculty Demo is now advising your team "Bengali NLP Lab".', 'team', 3, 1, '2026-08-14 15:00:00', '2026-08-15 09:00:00'),
+(19, 11, 'advisor_request', 'New Advisor Request', 'Sadia Rahman requested you as a Technical Mentor.', 'advisor_request', 2, 0, '2026-09-15 11:20:00', NULL),
+(20, 6, 'advisor_request', 'Advisor Request Declined', 'Dr. Farzana Yasmin declined your advisor request. Reason: My individual-mentee capacity is full this trimester — please reach out again next term.', 'advisor_request', 4, 0, '2026-09-05 09:30:00', NULL),
+(21, 11, 'advisor_request', 'New Advisor Request', 'Mehedi Hasan requested you as a Research Mentor.', 'advisor_request', 5, 1, '2026-09-16 09:00:00', '2026-09-16 10:00:00'),
+(22, 9, 'advisor_request', 'Clarification Requested', 'Dr. Kazi Shibli Zaman asked a question about your advisor request.', 'advisor_request', 5, 0, '2026-09-18 12:00:00', NULL),
+(23, 16, 'advisor_request', 'New Team Advisor Request', 'Team "Smart IoT Innovators" requested you as a FYDP Supervisor.', 'advisor_request', 6, 0, '2026-07-20 10:00:00', NULL),
+(24, 4, 'connection_request', 'Connection Accepted', 'Faculty Demo connected with you.', 'connection_request', 2, 1, '2026-08-10 10:05:00', '2026-08-10 12:00:00'),
+(25, 11, 'connection_request', 'New Connection Request', 'Student Demo wants to connect with you.', 'connection_request', 1, 0, '2026-09-20 08:30:00', NULL),
+(26, 4, 'direct_message', 'New Message', 'Faculty Demo sent you a message.', 'direct_message', 2, 0, '2026-08-11 09:05:00', NULL),
+(27, 1, 'direct_message', 'New Message', 'Faculty Demo sent you a message.', 'direct_message', 2, 0, '2026-08-14 15:10:00', NULL);
+
+-- =====================================================================
+-- Admin Portal — demo data.
+-- Requires database/migrations_006_admin_portal.sql to have been
+-- imported first (faculty_verifications, platform_settings, and the
+-- community_posts/community_comments.is_hidden columns).
+--
+-- Adds a 2nd admin account (so the "cannot deactivate the last active
+-- admin" rule has something real to demonstrate against the *original*
+-- admin), a 5th faculty account seeded specifically in a PENDING
+-- verification state (the other 4 faculty are marked verified so this
+-- pass does not lock any of them out), two students set to
+-- inactive/suspended so the admin user-management filters have real
+-- data on first look, and the 7 platform_settings defaults matching
+-- this codebase's existing hard-coded behavior exactly (so turning the
+-- Admin Portal on changes nothing until an admin deliberately edits a
+-- setting).
+-- =====================================================================
+
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `status`, `email_verified_at`, `last_login_at`, `created_at`, `updated_at`) VALUES
+(17, 'Second Admin', 'admin2@example.com', '$2b$10$skYHSQsOSXnLQ7XCsRjnOeqI2PCnINhBAlpdnL10B5FKPOPa10Usi', 'admin', 'active', '2026-06-01 09:10:00', '2026-09-01 09:00:00', '2026-06-01 09:10:00', '2026-06-01 09:10:00'),
+(18, 'Dr. Nasrin Akter', 'nasrin.akter@cse.uiu.ac.bd', '$2b$10$skYHSQsOSXnLQ7XCsRjnOeqI2PCnINhBAlpdnL10B5FKPOPa10Usi', 'faculty', 'active', NULL, NULL, '2026-09-20 10:00:00', '2026-09-20 10:00:00');
+
+INSERT INTO `faculty_profiles` (`id`, `user_id`, `faculty_id`, `department`, `designation`, `specialization`, `office_location`, `phone`, `bio`) VALUES
+(5, 18, 'FAC-1005', 'Computer Science and Engineering', 'Assistant Professor', 'Software Engineering, Empirical Software Studies', 'Room 315, UIU CSE Building', '+8801711000005', 'Dr. Nasrin Akter recently joined UIU and researches software engineering practices in student-led development teams. Her faculty account is awaiting administrator verification.');
+
+-- ---------------------------------------------------------------------
+-- Faculty verification records — the 4 previously-seeded faculty are
+-- already verified so this pass does not lock them out; the newest
+-- faculty member (above) is left pending to demonstrate the review
+-- queue.
+-- ---------------------------------------------------------------------
+INSERT INTO `faculty_verifications` (`faculty_user_id`, `status`, `admin_notes`, `verified_by`, `verified_at`, `created_at`) VALUES
+(2, 'verified', 'Verified at initial platform rollout.', 3, '2026-06-02 09:00:00', '2026-06-01 09:05:00'),
+(11, 'verified', 'Verified at initial platform rollout.', 3, '2026-08-02 09:00:00', '2026-08-01 10:00:00'),
+(15, 'verified', 'Verified after department onboarding check.', 3, '2026-08-06 09:00:00', '2026-08-05 09:00:00'),
+(16, 'verified', 'Verified after department onboarding check.', 3, '2026-08-07 09:00:00', '2026-08-06 09:00:00'),
+(18, 'pending', NULL, NULL, NULL, '2026-09-20 10:05:00');
+
+-- ---------------------------------------------------------------------
+-- A couple of non-active user examples (chosen to be peripheral to the
+-- advisor/team/chat seed narratives already in this file) so the admin
+-- user-management filters have real inactive/suspended rows to show.
+-- ---------------------------------------------------------------------
+UPDATE `users` SET `status` = 'inactive' WHERE `id` = 5;
+UPDATE `users` SET `status` = 'suspended' WHERE `id` = 7;
+
+-- ---------------------------------------------------------------------
+-- Platform settings — defaults exactly matching this codebase's
+-- existing hard-coded behavior, so enabling the Admin Portal changes
+-- nothing until an admin deliberately edits a setting.
+-- ---------------------------------------------------------------------
+INSERT INTO `platform_settings` (`setting_key`, `setting_value`, `updated_by`) VALUES
+('public_registration_enabled', '1', 3),
+('student_email_domain', 'bscse.uiu.ac.bd', 3),
+('default_profile_visibility', 'Students Only', 3),
+('default_team_size_limit', '6', 3),
+('faculty_verification_required', '0', 3),
+('community_creation_policy', 'open', 3),
+('maintenance_notice', '', 3);
+
+-- ---------------------------------------------------------------------
+-- Activity logs + notifications narrating the admin actions above, so
+-- the Admin Dashboard / Activity Logs pages have real recent history.
+-- ---------------------------------------------------------------------
+INSERT INTO `activity_logs` (`user_id`, `activity_type`, `description`, `related_type`, `related_id`, `created_at`) VALUES
+(3, 'admin_faculty_verification', 'Verified faculty account for Dr. Farzana Yasmin', 'faculty_verification', 3, '2026-08-06 09:00:00'),
+(3, 'admin_faculty_verification', 'Verified faculty account for Dr. Imran Chowdhury', 'faculty_verification', 4, '2026-08-07 09:00:00'),
+(3, 'admin_user_status_change', 'Set Farhana Islam''s account status to inactive', 'user', 5, '2026-09-21 10:00:00'),
+(3, 'admin_user_status_change', 'Set Nusrat Jahan''s account status to suspended', 'user', 7, '2026-09-21 10:05:00');
+
+INSERT INTO `notifications` (`user_id`, `type`, `title`, `message`, `related_type`, `related_id`, `is_read`, `created_at`) VALUES
+(18, 'faculty_verification', 'Faculty Verification Pending', 'Your faculty account has been created and is awaiting administrator verification.', 'faculty_verification', 5, 0, '2026-09-20 10:05:00'),
+(5, 'account_status', 'Account Status Updated', 'Your account status was changed to "Inactive" by an administrator.', 'user', 5, 0, '2026-09-21 10:00:00'),
+(7, 'account_status', 'Account Status Updated', 'Your account status was changed to "Suspended" by an administrator.', 'user', 7, 0, '2026-09-21 10:05:00');
+
 COMMIT;
 SET FOREIGN_KEY_CHECKS=1;

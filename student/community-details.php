@@ -106,9 +106,9 @@ try {
          FROM communities c
          JOIN users u ON u.id = c.created_by
          LEFT JOIN research_domains d ON d.id = c.domain_id
-         WHERE c.id = ? AND c.status = 'Active'"
+         WHERE c.id = ? AND (c.status = 'Active' OR c.created_by = ?)"
     );
-    $stmt->execute([$communityId]);
+    $stmt->execute([$communityId, $userId]);
     $community = $stmt->fetch();
 } catch (PDOException $e) {
     error_log('community-details.php load error: ' . $e->getMessage());
@@ -160,7 +160,7 @@ $totalPosts  = 0;
 // UI below shows a "private" notice instead.
 if ($canViewContent) {
 try {
-    $totalPostsStmt = $pdo->prepare('SELECT COUNT(*) FROM community_posts WHERE community_id = ?');
+    $totalPostsStmt = $pdo->prepare("SELECT COUNT(*) FROM community_posts WHERE community_id = ? AND is_hidden = 0");
     $totalPostsStmt->execute([$communityId]);
     $totalPosts = (int)$totalPostsStmt->fetchColumn();
 
@@ -168,7 +168,7 @@ try {
         "SELECT p.*, u.name AS author_name
          FROM community_posts p
          JOIN users u ON u.id = p.user_id
-         WHERE p.community_id = ?
+         WHERE p.community_id = ? AND p.is_hidden = 0
          ORDER BY p.created_at DESC
          LIMIT $perPage OFFSET $offset"
     );
@@ -182,7 +182,7 @@ try {
             "SELECT cc.*, u.name AS author_name
              FROM community_comments cc
              JOIN users u ON u.id = cc.user_id
-             WHERE cc.post_id IN ($in)
+             WHERE cc.post_id IN ($in) AND cc.is_hidden = 0
              ORDER BY cc.created_at ASC"
         );
         $commentsStmt->execute($postIds);

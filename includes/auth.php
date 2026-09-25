@@ -24,6 +24,12 @@ function current_user(): ?array
         if (!$cache) {
             // Session points at a user that no longer exists.
             do_logout();
+        } elseif ($cache['status'] !== 'active') {
+            // Account was deactivated/suspended after this session started —
+            // a stale session must not be able to keep acting as this user.
+            do_logout();
+            flash('error', 'Your account is no longer active. Please contact an administrator.');
+            $cache = null;
         }
     }
     return $cache;
@@ -42,6 +48,34 @@ function require_student(): void
     require_login();
     if (($_SESSION['role'] ?? '') !== 'student') {
         flash('error', 'That area is only available to students.');
+        redirect('/index.php');
+    }
+}
+
+function require_faculty(): void
+{
+    require_login();
+    if (($_SESSION['role'] ?? '') !== 'faculty') {
+        flash('error', 'That area is only available to faculty members.');
+        redirect('/index.php');
+    }
+}
+
+function require_admin(): void
+{
+    require_login();
+    if (($_SESSION['role'] ?? '') !== 'admin') {
+        flash('error', 'That area is only available to administrators.');
+        redirect('/index.php');
+    }
+}
+
+/** Allow only the given role(s), e.g. require_role('faculty', 'admin'). */
+function require_role(string ...$roles): void
+{
+    require_login();
+    if (!in_array($_SESSION['role'] ?? '', $roles, true)) {
+        flash('error', 'You do not have access to that area.');
         redirect('/index.php');
     }
 }

@@ -69,6 +69,10 @@ $iconMap = [
     'opportunity_application' => 'bi-file-earmark-text-fill',
     'community'               => 'bi-people',
     'community_post'          => 'bi-chat-square-text-fill',
+    'advisor_request'         => 'bi-person-check-fill',
+    'advisor_assignment'      => 'bi-mortarboard-fill',
+    'connection_request'      => 'bi-link-45deg',
+    'direct_message'          => 'bi-chat-dots-fill',
 ];
 
 $pageTitle = 'Notifications';

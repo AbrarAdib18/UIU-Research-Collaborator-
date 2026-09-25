@@ -25,6 +25,25 @@ $pendingInvitations = (int)$stmt->fetchColumn();
 
 $unreadCount = unread_notification_count($pdo, $userId);
 
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM advisor_requests WHERE requested_by_user_id = ? AND requester_type = 'student' AND status IN ('pending','clarification_requested')");
+$stmt->execute([$userId]);
+$pendingAdvisorRequests = (int)$stmt->fetchColumn();
+
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM advisor_assignments WHERE student_user_id = ? AND status = 'active'");
+$stmt->execute([$userId]);
+$activeAdvisorCount = (int)$stmt->fetchColumn();
+
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM research_connections WHERE recipient_id = ? AND status = 'pending'");
+$stmt->execute([$userId]);
+$pendingConnectionRequests = (int)$stmt->fetchColumn();
+
+$stmt = $pdo->prepare(
+    "SELECT COUNT(*) FROM direct_messages dm JOIN direct_conversations dc ON dc.id = dm.conversation_id
+     WHERE (dc.user_one_id = ? OR dc.user_two_id = ?) AND dm.sender_id != ? AND dm.is_read = 0"
+);
+$stmt->execute([$userId, $userId, $userId]);
+$unreadDirectMessages = (int)$stmt->fetchColumn();
+
 $stmt = $pdo->prepare('SELECT
         (SELECT COUNT(*) FROM saved_opportunities WHERE user_id = ?) +
         (SELECT COUNT(*) FROM saved_resources WHERE user_id = ?) AS total');
@@ -150,6 +169,41 @@ $pageTitle = 'Dashboard';
                             <strong><?= $teamCount ?></strong>
                             <span>My Teams</span>
                             <a href="<?= e(url('/student/teams.php')) ?>">View All</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-statistics">
+                    <div class="dashboard-stat-card">
+                        <div class="stat-card-icon blue"><i class="bi bi-person-check-fill"></i></div>
+                        <div class="stat-card-content">
+                            <strong><?= $pendingAdvisorRequests ?></strong>
+                            <span>Pending Advisor Requests</span>
+                            <a href="<?= e(url('/student/advisor-requests.php')) ?>">View All</a>
+                        </div>
+                    </div>
+                    <div class="dashboard-stat-card">
+                        <div class="stat-card-icon green"><i class="bi bi-mortarboard-fill"></i></div>
+                        <div class="stat-card-content">
+                            <strong><?= $activeAdvisorCount ?></strong>
+                            <span>Active Advisors</span>
+                            <a href="<?= e(url('/student/advisor-requests.php')) ?>">View All</a>
+                        </div>
+                    </div>
+                    <div class="dashboard-stat-card">
+                        <div class="stat-card-icon purple"><i class="bi bi-link-45deg"></i></div>
+                        <div class="stat-card-content">
+                            <strong><?= $pendingConnectionRequests ?></strong>
+                            <span>Connection Requests</span>
+                            <a href="<?= e(url('/student/faculty-connections.php')) ?>">View All</a>
+                        </div>
+                    </div>
+                    <div class="dashboard-stat-card">
+                        <div class="stat-card-icon orange"><i class="bi bi-chat-dots-fill"></i></div>
+                        <div class="stat-card-content">
+                            <strong><?= $unreadDirectMessages ?></strong>
+                            <span>Unread Messages</span>
+                            <a href="<?= e(url('/student/messages.php')) ?>">View All</a>
                         </div>
                     </div>
                 </div>

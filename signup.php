@@ -1,12 +1,24 @@
 <?php
 require_once __DIR__ . '/includes/bootstrap.php';
 
-// Only students belong on the dashboard — avoid a redirect loop for any
-// other logged-in role (see includes/student_guard.php).
-if (is_logged_in() && ($_SESSION['role'] ?? '') === 'student') {
-    redirect('/student/dashboard.php');
-} elseif (is_logged_in()) {
-    redirect('/index.php');
+// Redirect an already-logged-in visitor straight to their own dashboard.
+if (is_logged_in()) {
+    switch ($_SESSION['role'] ?? '') {
+        case 'student': redirect('/student/dashboard.php');
+        case 'faculty': redirect('/faculty/dashboard.php');
+        case 'admin':   redirect('/admin/dashboard.php');
+        default:        redirect('/index.php');
+    }
+}
+
+$pdo = db();
+$registrationEnabled = get_platform_setting($pdo, 'public_registration_enabled', '1') === '1';
+$emailDomain = get_platform_setting($pdo, 'student_email_domain', 'bscse.uiu.ac.bd');
+$emailDomainPattern = '/^[a-zA-Z0-9._%+-]+@' . preg_quote($emailDomain, '/') . '$/';
+
+if (!$registrationEnabled && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    flash('error', 'New registrations are temporarily disabled. Please contact an administrator.');
+    redirect('/signup.php');
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -24,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($name === '') {
         $errors[] = 'Please enter your full name.';
     }
-    if (!preg_match('/^[a-zA-Z0-9._%+-]+@bscse\.uiu\.ac\.bd$/', $email)) {
-        $errors[] = 'Please use a valid @bscse.uiu.ac.bd university email.';
+    if (!preg_match($emailDomainPattern, $email)) {
+        $errors[] = 'Please use a valid @' . $emailDomain . ' university email.';
     }
     if ($studentId === '') {
         $errors[] = 'Please enter your student ID.';
@@ -43,7 +55,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('/signup.php');
     }
 
-    $pdo = db();
     $check = $pdo->prepare('SELECT id FROM users WHERE email = ? LIMIT 1');
     $check->execute([$email]);
     if ($check->fetch()) {
@@ -75,10 +86,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $insertProfile->execute([$userId, $studentId]);
         $profileId = (int)$pdo->lastInsertId();
 
+        $defaultVisibility = get_platform_setting($pdo, 'default_profile_visibility', 'Students Only');
+        if (!in_array($defaultVisibility, ['Public', 'Students Only', 'Private'], true)) {
+            $defaultVisibility = 'Students Only';
+        }
         $insertVisibility = $pdo->prepare(
-            'INSERT INTO profile_visibility (profile_id) VALUES (?)'
+            'INSERT INTO profile_visibility (profile_id, profile_visibility) VALUES (?, ?)'
         );
-        $insertVisibility->execute([$profileId]);
+        $insertVisibility->execute([$profileId, $defaultVisibility]);
 
         $insertPrefs = $pdo->prepare(
             'INSERT INTO research_preferences (profile_id) VALUES (?)'

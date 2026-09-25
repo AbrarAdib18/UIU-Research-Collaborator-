@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/student_guard.php';
 
 $pdo    = db();
 $userId = (int)$currentUser['id'];
+$defaultTeamSizeLimit = (int)get_platform_setting($pdo, 'default_team_size_limit', '6');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_csrf('/student/team-create.php');
@@ -12,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description  = nullable_trim($_POST['description'] ?? '');
     $domainId     = ($_POST['research_domain_id'] ?? '') !== '' ? (int)$_POST['research_domain_id'] : null;
     $opportunityId = ($_POST['opportunity_id'] ?? '') !== '' ? (int)$_POST['opportunity_id'] : null;
-    $teamSizeLimit = (int)($_POST['team_size_limit'] ?? 6);
+    $teamSizeLimit = (int)($_POST['team_size_limit'] ?? $defaultTeamSizeLimit);
 
     $errors = [];
     if ($name === '') {
@@ -136,7 +137,7 @@ $openOpportunities = $pdo->query("SELECT id, title FROM research_opportunities W
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="team_size_limit" class="form-label">Team Size Limit</label>
-                        <input type="number" class="form-control" id="team_size_limit" name="team_size_limit" min="2" max="15" value="<?= e(old('team_size_limit', '6')) ?>">
+                        <input type="number" class="form-control" id="team_size_limit" name="team_size_limit" min="2" max="15" value="<?= e(old('team_size_limit', $defaultTeamSizeLimit)) ?>">
                     </div>
                 </div>
 

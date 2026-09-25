@@ -103,3 +103,12 @@ $activeNav = $activeNav ?? 'home'; // 'home' | 'about' | 'research' | 'community
     </div>
 
     <?php render_flashes(); ?>
+
+    <?php $maintenanceNotice = get_platform_setting(db(), 'maintenance_notice'); ?>
+    <?php if ($maintenanceNotice): ?>
+        <div class="container-fluid">
+            <div class="alert alert-warning mb-0" role="alert" style="border-radius:0;text-align:center;">
+                <i class="bi bi-exclamation-triangle-fill"></i> <?= e($maintenanceNotice) ?>
+            </div>
+        </div>
+    <?php endif; ?>

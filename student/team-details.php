@@ -77,6 +77,34 @@ if ($isMember) {
     $messageCount = (int)$stmt->fetchColumn();
 }
 
+$teamAdvisor = null;
+$pendingAdvisorRequests = [];
+$facultyOptions = [];
+$requestTypeLabels = [
+    'research_advisor' => 'Research Advisor',
+    'paper_advisor'     => 'Paper Advisor',
+    'project_mentor'    => 'Project Mentor',
+    'fydp_supervisor'   => 'FYDP Supervisor',
+    'research_mentor'   => 'Research Mentor',
+    'technical_mentor'  => 'Technical Mentor',
+];
+if ($isMember) {
+    $teamAdvisor = get_team_advisor($pdo, $teamId);
+
+    $pendingStmt = $pdo->prepare(
+        "SELECT ar.*, u.name AS faculty_name FROM advisor_requests ar JOIN users u ON u.id = ar.faculty_user_id
+         WHERE ar.team_id = ? AND ar.status IN ('pending','clarification_requested') ORDER BY ar.created_at DESC"
+    );
+    $pendingStmt->execute([$teamId]);
+    $pendingAdvisorRequests = $pendingStmt->fetchAll();
+
+    if ($isLeader && !$teamAdvisor) {
+        $facultyOptions = $pdo->query(
+            "SELECT u.id AS user_id, u.name, fp.designation FROM faculty_profiles fp JOIN users u ON u.id = fp.user_id WHERE u.status = 'active' ORDER BY u.name"
+        )->fetchAll();
+    }
+}
+
 function team_status_pill(string $status): string
 {
     return match ($status) {
@@ -192,6 +220,66 @@ $currentFile = 'team-details.php';
                     </div>
                 </div>
                 <div class="col-lg-5">
+                    <div class="app-panel">
+                        <h3>Faculty Advisor</h3>
+                        <?php if ($teamAdvisor): ?>
+                            <div class="member-row">
+                                <?php if (!empty($teamAdvisor['profile_photo'])): ?>
+                                    <img class="avatar-sm" src="<?= e(url('/uploads/avatars/' . $teamAdvisor['profile_photo'])) ?>" alt="<?= e($teamAdvisor['faculty_name']) ?>">
+                                <?php else: ?>
+                                    <span class="avatar-sm"><?= e(initials($teamAdvisor['faculty_name'])) ?></span>
+                                <?php endif; ?>
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold"><?= e($teamAdvisor['faculty_name']) ?></div>
+                                    <div class="text-muted small"><?= e($teamAdvisor['designation'] ?: 'Faculty') ?> &middot; <?= e(ucwords(str_replace('_', ' ', $teamAdvisor['assignment_type']))) ?></div>
+                                </div>
+                                <a href="<?= e(url('/student/conversation.php?user=' . $teamAdvisor['faculty_user_id'])) ?>" class="pill pill-blue text-decoration-none"><i class="bi bi-chat-dots"></i></a>
+                            </div>
+                        <?php elseif ($pendingAdvisorRequests): ?>
+                            <?php foreach ($pendingAdvisorRequests as $r): ?>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <div>
+                                        <div class="fw-semibold"><?= e($r['faculty_name']) ?></div>
+                                        <div class="text-muted small"><?= e($requestTypeLabels[$r['request_type']] ?? $r['request_type']) ?> &middot; <?= e(str_replace('_', ' ', $r['status'])) ?></div>
+                                    </div>
+                                    <?php if ($isLeader): ?>
+                                        <form method="post" action="<?= e(url('/student/team-advisor-requests.php')) ?>">
+                                            <?= csrf_field() ?>
+                                            <input type="hidden" name="action" value="cancel">
+                                            <input type="hidden" name="team_id" value="<?= $teamId ?>">
+                                            <input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
+                                            <button class="btn btn-sm btn-outline-secondary">Cancel</button>
+                                        </form>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="text-muted small mb-2">This team doesn't have a faculty advisor yet.</p>
+                            <?php if ($isLeader && $facultyOptions): ?>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('advisorRequestForm').hidden=false;this.hidden=true;">
+                                    <i class="bi bi-person-plus"></i> Request Faculty Advisor
+                                </button>
+                                <form id="advisorRequestForm" method="post" action="<?= e(url('/student/team-advisor-requests.php')) ?>" hidden style="margin-top:10px;">
+                                    <?= csrf_field() ?>
+                                    <input type="hidden" name="action" value="create">
+                                    <input type="hidden" name="team_id" value="<?= $teamId ?>">
+                                    <div class="mb-2">
+                                        <select name="faculty_id" class="form-select form-select-sm" required>
+                                            <option value="">Select faculty...</option>
+                                            <?php foreach ($facultyOptions as $f): ?><option value="<?= (int)$f['user_id'] ?>"><?= e($f['name']) ?> — <?= e($f['designation'] ?: 'Faculty') ?></option><?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <select name="request_type" class="form-select form-select-sm" required>
+                                            <?php foreach ($requestTypeLabels as $k => $label): ?><option value="<?= e($k) ?>"><?= e($label) ?></option><?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <textarea name="message" class="form-control form-control-sm mb-2" rows="2" placeholder="Message to faculty..."></textarea>
+                                    <button type="submit" class="btn btn-sm btn-uiu" style="background:var(--uiu-blue);border-color:var(--uiu-blue);color:#fff;">Send Request</button>
+                                </form>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
                     <div class="app-panel">
                         <h3>Members (<?= count($members) ?>)</h3>
                         <?php foreach ($members as $m): ?>

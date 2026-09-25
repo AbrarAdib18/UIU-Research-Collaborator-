@@ -8,6 +8,144 @@ $profileId = (int)$studentProfile['id'];
 $perPage   = 9;
 $page      = current_page();
 
+// ---------------------------------------------------------------------
+// Faculty discovery mode (?view=faculty) — a self-contained branch so the
+// existing student-matching code/queries below are left completely untouched.
+// ---------------------------------------------------------------------
+$view = (string)($_GET['view'] ?? 'students');
+if (!in_array($view, ['students', 'faculty'], true)) {
+    $view = 'students';
+}
+
+if ($view === 'faculty') {
+    $fq = trim((string)($_GET['q'] ?? ''));
+    $fSelectedDomains = array_values(array_unique(array_filter(array_map('intval', (array)($_GET['domains'] ?? [])))));
+    $acceptingOnly = isset($_GET['accepting_mentees']);
+
+    $fWhere  = ["u.role = 'faculty'", "u.status = 'active'", "(fv.profile_visibility IS NULL OR fv.profile_visibility <> 'Private')"];
+    $fParams = [];
+    if ($fq !== '') {
+        $fWhere[] = '(u.name LIKE ? OR fp.bio LIKE ? OR fp.research_statement LIKE ? OR fp.specialization LIKE ?)';
+        $like = '%' . $fq . '%';
+        $fParams[] = $like; $fParams[] = $like; $fParams[] = $like; $fParams[] = $like;
+    }
+    if ($fSelectedDomains) {
+        $ph = implode(',', array_fill(0, count($fSelectedDomains), '?'));
+        $fWhere[] = "EXISTS (SELECT 1 FROM faculty_research_domains frdf WHERE frdf.faculty_profile_id = fp.id AND frdf.domain_id IN ($ph))";
+        foreach ($fSelectedDomains as $d) { $fParams[] = $d; }
+    }
+    if ($acceptingOnly) {
+        $fWhere[] = "EXISTS (SELECT 1 FROM faculty_preferences fpr WHERE fpr.faculty_profile_id = fp.id AND fpr.accepting_mentees = 1)";
+    }
+
+    $fSql = "SELECT fp.*, u.name, u.id AS user_id
+             FROM faculty_profiles fp JOIN users u ON u.id = fp.user_id
+             LEFT JOIN faculty_visibility fv ON fv.faculty_profile_id = fp.id
+             WHERE " . implode(' AND ', $fWhere) . "
+             ORDER BY u.name LIMIT 60";
+    $fStmt = $pdo->prepare($fSql);
+    $fStmt->execute($fParams);
+    $facultyRows = $fStmt->fetchAll();
+
+    function frc_domain_names_for(PDO $pdo, int $fpId): array
+    {
+        $stmt = $pdo->prepare('SELECT rd.name FROM faculty_research_domains frd JOIN research_domains rd ON rd.id = frd.domain_id WHERE frd.faculty_profile_id = ? ORDER BY rd.name');
+        $stmt->execute([$fpId]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    $domains = all_research_domains($pdo);
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Find Faculty || UIU ResearchCollab</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <link rel="stylesheet" href="../CSS/dashboard.css">
+        <link rel="stylesheet" href="../CSS/research-connect.css">
+        <style>
+            .type-tabs{display:flex;gap:8px;margin-bottom:16px}
+            .type-tabs a{padding:8px 18px;border-radius:20px;background:#f0f4f9;color:var(--text-medium);font-size:13px;font-weight:600;text-decoration:none}
+            .type-tabs a.active{background:var(--uiu-blue);color:#fff}
+            .rc-grid{display:grid;grid-template-columns:2.4fr 1fr;gap:18px}
+            @media (max-width:900px){.rc-grid{grid-template-columns:1fr}}
+            .rc-card{background:#fff;border:1px solid var(--border-color);border-radius:10px;padding:16px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start}
+            .avatar-md{width:52px;height:52px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--uiu-blue);color:#fff;font-size:16px;font-weight:700;flex-shrink:0;object-fit:cover}
+            .rc-tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+            .rc-tags span{background:var(--uiu-light-blue);color:var(--uiu-dark-blue);font-size:11px;font-weight:600;padding:3px 9px;border-radius:14px}
+            .filter-card{background:#fff;border:1px solid var(--border-color);border-radius:10px;padding:16px;margin-bottom:14px}
+            .filter-card h3{font-size:14px;color:var(--uiu-blue);font-weight:700;margin-bottom:10px}
+            .app-empty-state{padding:30px;text-align:center;color:var(--text-light)}
+            .app-empty-state i{font-size:30px;display:block;margin-bottom:8px}
+            .btn-uiu{background:var(--uiu-blue);border-color:var(--uiu-blue);color:#fff}
+        </style>
+    </head>
+    <body>
+    <?php require __DIR__ . '/../includes/header.php'; ?>
+    <?php require __DIR__ . '/../includes/sidebar.php'; ?>
+        <main class="dashboard-main">
+            <?php render_flashes(); ?>
+            <div class="research-connect-header">
+                <div class="research-connect-title"><h2>Research Connect</h2><p>Find faculty accepting mentees, advisors, and research collaborators.</p></div>
+            </div>
+            <div class="type-tabs">
+                <a href="<?= e(url('/student/research-connect.php')) ?>">Researchers</a>
+                <a href="<?= e(url('/student/research-connect.php?view=faculty')) ?>" class="active">Find Faculty</a>
+            </div>
+
+            <div class="rc-grid">
+                <section>
+                    <?php if (!$facultyRows): ?>
+                        <div class="app-empty-state"><i class="bi bi-person-workspace"></i><p>No faculty match your filters.</p></div>
+                    <?php endif; ?>
+                    <?php foreach ($facultyRows as $f): ?>
+                        <?php $fDomainNames = frc_domain_names_for($pdo, (int)$f['id']); ?>
+                        <div class="rc-card">
+                            <?php if (!empty($f['profile_photo'])): ?>
+                                <img class="avatar-md" src="<?= e(url('/uploads/avatars/' . $f['profile_photo'])) ?>" alt="<?= e($f['name']) ?>">
+                            <?php else: ?>
+                                <span class="avatar-md"><?= e(initials($f['name'])) ?></span>
+                            <?php endif; ?>
+                            <div class="flex-grow-1">
+                                <h4 style="margin:0;font-size:15px;"><?= e($f['name']) ?></h4>
+                                <div class="text-muted small"><?= e($f['designation'] ?: 'Faculty') ?> &middot; <?= e($f['department'] ?: 'Department not set') ?></div>
+                                <div class="rc-tags">
+                                    <?php foreach (array_slice($fDomainNames, 0, 4) as $dn): ?><span><?= e($dn) ?></span><?php endforeach; ?>
+                                    <?php if (!$fDomainNames): ?><span class="text-muted small">No domains listed</span><?php endif; ?>
+                                </div>
+                            </div>
+                            <a href="<?= e(url('/student/faculty-profile.php?id=' . $f['user_id'])) ?>" class="btn btn-sm btn-outline-primary">View Profile</a>
+                        </div>
+                    <?php endforeach; ?>
+                </section>
+                <aside>
+                    <form method="get">
+                        <input type="hidden" name="view" value="faculty">
+                        <div class="filter-card"><h3>Search</h3><input type="text" name="q" value="<?= e($fq) ?>" class="form-control form-control-sm" placeholder="Keyword..."></div>
+                        <div class="filter-card">
+                            <h3>Research Domains</h3>
+                            <?php foreach ($domains as $d): ?>
+                                <label class="d-block small"><input type="checkbox" name="domains[]" value="<?= (int)$d['id'] ?>" <?= in_array((int)$d['id'], $fSelectedDomains, true) ? 'checked' : '' ?>> <?= e($d['name']) ?></label>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="filter-card">
+                            <label class="d-block small"><input type="checkbox" name="accepting_mentees" value="1" <?= $acceptingOnly ? 'checked' : '' ?>> Accepting mentees only</label>
+                        </div>
+                        <button type="submit" class="btn btn-uiu w-100">Apply Filters</button>
+                    </form>
+                </aside>
+            </div>
+        </main>
+    <?php require __DIR__ . '/../includes/footer.php'; ?>
+    </body>
+    </html>
+    <?php
+    exit;
+}
+
 $allowedTabs = ['recommended', 'top-matches', 'new', 'recently-active'];
 $tab = (string)($_GET['tab'] ?? 'recommended');
 if (!in_array($tab, $allowedTabs, true)) {
@@ -212,6 +350,11 @@ $circleDeg  = (int)round(min(100, max(0, $completion)) * 3.6);
                 <h2>Research Connect</h2>
                 <p>Discover the most compatible research collaborators based on your interests, skills, and goals.</p>
             </div>
+        </div>
+
+        <div class="type-tabs" style="display:flex;gap:8px;margin-bottom:16px;">
+            <a href="<?= e(url('/student/research-connect.php')) ?>" class="active" style="padding:8px 18px;border-radius:20px;background:var(--uiu-blue);color:#fff;font-size:13px;font-weight:600;text-decoration:none;">Researchers</a>
+            <a href="<?= e(url('/student/research-connect.php?view=faculty')) ?>" style="padding:8px 18px;border-radius:20px;background:#f0f4f9;color:var(--text-medium);font-size:13px;font-weight:600;text-decoration:none;">Find Faculty</a>
         </div>
 
         <div class="research-connect-grid">

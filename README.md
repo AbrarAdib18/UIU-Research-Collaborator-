@@ -1,14 +1,23 @@
-# UIU ResearchCollab — Student Portal
+# UIU ResearchCollab — Student + Faculty + Admin Portal
 
 Connecting Minds. Creating Research.
 
-A Core PHP + MySQL academic research-collaboration portal for UIU students. This
-milestone implements the **full student portal** (auth through Research
-Repository) plus a **fully functional public landing page** (About, How It
+A Core PHP + MySQL academic research-collaboration portal for UIU. This
+project implements the **full Student Portal** (auth through Research
+Repository), a **fully functional public landing page** (About, How It
 Works, Community, Research Domains, FAQs/Help Center, Contact Us, Terms,
-Privacy, and Forgot/Reset Password). Faculty/Admin dashboards, a Calendar
-module, real-time chat, and outbound email sending are out of scope (see
-§10 "Deferred / Out of Scope").
+Privacy, and Forgot/Reset Password), a **complete Faculty Portal** (built
+2026-09-24) with an advisor/mentorship request system, faculty↔student
+research connections, and polling-based direct messaging shared by both
+roles, and — as of 2026-09-25 — a **complete Admin Portal** covering user
+management, faculty verification, master-data management, moderation
+across opportunities/teams/communities/repository, advisor-system
+oversight, privacy-preserving message metadata oversight, platform-wide
+announcements, a full activity-log audit trail, reports with CSV export,
+and 7 platform settings that each have real, verified backend effect. See
+**§23** for the Faculty Portal report and **§24** for the Admin Portal
+report. A Calendar module and outbound email sending remain out of scope
+(see §10 "Deferred / Out of Scope").
 
 Stack: **HTML5, CSS3, Bootstrap 5.3.3, Bootstrap Icons, vanilla JavaScript,
 Core/Plain PHP, MySQL/MariaDB via PDO** — no frameworks (no Laravel/React/Vue/Node).
@@ -17,10 +26,18 @@ Core/Plain PHP, MySQL/MariaDB via PDO** — no frameworks (no Laravel/React/Vue/
 
 ## ✅ Application Status
 
-**Ready with minor known issues.** The project runs live through a real
-**XAMPP** install (Apache + bundled MariaDB + PHP + phpMyAdmin) — see §14 for
-the XAMPP migration runtime report, including the real Apache `403 Forbidden`
-result on the `.htaccess`-protected upload folder. As of this pass, the
+**Complete with minor known limitations.** All three portals (Student,
+Faculty, Admin) are implemented and runtime-tested against a real MariaDB
+database over real HTTP (61 pages swept with zero PHP errors in the latest
+pass — see §24). The one open gap across every pass in this project is
+visual/browser QA: no browser automation tool has been available in any
+session, so responsive/pixel-level verification has always been a documented
+manual checklist rather than a performed browser test (§9, §24 §9).
+
+The project runs live through a real **XAMPP** install (Apache + bundled
+MariaDB + PHP + phpMyAdmin) — see §14 for the XAMPP migration runtime report,
+including the real Apache `403 Forbidden` result on the
+`.htaccess`-protected upload folder. As of this pass, the
 **Student Profile / Edit Profile area has zero remaining "Coming Soon"
 fields** — every previously-inert field (Date of Birth, Gender, Preferred
 Contact, Expected Graduation, Academic Status, Research Methodologies,
@@ -85,8 +102,33 @@ Open **phpMyAdmin** (`http://localhost/phpmyadmin`) and:
    5. `database/migrations_004_communities.sql` — adds a case-insensitive
       unique constraint on `communities.name` and two read-path indexes.
       Safe to re-run. See §22 for full details.
-   6. `database/seed.sql` — realistic demo data (see credentials below).
-      **Assumes a fresh import** — run it only once, right after the files above.
+   6. `database/migrations_005_faculty_portal.sql` — the **Faculty Portal +
+      Advisor System** migration: 8 normalized faculty-profile tables
+      (`faculty_research_domains`, `faculty_skills`, `faculty_education`,
+      `faculty_publications`, `faculty_projects`, `faculty_availability`,
+      `faculty_preferences`, `faculty_visibility`), the advisor/mentorship
+      workflow (`advisor_requests`, `advisor_assignments`,
+      `advisor_feedback`), `research_connections`, direct-chat tables
+      (`direct_conversations`, `direct_messages`), 3 additive columns on
+      `faculty_profiles`, and one additive ENUM value
+      (`opportunity_applications.status` gains `'Shortlisted'`). Safe to
+      re-run (verified twice in this pass — see §23). See §23 for full details.
+   7. `database/migrations_006_admin_portal.sql` — the **Admin Portal**
+      migration: 2 new tables (`faculty_verifications`,
+      `platform_settings`), 2 additive columns
+      (`community_posts.is_hidden`, `community_comments.is_hidden` — the
+      only schema needed for admin hide/restore moderation, since every
+      *other* admin moderation action reuses a status ENUM value that
+      already existed), and one read-path index
+      (`users(role, status)`). Safe to re-run (verified twice — see §24).
+      See §24 for full details.
+   8. `database/seed.sql` — realistic demo data (see credentials below),
+      including the Faculty Portal demo data (§23: 4 faculty, advisor
+      requests/assignments, connections, chat threads) and the Admin
+      Portal demo data (§24: a 2nd admin, a 5th faculty seeded pending
+      verification, 2 users in inactive/suspended states, and the 7
+      platform-settings defaults). **Assumes a fresh import** — run it
+      only once, right after the files above.
 
 This exact import order was tested end-to-end against a **fresh, empty
 database on XAMPP's own bundled MySQL/MariaDB service** in this pass (see
@@ -157,14 +199,25 @@ the minimum necessary permissions; do not make these folders world-writable.
 | Admin   | admin@example.com       | Password123!   |
 
 Plus additional seeded student accounts (e.g. `tanvir.ahmed@bscse.uiu.ac.bd`,
-`farhana.islam@bscse.uiu.ac.bd`, same password) and a second faculty account —
-see `database/seed.sql` for the full list (11 users on a fresh import: 8
-students, 2 faculty, 1 admin). **These credentials are for local
-development/demo only — never use them in production.**
+`farhana.islam@bscse.uiu.ac.bd`, same password), **3 more faculty
+accounts** added in the Faculty Portal pass — `kazi.zaman@cse.uiu.ac.bd`,
+`farzana.yasmin@cse.uiu.ac.bd` (accepting mentees), and
+`imran.chowdhury@cse.uiu.ac.bd` (deliberately **not** accepting mentees —
+seeded "on sabbatical" to exercise that UI/logic path) — and, added in the
+Admin Portal pass: a **5th faculty account**,
+`nasrin.akter@cse.uiu.ac.bd`, seeded with a **pending** faculty-verification
+record (the other 4 are pre-verified so this pass locks nobody out — see
+§24), and a **2nd admin account**, `admin2@example.com` (so the
+"cannot deactivate the last active admin" rule has a real second admin to
+demonstrate against). Same password throughout. See `database/seed.sql`
+for the full list (15 users on a fresh import: 8 students, 5 faculty, 2
+admins). **These credentials are for local development/demo only — never
+use them in production.**
 
-Only the **Student** portal is functional in this milestone; Faculty/Admin
-accounts can log in (their role is recognized and routed correctly) but land
-on a "coming soon" notice rather than a dedicated portal.
+All three portals — **Student**, **Faculty**, and **Admin** — are fully
+functional. `login.php` routes each role to its own dashboard
+(`/student/dashboard.php`, `/faculty/dashboard.php`, `/admin/dashboard.php`)
+immediately after authentication.
 
 ---
 
@@ -177,16 +230,47 @@ on a "coming soon" notice rather than a dedicated portal.
 ├── contact.php, faq.php, terms.php, privacy.php    — public content pages
 ├── config/database.php                             — PDO connection
 ├── includes/                                        — shared bootstrap, auth, CSRF,
-│                                                       flash, functions, header/sidebar/footer,
-│                                                       public_header/public_footer
-├── student/                                          — the whole student portal (30+ pages)
-├── CSS/, JS/, IMAGES/                                — existing design system (preserved)
+│                                                       flash, functions, student header/sidebar,
+│                                                       faculty_header/faculty_sidebar/faculty_guard,
+│                                                       public_header/public_footer, footer
+├── student/                                          — the whole student portal (35+ pages,
+│                                                       including advisor-requests.php,
+│                                                       faculty-profile.php, faculty-connections.php,
+│                                                       messages.php/conversation.php)
+├── faculty/                                          — the whole Faculty Portal (17 pages:
+│                                                       dashboard, profile/profile-edit,
+│                                                       research-connect, student-profile,
+│                                                       opportunities CRUD, applications review,
+│                                                       mentorship-requests inbox, advised-students/
+│                                                       -teams/-projects, faculty-connections,
+│                                                       messages/conversation, communities,
+│                                                       repository, notifications, settings)
+├── admin/                                             — the whole Admin Portal (28 pages: dashboard,
+│                                                       users/user-details/user-edit/user-status/
+│                                                       students/faculty, faculty-verification,
+│                                                       domains/skills/languages, opportunities/
+│                                                       opportunity-details, applications, teams/
+│                                                       team-details, communities/community-details/
+│                                                       community-moderation, repository/
+│                                                       resource-details, advisor-requests/
+│                                                       advisor-assignments, connections,
+│                                                       messages-monitor, notifications
+│                                                       (inbox + announcement composer),
+│                                                       activity-logs, reports (+ CSV export), settings)
+├── api/chat/                                         — shared polling chat JSON endpoints
+│                                                       (conversations, get-messages, send-message,
+│                                                       mark-read) used by both portals
+├── CSS/, JS/, IMAGES/                                — existing design system (preserved, unchanged)
 ├── uploads/                                          — user-uploaded files (gitignored content)
 └── database/
-    ├── schema.sql                — original full schema
-    ├── migrations.sql            — Research Repository tables + cv_path column
-    ├── migrations_002_landing.sql — password_reset_tokens + contact_messages
-    └── seed.sql                  — demo data
+    ├── schema.sql                       — original full schema
+    ├── migrations.sql                   — Research Repository tables + cv_path column
+    ├── migrations_002_landing.sql       — password_reset_tokens + contact_messages
+    ├── migrations_003_profile_extended.sql — student profile "Coming Soon" fields
+    ├── migrations_004_communities.sql   — communities hardening
+    ├── migrations_005_faculty_portal.sql — Faculty Portal + Advisor System (§23)
+    ├── migrations_006_admin_portal.sql  — Admin Portal (§24)
+    └── seed.sql                         — demo data
 ```
 
 ---
@@ -291,9 +375,27 @@ wired — no dead `#` links or fake buttons remain:
 
 ## 10. Deferred / Out of Scope
 
-- Faculty and Admin portals (accounts exist and can log in, but no dedicated dashboards).
+- **Admin-driven faculty account creation.** The Admin Portal (§24) adds a
+  full faculty **verification** workflow, but not a "create faculty
+  account" form — faculty accounts are still provisioned only via
+  `database/seed.sql`, and `signup.php` still hard-codes `role='student'`
+  for public self-registration, unchanged. This was a deliberate scope
+  decision (see §24 "Known simplifications"), not an oversight.
+- **Content reporting system** (`content_reports`). Chat oversight in the
+  Admin Portal uses metadata-only visibility instead (participants, timing,
+  message count — never content) precisely because no report/flagging
+  system exists to give a documented basis for viewing message content;
+  see §24 for the full reasoning.
 - Calendar / events module.
-- Real-time chat (team messaging is page-refresh based, not WebSocket-driven).
+- WebSocket-driven chat — direct messages (faculty↔student) use 4-second
+  AJAX polling instead (see §23); this was the explicit choice for a
+  Core-PHP/no-framework stack. Team messaging (`team-messages.php`) is
+  unchanged from before this pass and remains page-refresh based.
+- A faculty-initiated "offer mentorship to a student" flow was intentionally
+  **not** built — the advisor relationship is always established by a
+  student/team request that the faculty member accepts (see §23 "Known
+  simplifications"). Faculty can still proactively **Connect** with a
+  student from Research Connect.
 - Outbound email sending (password reset and contact form both work fully at
   the database/session level, but no SMTP/mail service is configured).
 - Payment integration.
@@ -1082,3 +1184,643 @@ environment migration (§13/§14), the Student Profile completion pass
 runtime-tested by Claude Code on top of the existing approved frontend
 design — the visual design, color system, and layout were preserved
 throughout and confirmed byte-identical/pixel-consistent at every stage.
+
+## 23. Faculty Portal + Advisor System — Final Report (2026-09-24)
+
+This pass built the entire Faculty Portal, the advisor/mentorship request
+system, faculty↔student research connections, and shared polling-based
+direct messaging, plus the student-side integrations needed to use them —
+starting from a codebase where `faculty_profiles` existed but **no
+`/faculty/` area, guard, header, or sidebar existed at all**.
+
+### 1. Faculty modules implemented (`/faculty/`, 17 pages)
+
+| Page | Purpose |
+|---|---|
+| `dashboard.php` | Live stats (active opportunities, pending applications, pending mentor requests, advised students/teams, connection requests, unread messages/notifications), recent applications/requests, active opportunities, upcoming advised-team milestones, recent messages, quick actions |
+| `profile.php` / `profile-edit.php` | Full profile: identity/bio, contact & links, academic position, research domains + expertise tags, education, publications, projects, weekly availability, mentorship capacity/preferences, visibility settings, photo/cover upload — same inline-edit-toggle pattern as the student profile page |
+| `research-connect.php` | Discover students and teams (two tabs), domain/department/skill filters, "seeking advisor" filter, visibility-respecting |
+| `student-profile.php` | Single student detail view, visibility-checked, Connect / Message actions |
+| `opportunities.php`, `opportunity-create.php`, `opportunity-edit.php`, `opportunity-details.php` | Full CRUD on `research_opportunities`, ownership-checked, Draft→Open→Closed→Completed transitions, domain tagging |
+| `applications.php`, `application-details.php` | Cross-opportunity applicant inbox, applicant profile (visibility-respecting), internal review notes, Shortlist/Accept/Reject with student notifications |
+| `mentorship-requests.php`, `mentorship-request-details.php` | Advisor/mentor request inbox (filter by status/type/individual-vs-team), Accept (→ transactional assignment + connection + conversation), Decline, Request Clarification |
+| `advised-students.php`, `advised-teams.php`, `advised-projects.php` | Active/completed assignment lists; `advised-teams.php?team_id=` is a full team workspace (overview, tasks, milestones, post guidance) gated by `is_team_advisor()` |
+| `faculty-connections.php` | Incoming/outgoing/accepted research connections |
+| `messages.php`, `conversation.php` | Conversation list + polling chat thread |
+| `communities.php`, `community-details.php` | Browse/join public communities, post/comment (reuses existing tables, no moderator elevation) |
+| `repository.php`, `repository-resource-create.php` | Browse/add/remove resources (reuses `research_resources`, strict upload validation) |
+| `notifications.php`, `settings.php` | Notification inbox, password change |
+
+`includes/faculty_guard.php`, `includes/faculty_header.php`,
+`includes/faculty_sidebar.php` mirror the student equivalents exactly and
+reuse the **same `CSS/dashboard.css` / `CSS/profile.css` classes** — no CSS
+file was touched. The sidebar lists only implemented routes.
+
+### 2. Student-side modules updated
+
+- **`student/research-connect.php`** — added a self-contained `?view=faculty`
+  branch (own query + render + `exit`, existing student-matching code
+  untouched) with a **Researchers / Find Faculty** toggle, domain filter,
+  and "accepting mentees only" filter.
+- **`student/faculty-profile.php`** *(new)* — faculty detail view,
+  visibility-checked, with Connect / Message / **Request Advisor** actions
+  gated on `faculty_preferences.accepting_*` and remaining mentee capacity.
+- **`student/advisor-requests.php`** *(new)* — create an individual advisor
+  request (type, message, research summary, commitment, meeting frequency,
+  optional linked project), list own requests with live status, cancel
+  pending, respond to a clarification question (flips the request back to
+  `pending`).
+- **`student/faculty-connections.php`** *(new)* — incoming/outgoing/accepted
+  connections, mirrors the faculty side.
+- **`student/messages.php`, `student/conversation.php`** *(new)* — direct
+  chat with faculty, identical polling implementation to the faculty side.
+- **`student/team-details.php`** — added a **Faculty Advisor** panel:
+  assigned advisor display, pending team requests (leader can cancel), and
+  a leader-only "Request Faculty Advisor" inline form, backed by the new
+  **`student/team-advisor-requests.php`** handler (server-side
+  `is_team_leader()` check, duplicate/capacity checks, notifications).
+- **`includes/sidebar.php`** — added **My Advisor Requests** and
+  **Messages** (with an unread-count badge) nav items.
+- **`student/dashboard.php`** — added a second stat row: pending advisor
+  requests, active advisors, pending connection requests, unread messages.
+- **`student/notifications.php`**, **`includes/functions.php`**'s
+  `notification_link()` — new icon/link cases for `advisor_request`,
+  `advisor_assignment`, `connection_request`, `direct_message` (the
+  function gained an optional `$role` parameter, defaulting to `'student'`
+  so every pre-existing call site keeps working unchanged).
+
+### 3. Exact database changes — `database/migrations_005_faculty_portal.sql`
+
+New tables (all `utf8mb4`/InnoDB, FK'd, indexed, guarded/idempotent —
+verified safe to re-run twice against the live dev DB with zero errors):
+`faculty_research_domains`, `faculty_skills`, `faculty_education`,
+`faculty_publications`, `faculty_projects`, `faculty_availability`,
+`faculty_preferences`, `faculty_visibility`, `advisor_requests`,
+`advisor_assignments`, `advisor_feedback`, `research_connections`
+(generated `pair_key` column for fast unordered-pair lookup, `CHECK`
+against self-connection), `direct_conversations` (canonical
+`user_one_id < user_two_id` ordering enforced in PHP, unique pair key,
+`CHECK` against self-conversation), `direct_messages`.
+
+Additive-only column changes: `faculty_profiles` gains
+`research_statement`, `portfolio_url`, `cover_photo`;
+`opportunity_applications.status` ENUM widened to add `'Shortlisted'`
+(existing `Pending/Accepted/Rejected/Withdrawn` values and every existing
+comparison/switch statement in the student portal keep working unchanged);
+`opportunity_applications` gains `review_notes` (internal-only, added mid-pass
+once `faculty/application-details.php` needed it — folded into the same
+migration file rather than a separate 006 file, re-verified idempotent).
+
+No existing table was dropped or destructively altered. `team_members` was
+deliberately **not** touched — a faculty advisor's access to a team is a
+separate, explicit `is_team_advisor()` check against `advisor_assignments`,
+not a new `team_members.role` value, so every existing team query/capacity
+check/constraint in the codebase is untouched.
+
+**Verified twice**, independently: (a) applied to the live dev DB and
+re-applied for idempotency (all guarded blocks correctly no-op on the second
+run); (b) a full fresh import — `schema.sql` → `migrations.sql` →
+`migrations_002` → `migrations_003` → `migrations_004` →
+`migrations_005_faculty_portal.sql` → `seed.sql` — into a throwaway database
+(`uiu_seedtest`), zero errors, all row counts matched expectations, zero
+orphaned foreign keys, and the seeded bcrypt password hash verified with
+PHP's own `password_verify()`.
+
+### 4. Files created / modified (summary — see the file tree in §7 for full paths)
+
+**Created:** `database/migrations_005_faculty_portal.sql`;
+`includes/faculty_guard.php`, `includes/faculty_header.php`,
+`includes/faculty_sidebar.php`; all 17 files under `faculty/`; `api/chat/`
+(`conversations.php`, `get-messages.php`, `send-message.php`,
+`mark-read.php`); `student/faculty-profile.php`,
+`student/advisor-requests.php`, `student/faculty-connections.php`,
+`student/messages.php`, `student/conversation.php`,
+`student/team-advisor-requests.php`.
+
+**Modified:** `includes/auth.php` (`require_faculty()`, `require_role()`);
+`includes/functions.php` (faculty profile helpers, `can_view_student_profile()`
+/`can_view_faculty_profile()`, `is_team_advisor()`, `get_team_advisor()`,
+`faculty_active_assignment_count()`/`faculty_capacity_remaining()`,
+`has_pending_advisor_request()`/`has_active_advisor_assignment()`,
+`has_existing_connection()`/`can_message()`/`get_or_create_direct_conversation()`,
+and an extended role-aware `notification_link()`); `includes/sidebar.php`
+(new nav items + unread-message badge query); `student/research-connect.php`
+(faculty-discovery branch + toggle); `student/team-details.php` (advisor
+panel); `student/dashboard.php` (new stat row); `student/notifications.php`
+(icon map); `database/seed.sql` (Faculty Portal demo data appended).
+
+### 5. Advisor request workflow (implemented, transactional)
+
+Student or team leader submits a typed request (`research_advisor` /
+`paper_advisor` / `project_mentor` / `fydp_supervisor` / `research_mentor` /
+`technical_mentor`) → faculty sees it in `mentorship-requests.php` →
+**Accept** (capacity-checked, duplicate-active-assignment-checked, wrapped in
+a DB transaction), **Decline** (with optional reason, notifies requester —
+and all other team members if a team request), or **Request Clarification**
+(status → `clarification_requested`, student/leader responds on
+`student/advisor-requests.php`, which appends the reply and flips the
+request back to `pending`). Duplicate-**pending**-request prevention and
+duplicate-**active**-assignment prevention are enforced at the application
+layer inside the accept transaction (MariaDB 10.4 has no partial/filtered
+unique index support, documented in the migration file's own header
+comment) — verified live: a second identical request while one is pending
+is rejected with a clear error.
+
+### 6. Advisor assignment workflow (implemented)
+
+Accepting a request atomically: updates the request to `accepted`, inserts
+an `advisor_assignments` row, auto-creates (or reuses) an **accepted**
+`research_connections` row between faculty and requester, and
+gets-or-creates their `direct_conversations` row (linked to both the new
+connection and the new assignment) — so chat is available immediately, with
+no separate "connect" step required. All other active team members (for a
+team request) get a `advisor_assignment` notification; the requester gets an
+`advisor_request` notification. Faculty can post team guidance
+(`advisor_feedback`, `visibility='team'`) from the team workspace, which
+notifies every active member. Assignments can be marked **Completed**
+(updates the linked request too) from `advised-students.php` /
+`advised-projects.php`.
+
+### 7. Connection request workflow (implemented)
+
+Either role can send a connection request (unordered-pair duplicate check via
+`pair_key`, self-connection blocked by a DB `CHECK` constraint); the
+recipient Accepts/Declines, the sender can Cancel a pending one. An
+**accepted** connection is one of the two ways `can_message()` authorizes
+direct chat (the other being an active advisor assignment).
+
+### 8. Real-time chat workflow (implemented — polling, not WebSockets)
+
+`/api/chat/` (new folder): `conversations.php` (list), `get-messages.php`
+(since-last-id, capped page size), `send-message.php` (POST, CSRF-checked,
+2000-char cap, transactional conversation-get-or-create + insert),
+`mark-read.php`. Every endpoint: session-auth-checked, `can_message()`
+-authorized, PDO prepared statements, JSON responses with correct HTTP
+status codes (401/403/405/500 as appropriate), no leaked SQL errors. Both
+`faculty/conversation.php` and `student/conversation.php` server-render the
+existing message history (progressive enhancement — a full page reload with
+the plain `<form method="post">` still works with JS disabled) and layer
+`fetch()`-based polling on top: **4-second interval**, paused via the Page
+Visibility API when the tab is hidden and resumed (with an immediate poll)
+when it becomes visible again. Notifications are aggregated per-thread — a
+sender only triggers a new `direct_message` notification for their
+recipient if the recipient had zero unread messages from that sender
+already, avoiding a notification per keystroke of a fast conversation.
+
+### 9. Runtime test report (real PHP + real MariaDB + real HTTP — no mocks)
+
+Environment: XAMPP's bundled MariaDB 10.4.32 started directly via
+`mysqld.exe` (not the GUI control panel) against the project's existing
+`uiu_researchcollab` database; the app served via PHP 8.2's built-in server
+(`php -S 127.0.0.1:8000`); every scenario below driven by `curl` with a
+per-persona cookie jar (student, faculty A, faculty B), and every resulting
+row verified by direct SQL query against the same database.
+
+| # | Test | Result |
+|---|---|---|
+| 1 | Faculty login → dashboard renders (200, correct title, zero PHP warnings/fatals) | ✅ Pass |
+| 2 | Student blocked from every `/faculty/*` route → redirect to `/index.php`, no loop | ✅ Pass |
+| 3 | Faculty blocked from `/student/dashboard.php` → redirect to `/index.php`, no loop | ✅ Pass |
+| 4 | Anonymous request to a faculty route → redirect to `/login.php` | ✅ Pass |
+| 5 | Faculty profile: add research domain, update mentorship preferences → persisted correctly in `faculty_research_domains`/`faculty_preferences` | ✅ Pass |
+| 6 | Faculty creates + publishes an opportunity → visible to students, appears in `research_opportunities` with `status='Open'` | ✅ Pass |
+| 7 | Student applies → faculty shortlists → faculty accepts → student notified with correct message text at each step | ✅ Pass |
+| 8 | Student submits individual advisor request → faculty accepts → `advisor_assignments` row created, `research_connections` auto-accepted, `direct_conversations` row created and linked to both | ✅ Pass |
+| 9 | Duplicate pending advisor request (same faculty+target+type) → rejected with a clear flash error | ✅ Pass |
+| 10 | Team leader submits team advisor request (blocked first by faculty `accepting_team_advisory=0`, confirming the preference gate actually works; then corrected and retried) → faculty accepts → assignment created, **all other active team members** notified (requester excluded), `team-details.php` immediately shows the new advisor | ✅ Pass |
+| 11 | Faculty posts team guidance from the team workspace → row in `advisor_feedback`, notification to all active members | ✅ Pass |
+| 12 | Faculty tries to open `advised-teams.php?team_id=` for a team they don't advise → blocked, redirected with a clear error | ✅ Pass |
+| 13 | Mentee-capacity enforcement: `max_active_mentees=1` with 2+ active assignments → Accept correctly blocked with a capacity error | ✅ Pass |
+| 14 | Faculty sends connection request → student side updated (tested the reverse direction live: faculty→student send, DB row inserted, notification created) | ✅ Pass |
+| 15 | Accepted connection unlocks chat: message sent via `/api/chat/send-message.php`, conversation auto-created with correct canonical ordering, notification created, message retrievable via `get-messages.php` by the recipient | ✅ Pass |
+| 16 | Unauthorized chat: a user with no connection/assignment to the target gets HTTP 403 from `get-messages.php` | ✅ Pass |
+| 17 | CSRF: a request with a forged/invalid token is rejected ("Your session expired…") | ✅ Pass |
+| 18 | Cross-owner protection: faculty A cannot open/edit faculty B's opportunity | ✅ Pass |
+| 19 | Private student profile respected: a student who marks their profile `Private` is correctly hidden from other students' researcher-profile view | ✅ Pass |
+| 20 | Malicious file upload (`.exe` renamed as a document) rejected by `validate_upload()`'s extension allow-list | ✅ Pass |
+| 21 | `research-connect.php?view=faculty` (student side) and `research-connect.php?type=teams` (faculty side) both render correctly with real filtered data | ✅ Pass |
+| 22 | Fresh database import: `schema.sql` → all 5 migrations → `seed.sql` into an empty throwaway database → zero errors, correct row counts, zero orphaned FKs, seeded password verified with `password_verify()` | ✅ Pass |
+| 23 | Migration idempotency: `migrations_005_faculty_portal.sql` re-applied to the already-migrated dev DB → every guarded block correctly no-ops, zero errors | ✅ Pass |
+
+**Not covered by this pass** (see "Known limitations" below): no browser
+automation tool was available in this session, so there is no visual/
+click-through or responsive-layout (390px) verification — only functional/
+API-level HTTP + database verification. All CSS reused is the project's
+own existing, already-responsive `dashboard.css`/`profile.css`, unmodified.
+
+### 10. Bugs found and fixed during this pass
+
+- **Ambiguous `created_at` column** in `faculty/advised-students.php`'s
+  correlated subquery (`direct_messages` and `direct_conversations` both
+  have a `created_at` column) — caused a live `500` (`SQLSTATE[23000]`
+  `Integrity constraint violation: 1052`). Fixed by qualifying the column
+  as `dm.created_at`. Caught by the runtime HTTP smoke test, not by `php -l`
+  (which cannot catch ambiguous-column SQL errors).
+- **Test-data-induced false rejection**: an early manual test of
+  `update_preferences` (via a `curl` POST that only included the
+  `accepting_mentees` checkbox) left `accepting_team_advisory=0` for the
+  demo faculty account, which then correctly, and initially confusingly,
+  blocked a team-advisor-request test. This was the authorization logic
+  working as designed, not a bug — documented in the test table above (test
+  #10) rather than "fixed," since fixing it meant correcting the test's own
+  setup data, not the application code.
+
+No other runtime errors, fatals, or SQL errors were observed across the 17
+faculty pages, 6 new/modified student pages, 4 chat API endpoints, and the
+full advisor/connection/chat workflow testing above.
+
+### 11. Known simplifications / remaining limitations
+
+- **No faculty-initiated "offer mentorship" flow.** The `advisor_requests`
+  schema is requester-driven (student/team → faculty) by design; a faculty
+  member cannot unilaterally create an assignment. They can still
+  proactively **Connect** with a student from Research Connect, and once
+  connected, discuss mentorship over chat before the student/team formalizes
+  it with a request. Documented here rather than silently scoped out.
+- **No browser/visual QA** in this pass (see §9) — recommend a manual
+  click-through, especially at ~390px width, before a live demo.
+- **Admin portal remains out of scope** (§10) — faculty accounts are
+  provisioned only via `database/seed.sql`, as before this pass.
+- Advisor-request/assignment duplicate-prevention is enforced in the PHP
+  transaction, not a DB constraint (MariaDB 10.4 limitation, documented in
+  the migration file itself) — acceptable at demo/classroom concurrency
+  levels, same tradeoff already accepted elsewhere in this codebase (§11).
+- Chat polling is fixed at 4 seconds, not configurable per-user; acceptable
+  for a Core-PHP, no-WebSocket-server stack.
+- `faculty/advised-projects.php` shows all non-team-only assignment types
+  in one unified list rather than strictly separating "projects" from
+  "papers" (the schema doesn't distinguish a paper from a project beyond
+  `assignment_type`) — a reasonable reading of "Guided Projects & Papers"
+  given the available data model.
+
+### 12. Design preservation — confirmed
+
+No changes were made to `CSS/dashboard.css`, `CSS/profile.css`,
+`CSS/research-connect.css`, any file under `JS/`, `IMAGES/`, or any existing
+student-facing page's visual output. Every new faculty page and every new
+student page reuses the exact same class names already in production
+(`.dashboard-header`, `.dashboard-sidebar`, `.sidebar-navigation`,
+`.app-panel`, `.pill`, `.chat-bubble`/`.chat-row`/`.chat-thread`,
+`.profile-header-card`/`.profile-section`, `.dashboard-stat-card`, etc.) and
+the same UIU brand colors already defined as CSS custom properties. The
+Faculty Portal looks like — and *is* — part of the same product, not a
+bolted-on template.
+
+### 13. Presentation demo flow addition (Faculty Portal)
+
+1. Log in as `faculty@example.com` → tour the dashboard stat cards.
+2. `My Faculty Profile` → add a research domain / expertise tag live.
+3. `Research Opportunities` → create + publish a new opportunity.
+4. Log in as `student@example.com` in a second session → apply to it.
+5. Back as faculty → `Applications` → Shortlist → Accept; show the
+   student's notification appearing.
+6. `Research Connect` → **Find Faculty** tab on the student side → open a
+   faculty profile → **Request Advisor**.
+7. Back as faculty → `Mentor / Advisor Requests` → open the new request →
+   **Accept** → show `My Advised Students` updating and a conversation now
+   available in `Messages`.
+8. Send a chat message from faculty → switch to the student session →
+   watch it appear without a page reload (polling).
+9. On the student side, open a team the student leads → **Request Faculty
+   Advisor** → accept as faculty → show the team's `team-details.php`
+   Advisor panel updating and the "Post Guidance" flow in the team
+   workspace.
+
+### 14. Final readiness status
+
+**Ready for presentation.** All 17 faculty pages, all 6 new/updated student
+pages, all 4 chat API endpoints, the full advisor request → assignment →
+connection → chat pipeline, and the security/authorization boundaries
+around every one of them were verified against a real, running MariaDB
+database over real HTTP — not simulated. The one open gap is **visual/
+browser QA** (§9, §11), which this session had no tool to perform; a quick
+manual click-through, particularly at mobile width, is recommended before a
+live demo, but no functional blocker is known to exist.
+
+## 24. Admin Portal — Final Report (2026-09-25)
+
+### 1. Executive summary
+
+This pass built the entire Admin Portal — the final of the three role
+modules — completing the platform. It also fixed a real, pre-existing bug
+discovered during this work: **`login.php` never routed Faculty or Admin
+accounts to their own dashboards** (it still said "coming soon" and sent
+both roles to `/index.php`, even though the Faculty Portal had already been
+fully built in the previous pass — it was simply never wired into the
+login redirect). That is fixed; all three roles now land on their own
+dashboard immediately after login. A second real gap was found and fixed
+during testing: **a user's session was never re-validated against their
+current account status**, meaning a student/faculty account suspended by
+an admin mid-session could keep acting until their session naturally
+expired. `current_user()` now force-logs-out and flashes a clear message
+the moment a non-active account's session makes its next request — this
+single fix protects every existing role guard (student/faculty/admin)
+without needing to touch each one individually.
+
+### 2. Admin modules implemented (`/admin/`, 28 files)
+
+| Area | Pages | Notes |
+|---|---|---|
+| Dashboard | `dashboard.php` | Every count the brief listed, all real queries; 8 quick actions |
+| User management | `users.php`, `user-details.php`, `user-edit.php`, `user-status.php` | Search/filter/sort; activate/deactivate/suspend/restore; self-protection + last-active-admin protection; safe-fields-only edit (never password/role/email) |
+| Role-specific lists | `students.php`, `faculty.php` | Richer role-relevant columns (CGPA/program; department/designation/verification/active-mentee-count) |
+| Faculty verification | `faculty-verification.php` | Pending queue, Approve/Reject-with-reason/Request-update, transactional, notifies the faculty member |
+| Master data | `domains.php`, `skills.php`, `languages.php` | Full CRUD, duplicate-name prevention, delete blocked when a domain/skill/language is still referenced anywhere (checked via `EXISTS` against every referencing table) |
+| Opportunities | `opportunities.php`, `opportunity-details.php` | Platform-wide (no ownership restriction), Close/Reopen/Archive/Delete, moderation reason logged + notifies the creator |
+| Applications | `applications.php` | Read-heavy oversight; the *only* intervention is marking an application invalid/withdrawn — Accept/Reject/Shortlist decisions remain faculty-owned, per the brief |
+| Teams | `teams.php`, `team-details.php` | Archive/Restore/Delete, remove-a-member (leader protected, logged + notified), no private file content exposed |
+| Communities | `communities.php`, `community-details.php`, `community-moderation.php` | Suspend/Restore/Delete communities; per-community and cross-community (flat, newest-first) post/comment Hide/Restore/Delete |
+| Repository | `repository.php`, `resource-details.php` | Publish/Hide/Delete, save-count, uploader notified |
+| Advisor oversight | `advisor-requests.php`, `advisor-assignments.php` | Platform-wide view; "mark invalid" only (never accept/decline — faculty-owned); admin-initiated End Assignment (transactional, notifies faculty + student/team); a faculty-capacity-exceeded warning panel reusing the Faculty Portal's own `faculty_capacity_remaining()`/`faculty_active_assignment_count()` helpers |
+| Connections | `connections.php` | List/filter, Block action, notifies both parties |
+| Chat oversight | `messages-monitor.php` | **Metadata only** — participants, created/last-message dates, message count. Message *content* is never shown; see "Known simplifications" below |
+| Notifications | `notifications.php` | Admin's own inbox **and** the announcement composer (audience: all / students / faculty / selected-by-email), fans out into individual `notifications` rows |
+| Activity logs | `activity-logs.php` | Search/filter by user, role, activity type, related type, date range; paginated |
+| Reports | `reports.php` | Every stat category the brief listed as CSS-progress-bar breakdowns (reusing the existing `.completion-progress` component — no chart library added), date-range new-registrations count, CSV export (4 datasets, CSV-injection-guarded, admin-only) |
+| Settings | `settings.php` | 7 settings, every one with real, independently-verified backend effect (§5 below) |
+
+`includes/admin_guard.php` / `admin_header.php` / `admin_sidebar.php` mirror
+the Faculty Portal's equivalents exactly (same `.dashboard-header`/
+`.dashboard-sidebar`/`.app-panel`/`.pill` classes, same top-bar/logo) — no
+CSS file was touched. The sidebar lists exactly the 20 implemented routes
+— never a dead link.
+
+### 3. Student/Faculty integration changes
+
+- **`login.php` / `signup.php`** — both now route an already-logged-in
+  visitor (and, for `login.php`, a freshly-authenticated one) to
+  `student|faculty|admin` `/dashboard.php` via one small `switch`, instead
+  of the old two-branch check that only handled `student` correctly.
+- **`includes/auth.php`** — `current_user()` now force-logs-out a session
+  whose account status is no longer `active` (see Executive Summary).
+- **`signup.php`** — 3 narrowly-scoped, additive reads of `platform_settings`
+  (registration-enabled gate, DB-driven email-domain regex, default profile
+  visibility on insert) layered on top of the existing validation/
+  transaction structure, which is otherwise untouched.
+- **`student/team-create.php`** — the pre-filled "Team Size Limit" default
+  is now DB-driven instead of a hard-coded `6`.
+- **`student/community-create.php`** — when `community_creation_policy` is
+  `admin_approval`, a new community is inserted as `Inactive` instead of
+  `Active`, with a clear "pending administrator approval" success message.
+- **`student/community-details.php`** — the community-lookup `WHERE`
+  clause was widened to `(status = 'Active' OR created_by = ?)` so a
+  creator can still see their own pending community immediately after
+  creating it (without this, the flow above would have been a dead end —
+  found and fixed during testing, see §10).
+- **`student/community-details.php`**, **`faculty/community-details.php`**
+  — post/comment `SELECT` queries gained `AND is_hidden = 0` so admin-hidden
+  content simply stops appearing to normal users; nothing else on those
+  pages changed.
+- **`includes/public_header.php`** — one conditional banner block (reusing
+  a plain Bootstrap `.alert-warning`, not a new component), shown only
+  when the `maintenance_notice` setting is non-empty.
+- **`faculty/opportunity-create.php`**, **`faculty/opportunity-edit.php`**
+  — when `faculty_verification_required` is on, an unverified faculty
+  member's "Publish immediately" checkbox / "Open" status option is
+  disabled in the UI **and** rejected server-side (tested by submitting
+  `publish_now=1` directly via `curl`, bypassing the disabled HTML
+  attribute entirely — the opportunity was still forced to `Draft`).
+- **`faculty/settings.php`** — a "Verification Status" line was added
+  (Pending / Verified / Rejected-with-reason / Needs-Update-with-note),
+  satisfying the brief's "faculty must see verification status" requirement
+  that was missed on the first implementation pass and added after review.
+
+### 4. Database migrations and exact schema changes — `database/migrations_006_admin_portal.sql`
+
+Guarded/idempotent, identical style to migrations 002–005. New tables:
+`faculty_verifications` (id, faculty_user_id, status
+enum('pending','verified','rejected','needs_update'), admin_notes,
+rejection_reason, verified_by, verified_at, timestamps — unique on
+faculty_user_id), `platform_settings` (setting_key PK, setting_value,
+updated_by, updated_at). Additive columns: `community_posts.is_hidden`,
+`community_comments.is_hidden` (tinyint, default 0 — the only schema
+genuinely required for Hide/Restore moderation). One read-path index:
+`users(role, status)`.
+
+**Every other admin moderation action reuses an existing status ENUM
+value** — no new column was added for it:
+
+| Action | Table.column reused |
+|---|---|
+| User activate/deactivate/suspend/restore | `users.status` (already had all 3 non-active states) |
+| Opportunity close/reopen/archive | `research_opportunities.status` |
+| Team archive/restore | `research_teams.status` (already had `'Archived'`) |
+| Community suspend/restore | `communities.status` |
+| Resource publish/hide | `research_resources.status` |
+| Connection block | `research_connections.status` (already had `'blocked'`) |
+| Advisor assignment end | `advisor_assignments.status` |
+
+Moderation *reasons* are written into the existing `activity_logs.description`
+column rather than a new `note` column on five different tables. No
+`content_reports` table was added (see "Known simplifications"). No
+`system_announcements` table was added — announcements reuse the existing
+`notifications` table, per the brief's own stated preference.
+
+### 5. Files created and modified
+
+**Created:** `database/migrations_006_admin_portal.sql`;
+`includes/admin_guard.php`, `includes/admin_header.php`,
+`includes/admin_sidebar.php`; all 28 files under `admin/`.
+
+**Modified:** `includes/auth.php` (`require_admin()`, plus the
+stale-session fix in `current_user()`); `includes/functions.php`
+(`validate_id()`, `is_valid_http_url()`, `get_platform_setting()`,
+`get_all_platform_settings()`); `login.php`, `signup.php` (role-redirect
+fix + 3 settings-driven behaviors); `student/team-create.php`,
+`student/community-create.php`, `student/community-details.php`,
+`faculty/community-details.php` (settings-driven defaults + `is_hidden`
+filtering); `includes/public_header.php` (maintenance banner);
+`faculty/opportunity-create.php`, `faculty/opportunity-edit.php`
+(verification gate); `faculty/settings.php` (verification status display);
+`database/seed.sql` (Admin Portal demo data appended).
+
+### 6. Fresh database import result
+
+`schema.sql` → `migrations.sql` → `migrations_002` → `migrations_003` →
+`migrations_004` → `migrations_005_faculty_portal.sql` →
+`migrations_006_admin_portal.sql` → `seed.sql`, imported into a throwaway
+database (`uiu_seedtest`) twice in this pass (once before, once after the
+final seed additions) — **zero errors both times**. Verified: 15 users on
+a fresh import (8 students, 5 faculty, 2 admins — up from 13/4/1 before
+this pass), 5 `faculty_verifications` rows (4 verified, 1 pending), 7
+`platform_settings` rows, 2 users in a non-active status, zero orphaned
+foreign keys across every new table. `migrations_006_admin_portal.sql` was
+also re-applied a second time directly to the live dev database to confirm
+idempotency — every guarded block correctly no-opped.
+
+### 7. Demo credential password verification result
+
+The new admin (`admin2@example.com`) and new faculty
+(`nasrin.akter@cse.uiu.ac.bd`) seed rows reuse the same bcrypt hash as
+every other seeded account. Verified directly with PHP:
+`password_verify('Password123!', $hash) === true` — confirmed `bool(true)`
+in this pass (same hash already verified in §23 for the Faculty Portal
+accounts).
+
+### 8. Runtime test environment
+
+Identical methodology to §23: XAMPP's bundled MariaDB 10.4.32 started
+directly via `mysqld.exe` (not the GUI control panel) against the
+project's existing `uiu_researchcollab` database (both processes had
+stopped between sessions and were restarted at the top of this pass); the
+app served via PHP 8.2's built-in server (`php -S 127.0.0.1:8000`); every
+scenario driven by `curl` with per-persona cookie jars (student, faculty,
+admin, and a temporary 2nd/3rd admin for the last-admin-protection test),
+every resulting row verified by direct SQL query against the same
+database.
+
+### 9. Complete pass/fail test table
+
+| # | Test | Result |
+|---|---|---|
+| 1 | Admin login → `/admin/dashboard.php`, correct title, zero PHP warnings/fatals | ✅ Pass |
+| 2 | Faculty login → now correctly reaches `/faculty/dashboard.php` (previously broken, fixed this pass) | ✅ Pass |
+| 3 | Student login → `/student/dashboard.php` (unchanged, re-verified) | ✅ Pass |
+| 4 | Student blocked from every `/admin/*` route → redirect to `/index.php` | ✅ Pass |
+| 5 | Faculty blocked from every `/admin/*` route | ✅ Pass |
+| 6 | Admin blocked from `/student/*` and `/faculty/*` routes (redirected to `/index.php`, **not** dropped into those dashboards) | ✅ Pass |
+| 7 | Suspend a student → `users.status` updated, notification created, dashboard/user-details reflect it | ✅ Pass |
+| 8 | Admin cannot suspend/deactivate their own account | ✅ Pass |
+| 9 | A different active admin **can** suspend another admin while 2+ are active | ✅ Pass |
+| 10 | The last remaining active admin **cannot** be suspended/deactivated by a different admin | ✅ Pass |
+| 11 | **Stale-session protection**: a user suspended mid-session is force-logged-out with a clear message on their very next request (real bug found + fixed this pass) | ✅ Pass |
+| 12 | Add a research domain via admin → immediately appears in the student profile-edit domain dropdown | ✅ Pass |
+| 13 | Delete-blocked-when-referenced: deleting a domain still used by profiles/opportunities/teams/communities/resources is rejected with a clear message | ✅ Pass |
+| 14 | Faculty verification: Approve → status/notes/verified_by updated, faculty notified, "Verified" badge shows on `faculty/settings.php` | ✅ Pass |
+| 15 | Opportunity moderation: admin Close/Delete → creator notified, `activity_logs` entry created | ✅ Pass |
+| 16 | Team moderation: admin views team detail (members/tasks/milestones counts, no file contents exposed) | ✅ Pass |
+| 17 | Community moderation: Hide a post → `is_hidden=1`, post immediately disappears from the student-facing community page, restore reverses it | ✅ Pass |
+| 18 | Community creation-policy gate: `admin_approval` → new community created `Inactive`, hidden from other users, creator can still see/manage their own pending one, admin Restore makes it publicly visible | ✅ Pass |
+| 19 | Repository moderation: publish/hide a resource, uploader notified | ✅ Pass |
+| 20 | Advisor assignment: admin Ends an active assignment → transactional status update, faculty **and** student/team members all notified | ✅ Pass |
+| 21 | Faculty-capacity-exceeded warning panel renders correctly on `advisor-assignments.php` | ✅ Pass |
+| 22 | Connection block action → both parties notified | ✅ Pass |
+| 23 | Messages-monitor shows only metadata (participants/dates/count) — no message content anywhere on the page | ✅ Pass |
+| 24 | Announcement sent to "All Students" → fans out into individual `notifications` rows, recipient sees it on `student/notifications.php` | ✅ Pass |
+| 25 | Activity log filters (role, type, date range) all narrow results correctly | ✅ Pass |
+| 26 | Reports counts cross-checked against raw `SELECT ... GROUP BY` — matched | ✅ Pass |
+| 27 | CSV export (`users`) → correct `Content-Type`/`Content-Disposition` headers, correct row count, correct content | ✅ Pass |
+| 28 | Platform Settings — registration-disabled gate: signup blocked with a clear message, **zero row inserted** in `users` | ✅ Pass |
+| 29 | Platform Settings — verification-required gate: unverified faculty's `publish_now=1` forced to `Draft` server-side even when sent directly via `curl` (bypassing the disabled UI control); a verified faculty publishes normally | ✅ Pass |
+| 30 | CSRF: a forged token on `admin/user-status.php` is rejected | ✅ Pass |
+| 31 | IDOR/input validation: non-numeric, negative, and non-existent IDs on 5 different admin detail pages all redirect cleanly — zero SQL errors, zero fatals | ✅ Pass |
+| 32 | XSS: `<script>` in an announcement title is stored as-is and rendered escaped (`&lt;script&gt;`) everywhere it's displayed — never executes | ✅ Pass |
+| 33 | Fresh-database import (6 migrations + seed) — zero errors, correct row counts, zero orphaned FKs | ✅ Pass |
+| 34 | Migration idempotency — `migrations_006` re-applied to the live dev DB, every guarded block no-ops | ✅ Pass |
+| 35 | Full regression sweep: all 28 admin + 17 student + 16 faculty + 8 public pages (61 total) load with **zero** PHP fatals/warnings/parse errors after every change in this pass | ✅ Pass |
+
+### 10. Bugs found and fixed during this pass
+
+- **`login.php` never routed Faculty/Admin to their dashboards** (pre-existing
+  from before this pass — the Faculty Portal was built but never wired into
+  login). Fixed in both `login.php` and `signup.php`.
+- **Stale sessions survived a status change.** `current_user()` didn't
+  re-check `users.status`, so a suspended/deactivated account's existing
+  session could keep working until it expired naturally. Fixed with a
+  single check inside `current_user()` that force-logs-out and flashes a
+  message — protects every role guard at once.
+- **Dead-end after creating a community under the approval policy.** The
+  new `community_creation_policy=admin_approval` setting would have made
+  `student/community-details.php` redirect the *creator* away from their
+  own brand-new (Inactive) community, right after telling them "You are
+  its admin." Found while testing the setting end-to-end, fixed by
+  widening that page's lookup to `(status='Active' OR created_by=?)`.
+- **Faculty verification status wasn't visible to faculty.** The brief
+  requires "Faculty must see verification status in Faculty
+  Profile/Settings" — missed on the first pass, added to
+  `faculty/settings.php` after review, then verified live (shows the
+  correct "Verified" badge for the verified demo faculty account).
+- **Self-inflicted test-data collision** (process note, not a code bug):
+  while testing last-admin protection, temporary admin test accounts
+  happened to land on the same auto-increment IDs as two real seeded
+  faculty accounts (`Dr. Farzana Yasmin`, `Dr. Imran Chowdhury`) that had
+  been deleted moments earlier as part of that same test's cleanup. Caught
+  immediately, both accounts were restored with fresh IDs before continuing
+  — `database/seed.sql` itself was never affected (it was verified correct
+  independently via the fresh-import tests in §6, which don't touch the
+  live dev database at all).
+
+No other runtime errors, fatals, or SQL errors were observed across the 28
+admin pages, the 8 modified cross-cutting files, or the full 61-page
+regression sweep.
+
+### 11. Security verification result
+
+`require_admin()` guards every one of the 28 admin pages (verified: no
+sidebar item, and no direct URL, is reachable by a student or faculty
+session). Every state-changing action is POST-only, CSRF-protected
+(verified: a forged token is rejected), and uses PDO prepared statements
+throughout — no string-concatenated SQL was introduced anywhere in this
+pass. `validate_id()` guards every GET/POST id read on every admin detail
+page (verified against non-numeric/negative/non-existent ids — clean
+redirects, never a raw SQL error). Self-protection and last-active-admin
+protection are enforced server-side in one shared handler
+(`admin/user-status.php`), not via hidden UI. Announcement/admin-note
+content is escaped via the existing `e()` helper wherever displayed
+(verified: a `<script>` XSS attempt renders as inert text). Chat oversight
+never exposes message content (metadata-only by design — see §12).
+Multi-step actions (faculty verification, user status change, advisor
+assignment ending, opportunity/team/community/resource moderation,
+settings save) all use `$pdo->beginTransaction()`/`commit()`/`rollBack()`.
+No password hash, raw SQL error, or physical upload path is ever displayed.
+
+### 12. Visual design preservation result
+
+No changes were made to `CSS/dashboard.css`, `CSS/profile.css`, any file
+under `JS/`, `IMAGES/`, or any existing student/faculty page's visual
+output. Every admin page reuses the exact class names already in
+production (`.dashboard-header`, `.dashboard-sidebar`, `.sidebar-navigation`,
+`.app-panel`, `.pill`, `.completion-progress`/`.completion-progress-bar`
+for the report bars, standard Bootstrap `.table`) and the same UIU brand
+colors already defined as CSS custom properties — no new color, gradient,
+dark-mode rule, or font was introduced anywhere in this pass (spot-checked
+by grep across every new file: every hex value present is either the
+approved brand blue or a neutral gray/pill-color already used verbatim
+elsewhere in the codebase). The black public-portal top bar and blue
+authenticated header/sidebar are both reused unmodified — the Admin Portal
+only changes the top-bar text to say "— Admin" and the sidebar's nav
+links, exactly the same pattern already used for "— Faculty".
+
+### 13. Remaining limitations
+
+- **No browser/visual QA in this pass either** (consistent with §9/§11's
+  standing limitation) — no browser automation tool has been available in
+  any session of this project. Recommend a manual click-through at
+  desktop/tablet/mobile widths before a live demo; no functional blocker
+  is known to exist.
+- **No content-reporting system.** Chat oversight is metadata-only by
+  deliberate design (§10 "Deferred / Out of Scope") — there is no
+  student/faculty-facing "report a message" UI, so there is no documented
+  basis on which an admin could view message content, and none is shown.
+- **No admin-driven faculty account creation.** Faculty provisioning
+  remains seed-only; the Admin Portal adds *verification*, not *creation*.
+- **`platform_name`/`tagline` are not dynamic settings.** Making them so
+  would require touching every header file (public, student, faculty,
+  admin) for cosmetic benefit only — left out of the settings page
+  entirely per the brief's own "if a setting cannot be made functional, do
+  not display it" rule, rather than shown as a decorative control.
+- Duplicate-prevention on advisor requests/assignments remains
+  application-layer (MariaDB 10.4 has no partial/filtered unique index
+  support) — documented already in `migrations_005_faculty_portal.sql`'s
+  own header comment, unchanged by this pass.
+
+### 14. Full project completion assessment
+
+**Complete with minor known limitations.**
+
+All three portals — Student, Faculty, Admin — are fully implemented,
+database-backed, and runtime-tested against a real MariaDB database over
+real HTTP in this session (35 distinct test scenarios in §9 above, plus
+the 61-page zero-error regression sweep). Two real bugs were found during
+testing and fixed, not just noted: the Faculty/Admin login-redirect gap,
+and the stale-session-after-status-change gap — both are now verified
+fixed with reproducible before/after evidence. Every requested Admin
+Portal feature has real backend behavior with server-side enforcement, not
+merely a UI control; the few features deliberately left out (content
+reporting, admin-driven faculty creation, decorative-only settings) are
+each explicitly documented as scope decisions with their reasoning, not
+silently dropped. The only standing gap across the entire project is
+visual/browser QA, honestly disclosed rather than claimed, because no
+browser automation tool has been available in any session — this is why
+the assessment is "Complete with minor known limitations" rather than
+"Complete and ready for presentation."

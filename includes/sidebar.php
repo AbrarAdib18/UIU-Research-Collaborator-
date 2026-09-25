@@ -6,12 +6,24 @@
 $currentFile = basename($_SERVER['SCRIPT_NAME']);
 $completion  = (int)($studentProfile['profile_completion'] ?? 0);
 
+$sidebarUnreadMessages = 0;
+if (!empty($currentUser['id'])) {
+    $sidebarMsgStmt = db()->prepare(
+        "SELECT COUNT(*) FROM direct_messages dm JOIN direct_conversations dc ON dc.id = dm.conversation_id
+         WHERE (dc.user_one_id = ? OR dc.user_two_id = ?) AND dm.sender_id != ? AND dm.is_read = 0"
+    );
+    $sidebarMsgStmt->execute([$currentUser['id'], $currentUser['id'], $currentUser['id']]);
+    $sidebarUnreadMessages = (int)$sidebarMsgStmt->fetchColumn();
+}
+
 $navLinks = [
     ['dashboard.php', 'bi-house-fill', 'Dashboard'],
     ['profile.php', 'bi-person-fill', 'My Profile'],
     ['research-connect.php', 'bi-people', 'Research Connect'],
     ['opportunities.php', 'bi-file-earmark-text', 'Research Opportunities'],
     ['teams.php', 'bi-people-fill', 'My Teams'],
+    ['advisor-requests.php', 'bi-person-check', 'My Advisor Requests'],
+    ['messages.php', 'bi-chat-dots', 'Messages'],
     ['communities.php', 'bi-diagram-3', 'Communities'],
     ['repository.php', 'bi-database-fill', 'Research Repositories'],
     ['saved-items.php', 'bi-bookmark', 'Saved Items'],
@@ -28,6 +40,8 @@ $navLinks = [
                 <span><?= e($label) ?></span>
                 <?php if ($file === 'notifications.php' && $unreadCount > 0): ?>
                     <span class="sidebar-count"><?= (int)$unreadCount ?></span>
+                <?php elseif ($file === 'messages.php' && $sidebarUnreadMessages > 0): ?>
+                    <span class="sidebar-count"><?= (int)$sidebarUnreadMessages ?></span>
                 <?php endif; ?>
             </a>
         <?php endforeach; ?>

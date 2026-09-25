@@ -79,6 +79,33 @@ function nullable_trim($value): ?string
     return $value === '' ? null : $value;
 }
 
+/** Returns a positive integer id from a raw GET/POST value, or null if it isn't one. */
+function validate_id($raw): ?int
+{
+    if (!is_numeric($raw)) {
+        return null;
+    }
+    $id = (int)$raw;
+    return $id > 0 ? $id : null;
+}
+
+/**
+ * Returns a http(s) URL only if it is well-formed, else null. Rejects
+ * javascript:/data:/vbscript: and other dangerous schemes that would
+ * otherwise be stored and later echoed into an href="" attribute.
+ */
+function is_valid_http_url($raw): ?string
+{
+    $v = trim((string)$raw);
+    if ($v === '') {
+        return null;
+    }
+    if (!preg_match('~^https?://~i', $v) || !filter_var($v, FILTER_VALIDATE_URL)) {
+        return null;
+    }
+    return $v;
+}
+
 // ---------------------------------------------------------------------
 // Formatting helpers
 // ---------------------------------------------------------------------
@@ -360,8 +387,35 @@ function unread_notification_count(PDO $pdo, int $userId): int
     return (int)$stmt->fetchColumn();
 }
 
-function notification_link(?string $relatedType, ?int $relatedId): string
+function notification_link(?string $relatedType, ?int $relatedId, string $role = 'student'): string
 {
+    if ($role === 'faculty') {
+        switch ($relatedType) {
+            case 'opportunity_application':
+                return $relatedId ? url('/faculty/application-details.php?id=' . $relatedId) : url('/faculty/applications.php');
+            case 'opportunity':
+                return $relatedId ? url('/faculty/opportunity-details.php?id=' . $relatedId) : url('/faculty/opportunities.php');
+            case 'advisor_request':
+                return $relatedId ? url('/faculty/mentorship-request-details.php?id=' . $relatedId) : url('/faculty/mentorship-requests.php');
+            case 'advisor_assignment':
+                return url('/faculty/advised-students.php');
+            case 'connection_request':
+                return url('/faculty/faculty-connections.php');
+            case 'direct_message':
+                return $relatedId ? url('/faculty/conversation.php?user=' . $relatedId) : url('/faculty/messages.php');
+            case 'team':
+            case 'team_message':
+            case 'team_milestone':
+            case 'team_task':
+                return $relatedId ? url('/faculty/advised-teams.php?team_id=' . $relatedId) : url('/faculty/advised-teams.php');
+            case 'community':
+            case 'community_post':
+                return $relatedId ? url('/faculty/community-details.php?id=' . $relatedId) : url('/faculty/communities.php');
+            default:
+                return url('/faculty/notifications.php');
+        }
+    }
+
     switch ($relatedType) {
         case 'opportunity_application':
             return url('/student/saved-items.php');
@@ -379,6 +433,14 @@ function notification_link(?string $relatedType, ?int $relatedId): string
         case 'community':
         case 'community_post':
             return $relatedId ? url('/student/community-details.php?id=' . $relatedId) : url('/student/communities.php');
+        case 'advisor_request':
+            return url('/student/advisor-requests.php');
+        case 'advisor_assignment':
+            return url('/student/advisor-requests.php');
+        case 'connection_request':
+            return url('/student/faculty-connections.php');
+        case 'direct_message':
+            return $relatedId ? url('/student/conversation.php?user=' . $relatedId) : url('/student/messages.php');
         default:
             return url('/student/notifications.php');
     }
@@ -461,4 +523,315 @@ function safe_filename(string $originalName): string
     $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
     $ext = preg_replace('/[^a-z0-9]/', '', $ext) ?? '';
     return bin2hex(random_bytes(16)) . ($ext !== '' ? '.' . $ext : '');
+}
+
+// ---------------------------------------------------------------------
+// Faculty profile helpers (mirror the student_profiles helpers above)
+// ---------------------------------------------------------------------
+
+function get_faculty_profile(PDO $pdo, int $userId): ?array
+{
+    $stmt = $pdo->prepare('SELECT * FROM faculty_profiles WHERE user_id = ? LIMIT 1');
+    $stmt->execute([$userId]);
+    $row = $stmt->fetch();
+    return $row ?: null;
+}
+
+function get_faculty_profile_by_id(PDO $pdo, int $facultyProfileId): ?array
+{
+    $stmt = $pdo->prepare('SELECT * FROM faculty_profiles WHERE id = ? LIMIT 1');
+    $stmt->execute([$facultyProfileId]);
+    $row = $stmt->fetch();
+    return $row ?: null;
+}
+
+function get_faculty_domain_ids(PDO $pdo, int $facultyProfileId): array
+{
+    $stmt = $pdo->prepare('SELECT domain_id FROM faculty_research_domains WHERE faculty_profile_id = ?');
+    $stmt->execute([$facultyProfileId]);
+    return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+}
+
+function get_faculty_skill_ids(PDO $pdo, int $facultyProfileId): array
+{
+    $stmt = $pdo->prepare('SELECT skill_id FROM faculty_skills WHERE faculty_profile_id = ?');
+    $stmt->execute([$facultyProfileId]);
+    return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+}
+
+function get_faculty_preferences(PDO $pdo, int $facultyProfileId): ?array
+{
+    $stmt = $pdo->prepare('SELECT * FROM faculty_preferences WHERE faculty_profile_id = ? LIMIT 1');
+    $stmt->execute([$facultyProfileId]);
+    return $stmt->fetch() ?: null;
+}
+
+function get_faculty_visibility(PDO $pdo, int $facultyProfileId): array
+{
+    $stmt = $pdo->prepare('SELECT * FROM faculty_visibility WHERE faculty_profile_id = ? LIMIT 1');
+    $stmt->execute([$facultyProfileId]);
+    $row = $stmt->fetch();
+    return $row ?: [
+        'profile_visibility'     => 'Public',
+        'contact_visibility'     => 1,
+        'research_visibility'    => 1,
+        'project_visibility'     => 1,
+        'publication_visibility' => 1,
+    ];
+}
+
+/**
+ * Recomputes and persists nothing (faculty_profiles has no completion
+ * column) — returns a 0-100 completion score for display only.
+ * Weighted: bio 10, contact 10, department+designation 15, research
+ * statement 10, domains 15, skills 10, publications/projects 15, photo 5,
+ * preferences 10 = 100.
+ */
+function calculate_faculty_profile_completion(PDO $pdo, int $userId): int
+{
+    $profile = get_faculty_profile($pdo, $userId);
+    if (!$profile) {
+        return 0;
+    }
+    $fpId  = (int)$profile['id'];
+    $score = 0;
+
+    if (nullable_trim($profile['bio'] ?? '') !== null) {
+        $score += 10;
+    }
+    if (nullable_trim($profile['phone'] ?? '') !== null && nullable_trim($profile['office_location'] ?? '') !== null) {
+        $score += 10;
+    }
+    if (!empty($profile['department']) && !empty($profile['designation'])) {
+        $score += 15;
+    }
+    if (nullable_trim($profile['research_statement'] ?? '') !== null) {
+        $score += 10;
+    }
+    if (count(get_faculty_domain_ids($pdo, $fpId)) > 0) {
+        $score += 15;
+    }
+    if (count(get_faculty_skill_ids($pdo, $fpId)) > 0) {
+        $score += 10;
+    }
+
+    $pubStmt = $pdo->prepare('SELECT COUNT(*) FROM faculty_publications WHERE faculty_profile_id = ?');
+    $pubStmt->execute([$fpId]);
+    $projStmt = $pdo->prepare('SELECT COUNT(*) FROM faculty_projects WHERE faculty_profile_id = ?');
+    $projStmt->execute([$fpId]);
+    if ((int)$pubStmt->fetchColumn() > 0 || (int)$projStmt->fetchColumn() > 0) {
+        $score += 15;
+    }
+
+    if (!empty($profile['profile_photo'])) {
+        $score += 5;
+    }
+    if (get_faculty_preferences($pdo, $fpId) !== null) {
+        $score += 10;
+    }
+
+    return (int)min(100, $score);
+}
+
+// ---------------------------------------------------------------------
+// Cross-role visibility checks
+// ---------------------------------------------------------------------
+
+/** True if $viewerUserId may view $studentProfile (owner always can). */
+function can_view_student_profile(PDO $pdo, int $viewerUserId, array $studentProfile): bool
+{
+    if ((int)$studentProfile['user_id'] === $viewerUserId) {
+        return true;
+    }
+    $vis = get_profile_visibility($pdo, (int)$studentProfile['id']);
+    return ($vis['profile_visibility'] ?? 'Students Only') !== 'Private';
+}
+
+/** True if $viewerUserId may view $facultyProfile (owner always can). */
+function can_view_faculty_profile(PDO $pdo, int $viewerUserId, array $facultyProfile): bool
+{
+    if ((int)$facultyProfile['user_id'] === $viewerUserId) {
+        return true;
+    }
+    $vis = get_faculty_visibility($pdo, (int)$facultyProfile['id']);
+    return ($vis['profile_visibility'] ?? 'Public') !== 'Private';
+}
+
+// ---------------------------------------------------------------------
+// Advisor / mentorship helpers
+// ---------------------------------------------------------------------
+
+/** True if this faculty member has an *active* advisor assignment on this team. */
+function is_team_advisor(PDO $pdo, int $teamId, int $facultyUserId): bool
+{
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM advisor_assignments WHERE team_id = ? AND faculty_user_id = ? AND status = 'active'");
+    $stmt->execute([$teamId, $facultyUserId]);
+    return (bool)$stmt->fetchColumn();
+}
+
+/** The faculty member currently advising this team, if any. */
+function get_team_advisor(PDO $pdo, int $teamId): ?array
+{
+    $stmt = $pdo->prepare(
+        "SELECT aa.*, u.name AS faculty_name, fp.designation, fp.department, fp.profile_photo
+         FROM advisor_assignments aa
+         JOIN users u ON u.id = aa.faculty_user_id
+         LEFT JOIN faculty_profiles fp ON fp.user_id = aa.faculty_user_id
+         WHERE aa.team_id = ? AND aa.status = 'active'
+         ORDER BY aa.assigned_at DESC LIMIT 1"
+    );
+    $stmt->execute([$teamId]);
+    return $stmt->fetch() ?: null;
+}
+
+/** How many mentee "slots" (individual + team assignments) this faculty member currently has active. */
+function faculty_active_assignment_count(PDO $pdo, int $facultyUserId): int
+{
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM advisor_assignments WHERE faculty_user_id = ? AND status = 'active'");
+    $stmt->execute([$facultyUserId]);
+    return (int)$stmt->fetchColumn();
+}
+
+/** Remaining mentee capacity, or null if this faculty member has no preferences row (treated as unlimited). */
+function faculty_capacity_remaining(PDO $pdo, int $facultyUserId): ?int
+{
+    $profile = get_faculty_profile($pdo, $facultyUserId);
+    if (!$profile) {
+        return null;
+    }
+    $prefs = get_faculty_preferences($pdo, (int)$profile['id']);
+    if (!$prefs) {
+        return null;
+    }
+    $max = (int)$prefs['max_active_mentees'];
+    return max(0, $max - faculty_active_assignment_count($pdo, $facultyUserId));
+}
+
+/** True if there's already a pending advisor_requests row for this exact faculty+target+type. */
+function has_pending_advisor_request(PDO $pdo, int $facultyUserId, ?int $studentUserId, ?int $teamId, string $requestType): bool
+{
+    $sql = "SELECT COUNT(*) FROM advisor_requests WHERE faculty_user_id = ? AND request_type = ? AND status = 'pending'";
+    $params = [$facultyUserId, $requestType];
+    if ($teamId !== null) {
+        $sql .= ' AND team_id = ?';
+        $params[] = $teamId;
+    } else {
+        $sql .= ' AND team_id IS NULL AND requested_by_user_id = ?';
+        $params[] = $studentUserId;
+    }
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    return (bool)$stmt->fetchColumn();
+}
+
+/** True if there's already an active advisor_assignments row for this exact faculty+target+type. */
+function has_active_advisor_assignment(PDO $pdo, int $facultyUserId, ?int $studentUserId, ?int $teamId, string $assignmentType): bool
+{
+    $sql = "SELECT COUNT(*) FROM advisor_assignments WHERE faculty_user_id = ? AND assignment_type = ? AND status = 'active'";
+    $params = [$facultyUserId, $assignmentType];
+    if ($teamId !== null) {
+        $sql .= ' AND team_id = ?';
+        $params[] = $teamId;
+    } else {
+        $sql .= ' AND team_id IS NULL AND student_user_id = ?';
+        $params[] = $studentUserId;
+    }
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    return (bool)$stmt->fetchColumn();
+}
+
+// ---------------------------------------------------------------------
+// Research connections + direct chat
+// ---------------------------------------------------------------------
+
+/** True if there's a pending or accepted connection already between these two users. */
+function has_existing_connection(PDO $pdo, int $userA, int $userB): bool
+{
+    $pairKey = min($userA, $userB) . '-' . max($userA, $userB);
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM research_connections WHERE pair_key = ? AND status IN ('pending','accepted')");
+    $stmt->execute([$pairKey]);
+    return (bool)$stmt->fetchColumn();
+}
+
+/** True if $userA and $userB are allowed to exchange direct messages. */
+function can_message(PDO $pdo, int $userA, int $userB): bool
+{
+    if ($userA === $userB) {
+        return false;
+    }
+    $pairKey = min($userA, $userB) . '-' . max($userA, $userB);
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM research_connections WHERE pair_key = ? AND status = 'accepted'");
+    $stmt->execute([$pairKey]);
+    if ((int)$stmt->fetchColumn() > 0) {
+        return true;
+    }
+
+    $stmt = $pdo->prepare(
+        "SELECT COUNT(*) FROM advisor_assignments
+         WHERE status = 'active'
+           AND ((faculty_user_id = ? AND student_user_id = ?) OR (faculty_user_id = ? AND student_user_id = ?))"
+    );
+    $stmt->execute([$userA, $userB, $userB, $userA]);
+    return (bool)$stmt->fetchColumn();
+}
+
+/**
+ * Finds (or transactionally creates) the direct_conversations row for this
+ * user pair. Canonicalizes ordering (user_one_id < user_two_id) so the
+ * unique key on (user_one_id,user_two_id) can never be duplicated.
+ */
+function get_or_create_direct_conversation(PDO $pdo, int $userA, int $userB, ?int $connectionId = null, ?int $assignmentId = null): int
+{
+    $one = min($userA, $userB);
+    $two = max($userA, $userB);
+
+    $find = $pdo->prepare('SELECT id FROM direct_conversations WHERE user_one_id = ? AND user_two_id = ? LIMIT 1');
+    $find->execute([$one, $two]);
+    $existing = $find->fetchColumn();
+    if ($existing) {
+        return (int)$existing;
+    }
+
+    try {
+        $ins = $pdo->prepare(
+            'INSERT INTO direct_conversations (user_one_id, user_two_id, connection_id, advisor_assignment_id) VALUES (?, ?, ?, ?)'
+        );
+        $ins->execute([$one, $two, $connectionId, $assignmentId]);
+        return (int)$pdo->lastInsertId();
+    } catch (PDOException $e) {
+        // Unique-key race: another request created it between our SELECT and INSERT.
+        $find->execute([$one, $two]);
+        $existing = $find->fetchColumn();
+        if ($existing) {
+            return (int)$existing;
+        }
+        throw $e;
+    }
+}
+
+// ---------------------------------------------------------------------
+// Platform settings (admin-configurable, real backend effect only)
+// ---------------------------------------------------------------------
+
+/** All platform_settings rows as [key => value], cached per request. */
+function get_all_platform_settings(PDO $pdo): array
+{
+    static $cache = null;
+    if ($cache === null) {
+        $cache = [];
+        $stmt = $pdo->query('SELECT setting_key, setting_value FROM platform_settings');
+        foreach ($stmt->fetchAll() as $row) {
+            $cache[$row['setting_key']] = $row['setting_value'];
+        }
+    }
+    return $cache;
+}
+
+function get_platform_setting(PDO $pdo, string $key, ?string $default = null): ?string
+{
+    $all = get_all_platform_settings($pdo);
+    return array_key_exists($key, $all) && $all[$key] !== null && $all[$key] !== ''
+        ? $all[$key]
+        : $default;
 }

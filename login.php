@@ -1,12 +1,15 @@
 <?php
 require_once __DIR__ . '/includes/bootstrap.php';
 
-// Only students belong on the dashboard — avoid a redirect loop for any
-// other logged-in role (see includes/student_guard.php).
-if (is_logged_in() && ($_SESSION['role'] ?? '') === 'student') {
-    redirect('/student/dashboard.php');
-} elseif (is_logged_in()) {
-    redirect('/index.php');
+// Redirect an already-logged-in visitor straight to their own dashboard
+// (avoids a redirect loop back through this page).
+if (is_logged_in()) {
+    switch ($_SESSION['role'] ?? '') {
+        case 'student': redirect('/student/dashboard.php');
+        case 'faculty': redirect('/faculty/dashboard.php');
+        case 'admin':   redirect('/admin/dashboard.php');
+        default:        redirect('/index.php');
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -24,12 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = attempt_login($email, $password);
     if ($user) {
         flash('success', 'Welcome back, ' . explode(' ', $user['name'])[0] . '!');
-        if ($user['role'] === 'student') {
-            redirect('/student/dashboard.php');
+        switch ($user['role']) {
+            case 'student': redirect('/student/dashboard.php');
+            case 'faculty': redirect('/faculty/dashboard.php');
+            case 'admin':   redirect('/admin/dashboard.php');
+            default:        redirect('/index.php');
         }
-        // Faculty/Admin portals are out of scope for this milestone.
-        flash('info', 'The Faculty/Admin portal is coming soon. You have been logged in.');
-        redirect('/index.php');
     }
 
     set_old(['email' => $email]);

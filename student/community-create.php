@@ -74,11 +74,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
 
+        $creationPolicy = get_platform_setting($pdo, 'community_creation_policy', 'open');
+        $initialStatus  = $creationPolicy === 'admin_approval' ? 'Inactive' : 'Active';
+
         $ins = $pdo->prepare(
             "INSERT INTO communities (name, description, domain_id, created_by, cover_image, privacy, status)
-             VALUES (?, ?, ?, ?, ?, ?, 'Active')"
+             VALUES (?, ?, ?, ?, ?, ?, ?)"
         );
-        $ins->execute([$name, $description, $domainId, $userId, $coverFilename, $privacy]);
+        $ins->execute([$name, $description, $domainId, $userId, $coverFilename, $privacy, $initialStatus]);
         $communityId = (int)$pdo->lastInsertId();
 
         $memberIns = $pdo->prepare(
@@ -90,7 +93,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         log_activity($pdo, $userId, 'community_create', "Created the community \"{$name}\".", 'community', $communityId);
 
-        flash('success', 'Community created successfully. You are its admin.');
+        flash('success', $initialStatus === 'Inactive'
+            ? 'Community created and is pending administrator approval before it becomes visible to others. You are its admin.'
+            : 'Community created successfully. You are its admin.');
         redirect('/student/community-details.php?id=' . $communityId);
     } catch (Throwable $ex) {
         if ($pdo->inTransaction()) {
