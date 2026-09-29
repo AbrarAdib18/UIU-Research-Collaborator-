@@ -187,6 +187,10 @@ $pageTitle = 'My Faculty Profile';
                 <?= csrf_field() ?>
                 <input type="hidden" name="action" value="update_identity">
                 <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" class="form-control profile-input" value="<?= e($currentUser['name']) ?>" maxlength="100" required disabled>
+                </div>
+                <div class="form-group">
                     <label>Bio</label>
                     <textarea name="bio" class="form-control profile-input" rows="4" disabled><?= e($facultyProfile['bio'] ?? '') ?></textarea>
                 </div>

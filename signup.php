@@ -238,6 +238,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="auth-bottom">
                 <p>Already have an account? <a href="login.php">Login</a></p>
+                <p>Are you faculty? <a href="faculty-signup.php">Faculty sign up</a></p>
             </div>
 
             <div class="auth-footer">
