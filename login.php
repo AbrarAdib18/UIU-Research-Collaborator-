@@ -148,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="auth-divider"><span>OR</span></div>
 
             <div class="auth-bottom">
-                <p>Don't have an account? <a href="signup.php">Create Account</a></p>
+                <p>Don't have an account? <a href="signup.php">Student sign up</a> &middot; <a href="faculty-signup.php">Faculty sign up</a></p>
             </div>
 
             <div class="auth-footer">

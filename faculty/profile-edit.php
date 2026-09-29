@@ -42,14 +42,26 @@ switch ($action) {
     // IDENTITY / CONTACT / ACADEMIC
     // -----------------------------------------------------------------
     case 'update_identity': {
+        $name           = trim(preg_replace('/\s+/', ' ', (string)($_POST['name'] ?? '')));
         $bio            = nullable_trim($_POST['bio'] ?? '');
         $specialization = nullable_trim($_POST['specialization'] ?? '');
+        if ($name === '' || mb_strlen($name) > 100) {
+            flash('error', 'Name is required and must be at most 100 characters.');
+            break;
+        }
         try {
+            $pdo->beginTransaction();
+            $pdo->prepare('UPDATE users SET name = ? WHERE id = ?')->execute([$name, $userId]);
             $pdo->prepare('UPDATE faculty_profiles SET bio = ?, specialization = ? WHERE id = ?')
                 ->execute([$bio, $specialization, $fpId]);
+            $pdo->commit();
+            $_SESSION['name'] = $name;
             log_activity($pdo, $userId, 'profile_update', 'Updated faculty identity information');
             flash('success', 'Profile updated.');
         } catch (Throwable $ex) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             error_log('faculty profile-edit update_identity: ' . $ex->getMessage());
             flash('error', 'Could not update your profile. Please try again.');
         }
